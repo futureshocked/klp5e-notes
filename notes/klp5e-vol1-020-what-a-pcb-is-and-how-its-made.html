@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>What a PCB Is and How It&#x27;s Made — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">What a PCB Is and How It&#x27;s Made</h1>
+<p>Before you touch a single tool, it helps to know exactly what you are setting out to build. In this chapter, I’ll show you what a printed circuit board really is: what it’s made of, what each part does, and the names we use for those parts. Then we’ll follow a design from an idea on your screen all the way to a finished board in your hand, install KiCad 10 on your computer, and take a quick look around the KiCad workspace so the rest of the book feels familiar. This is the most “reading” you’ll do for a while; from the next chapter on, you’ll be doing.</p>
+<h2 id="sec:c1-anatomy">PCB Anatomy</h2>
+<p>As a child, my interest in electronics grew from admiration of what clever engineers had come up with into plain curiosity about how those things actually worked. That curiosity led me to take an old screwdriver to anything electronic with a screw that fit. A record player, a VCR, and a radio were only a few of my “victims.” I am still surprised I never got electrocuted, though I did at least have the good sense to unplug things from the mains first. Inside those devices I found all sorts of wonders: resistors, transformers, integrated circuits, coils, and power supplies.</p>
+<p>The engineers had attached all those parts to small boards (Figure 1.1). A board like that is a ‘printed circuit board,’ or ‘PCB’ for short. It is the flat green (or red, or blue, or black) slab that almost every electronic device is built around. Its job is twofold: to hold the components in place, and to wire them together electrically without a single loose strand of hook-up wire. Let’s look at what a PCB is made of, what each part is called, and why it’s there. The example I’ll use throughout this section is a simple board I designed for this book (Figure 1.1).</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_01_v8.png" /></p>
+<p>Figure 1.1: The top side of our example board, with the main features we’ll meet in this section labelled.</p>
+<h3 id="a-board-is-a-sandwich-of-layers">A board is a sandwich of layers</h3>
+<p>The easiest way to picture a PCB is as a sandwich (Figure 1.2). At its core is an insulating board that gives the PCB its strength and shape. Onto that core, the manufacturer bonds a thin sheet of copper and then carves the copper away until only the wiring you designed remains. Over the copper goes a protective coating, and on top of that, some printed lettering. Stack those up and you have a board:</p>
+<ul>
+<li>the ‘substrate’, the rigid insulating core;</li>
+<li>the ‘copper’, the conductive wiring, bonded to the substrate;</li>
+<li>the ‘soldermask’, a thin protective coating over the copper;</li>
+<li>the ‘silkscreen’, printed text and graphics on the very outside.</li>
+</ul>
+<p>A simple board like ours has copper on just two faces, a ‘top’ layer and a ‘bottom’ layer, so we call it a ‘two-layer board.’ More complex boards bury extra copper layers inside the sandwich; four, six, and more are common, and we’ll get to those in later volumes. For now, two layers is all we need.</p>
+
+<div class="figure-pending">
+Figure coming soon
+</div>
+<p>Figure 1.2: A two-layer PCB is a sandwich of substrate, copper, soldermask, and silkscreen.</p>
+<h3 id="the-substrate">The substrate</h3>
+<p>The substrate is the board you can hold. By far the most common material is a fiberglass-and-epoxy laminate the industry calls ‘FR-4,’ and it’s what your first boards will almost certainly be made of. It’s cheap, strong, and a good electrical insulator. The standard thickness is 1.6 mm (about the thickness of two stacked credit cards), but manufacturers will happily make boards from roughly 0.4 mm up to 2.0 mm if you ever need thinner or thicker stock.</p>
+<p>FR-4 isn’t the only option. Boards meant to bend are built on a thin, flexible plastic film instead (‘flex’ PCBs). Boards that have to shed a lot of heat, such as high-power LED lighting, are sometimes built on an aluminium or copper core. And boards for very high-frequency radio work use specialised materials such as PTFE-based laminates. You don’t need any of these to get started, and we’ll only reach for them much later in the series, but it’s worth knowing FR-4 is a choice, not the only possibility.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_07_v8.png" /></p>
+<p>Figure 1.3: Our example board is a standard 1.6 mm-thick FR-4 board.</p>
+<h3 id="copper-tracks-and-traces">Copper: tracks and traces</h3>
+<p>The wiring on a PCB is made of copper. The thin copper lines you can see snaking across the board are called ‘tracks’, or ‘traces’. The two words mean the same thing, and you’ll hear both in the field. A track carries current from one point on the board to another, exactly as a piece of wire would, and you control how wide each one is in your design. Wider tracks carry more current; we’ll come back to that idea when a project actually needs it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_10_v8.png" /></p>
+<p>Figure 1.4: The copper lines connecting points on the board are tracks (also called traces).</p>
+<h3 id="pads-holes-and-the-two-ways-to-mount-a-part">Pads, holes, and the two ways to mount a part</h3>
+<p>Components don’t solder to bare track; they solder to ‘pads,’ small exposed areas of copper sized to match a component’s connections. How a part attaches to its pads depends on which of the two main component styles it is: ‘through-hole’ or ‘surface-mount.’</p>
+<p>A through-hole part (often abbreviated ‘THT,’ for through-hole technology) has wire leads or pins that you push through holes drilled in the board, then solder on the other side (Figure 1.5). Those holes run all the way from the top face to the bottom and are plated on the inside with metal, so the copper on the top connects electrically to the copper on the bottom. The plated ring of copper around each hole is the pad; the more precise name for that ring is the ‘annular ring.’</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_02_v8.jpg" /></p>
+<p>Figure 1.5: A through-hole component sits in plated holes and solders on the far side.</p>
+<p>How does a drilled hole end up conducting? Right after the holes are drilled, the factory plates their inside walls with a thin layer of copper, building a continuous metal ‘barrel’ that joins the top copper to the bottom copper. That barrel gets the same surface finish as the pads, which is why, when you peer into a finished through-hole, you see a bright, solderable sleeve rather than bare brown fibreglass (Figure 1.6). It is this plating, not the component’s lead, that carries current from one side of the board to the other.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_08_v8.jpg" /></p>
+<p>Figure 1.6: Inside each through-hole, a plated copper barrel — here finished bright with solder — joins the top and bottom copper.</p>
+<p>A surface-mount part (‘SMD,’ for surface-mount device) has no leads to poke through the board. Instead it sits flat on the surface and solders directly onto flat pads (Figure 1.7), using just enough solder to bridge the part’s connector to the pad beneath it (Figure 1.8). Surface-mount parts are smaller and are what most modern electronics use. Beginners often start with through-hole parts because they’re a little more forgiving to solder by hand, and that’s a perfectly good place to begin. But don’t let the small size scare you off: with a little practice, surface-mount parts are every bit as manageable, and you can also have a fab house assemble them for you (more on that shortly).</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_05_v8.jpg" /></p>
+<p>Figure 1.7: Bare surface-mount pads — flat exposed copper — with tracks and vias around them, before any component is soldered on.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_03_v8.png" /></p>
+<p>Figure 1.8: A surface-mount component solders flat onto pads on the board’s surface.</p>
+<h3 id="vias">Vias</h3>
+<p>Look closely and you’ll spot tiny holes scattered across the board that have no component in them (Figure 1.9). These are called ‘vias.’ A via looks like a mounting hole but does a different job: it lets a track jump from one copper layer to another. If a track on the top layer needs to continue on the bottom layer (perhaps to get around something in its way), it dives into a via, crosses to the other side, and carries on. On a two-layer board that’s the whole story. Boards with more layers can use fancier vias that connect only some of the layers (‘blind’ and ‘buried’ vias), but you won’t need those until much later.</p>
+
+<div class="figure-pending">
+Figure coming soon
+</div>
+<p>Figure 1.9: Vias are small plated holes that carry a track from one layer to another.</p>
+<h3 id="soldermask">Soldermask</h3>
+<p>That coloured coating over most of the board is the ‘soldermask.’ On our example board it happens to be one colour, but soldermask comes in a whole menu of colours these days: green is the classic, but red, blue, black, white, yellow, and purple are all standard options from most manufacturers at no real extra cost. The colour is up to you; the job it does is the same regardless.</p>
+<p>The soldermask does two important things. First, it seals the copper away from the air. Bare copper slowly oxidises, and oxidised copper conducts poorly, so the mask keeps your tracks healthy over time. Second, it makes the board far easier to solder. The mask coats everything <em>except</em> the pads, and because solder won’t stick to the mask, it stays where you want it, on the pads, instead of wandering between them. That matters because pads can sit very close together, and the tip of a soldering iron is often as wide as a pad or wider. Without soldermask it’s easy to accidentally join two neighbouring pads with a blob of solder, a defect called a ‘solder bridge’ (Figure 1.10). The mask doesn’t make bridges impossible, but it makes them much less likely.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_06_v8.png" /></p>
+<p>Figure 1.10: A solder bridge, a defect that soldermask helps prevent.</p>
+<h3 id="silkscreen">Silkscreen</h3>
+<p>The text and line art printed on the outside of the board is the ‘silkscreen,’ usually in white ink (Figure 1.11). The silkscreen carries no electricity; it’s there purely for the humans who build and use the board. We use it to outline where each component goes, to label pins and connectors, to print the board’s name and version number, and to add logos or other markings. It’s a good habit to give every board a name and a version on the silkscreen, so that a year later you can tell at a glance which board you’re holding. Silkscreen can go on the top, the bottom, or both.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_04_v8.jpg" /></p>
+<p>Figure 1.11: The white lettering and outlines are the silkscreen.</p>
+<h3 id="surface-finish">Surface finish</h3>
+<p>There’s one more layer most people never notice. Bare copper pads would oxidise just like bare tracks, so the exposed pads get a thin protective ‘surface finish’ that keeps them solderable. You’ll choose a finish when you order a board, so it’s worth recognising the common names. The cheapest and most common is ‘HASL’ (hot-air solder levelling), now usually offered in a lead-free version. A slightly more expensive finish called ‘ENIG’ coats the pads with a microscopically thin layer of gold over nickel; it gives beautifully flat, gold-coloured pads and has become quite affordable. A third option, ‘OSP,’ is a thin organic coating. For your first boards, the standard lead-free HASL is perfectly fine, but when you see “ENIG” or “gold” offered, now you’ll know what it means.</p>
+<h3 id="mounting-holes-copper-pours-and-thermal-relief">Mounting holes, copper pours, and thermal relief</h3>
+<p>A few more features round out the board. Sometimes you’ll want to bolt your PCB down inside a case, so you add a ‘mounting hole’, much like the holes for through-hole parts, except it carries no electrical connection and doesn’t need to be plated. A screw and nut through it hold the board in place.</p>
+<p>You’ll also often see large open areas of copper rather than thin tracks (Figure 1.12). This is a ‘copper pour’ (or ‘copper fill’), and it’s commonly used to spread a ground or power connection across a wide region of the board. Where a pad connects to one of these large copper areas, you’ll frequently notice the connection is made through a few short, narrow spokes rather than solid metal. That little spoked connection is called a ‘thermal relief.’ It exists to make soldering easier: without it, the big copper area would whisk heat away from your soldering iron faster than you could warm the joint. The thermal relief deliberately pinches the connection so the heat stays put long enough to make a clean joint.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_09_v8.png" /></p>
+<p>Figure 1.12: A thermal relief connects a pad to a surrounding copper pour through narrow spokes.</p>
+<p>That’s a complete tour of the board in your hand. Here’s the encouraging part: getting a board like this made is no longer the expensive, industrial affair it once was. Manufacturers will produce a handful of small two-layer boards for you for only a few dollars, in your choice of colour and finish, and ship them within a week or two, some far faster. Designing the board is now the interesting part, and that’s exactly what KiCad is for. So how does the design on your screen become the board on your bench? That’s the pipeline we’ll look at next.</p>
+<h2 id="sec:c1-pipeline">The Design → Fabrication → Assembly Pipeline</h2>
+<p>Turning an idea into a working board happens in three stages, and it helps to keep them straight from the start because different people (and different tools) own each one: you <strong>design</strong> the board, a factory <strong>fabricates</strong> it, and then someone, maybe you, maybe a machine, <strong>assembles</strong> the components onto it.</p>
+<h3 id="design-what-you-do-in-kicad">Design: what you do in KiCad</h3>
+<p>Design is the part this book is mostly about, and it’s the part KiCad handles. Designing a PCB means creating the <em>plans</em> for a board; it is not the same as manufacturing one. As the designer, you decide what the circuit is, what it’s built from, and how everything is laid out physically. It’s a procedural, iterative craft with a real element of personal style; over time, your boards will start to look recognisably yours. You don’t need to be a manufacturing expert, but you do need a rough sense of what a factory can and can’t do, so your design stays buildable.</p>
+<p>In KiCad, design happens in two big steps (we’ll spend whole chapters on each, so this is just the map):</p>
+<ol type="1">
+<li><strong>Schematic design.</strong> First you draw a ‘schematic’, a diagram of your circuit that captures <em>what connects to what</em>, without worrying yet about physical placement. You build it from ‘symbols,’ where each symbol is a stand-in for a real component (a resistor, a chip, a connector) and represents its <em>function</em>, not its physical shape.</li>
+<li><strong>Layout design.</strong> Then you create the ‘layout’, the physical board itself. Here every symbol gets paired with a ‘footprint,’ the real-world pattern of pads and holes that the actual part will solder to. You arrange those footprints on the board, draw the copper tracks that connect them, define the board’s outline, and add the mounting holes, silkscreen, and other features you met in the previous section.</li>
+</ol>
+<p>The same schematic can become many different layouts, which is why we separate the two. KiCad also checks your work at each step, an ‘Electrical Rules Check’ on the schematic and a ‘Design Rules Check’ on the layout, to catch mistakes early, while they’re cheap to fix.</p>
+<h3 id="fabrication-handing-off-to-the-factory">Fabrication: handing off to the factory</h3>
+<p>When the layout is finished, you export it in the format a manufacturer understands. The industry standard is a set of files called ‘Gerber’ files: plain text files, one per layer of your board, describing exactly where the copper, soldermask, silkscreen, and holes go. (The format is maintained by a company called Ucamco; you never have to read a Gerber file by hand, but it’s good to know the name.) Because they’re text, you can even keep them under version control, which we’ll do in a later volume.</p>
+<p>You upload those files to a PCB manufacturer (a ‘fab house’) and a couple of weeks later a stack of finished boards arrives. This is where modern hobby electronics has changed the most. Services such as OSH Park and NextPCB will make small two-layer boards for only a few dollars, in your choice of colour and surface finish, with quick turnaround. It is possible to etch boards yourself at home with chemicals, but it’s messy, smelly, and mildly hazardous, and the results rarely match a factory’s. For the price, I don’t bother, and I don’t recommend you do either when you’re starting out.</p>
+<h3 id="assembly-putting-the-parts-on">Assembly: putting the parts on</h3>
+<p>A bare board from the fab is just that: bare. ‘Assembly’ is the step that solders the actual components onto it. For a simple through-hole board you can do this yourself with a soldering iron in an afternoon. For surface-mount boards, you can still hand-solder with a little practice, or you can have the fab house assemble the board for you: many now offer an assembly service where they source the parts, place them by machine, and ship a finished, populated board. Either way, assembly is a separate stage from both design and fabrication, and the boundary matters, because it’s where your job as the designer ends and the factory’s begins.</p>
+<p>With the big picture in place, it’s time to get the tool. Let’s install KiCad.</p>
+<h2 id="sec:c1-install">Installing KiCad 10</h2>
+<p>KiCad is free, open-source, and runs on Windows, macOS, and Linux. This book is built on KiCad 10, so that’s the version to install. I won’t walk through every click of every installer; the KiCad team has polished the process to the point where it works like any other well-made application, and the official download pages always carry the current, correct instructions for each platform. Rather than reproduce screenshots that would go stale, I’ll point you to the official source and tell you what to choose.</p>
+<p>Head to the official KiCad download page and pick your operating system:</p>
+<ul>
+<li><strong>Windows:</strong> <a href="https://www.kicad.org/download/windows/" class="uri">https://www.kicad.org/download/windows/</a>, download the stable installer, run it, and follow the wizard.</li>
+<li><strong>macOS:</strong> <a href="https://www.kicad.org/download/macos/" class="uri">https://www.kicad.org/download/macos/</a>, download the stable <code>.dmg</code> and install it the usual way.</li>
+<li><strong>Linux:</strong> <a href="https://www.kicad.org/download/linux/" class="uri">https://www.kicad.org/download/linux/</a>, follow the instructions for your distribution (Ubuntu, Fedora, and others each have their own).</li>
+</ul>
+<p>You’ll notice each platform also offers a ‘nightly’ build. Nightly builds contain the very latest, in-progress code and are labelled “unstable” for good reason: they can behave oddly and occasionally crash. They’re fun to explore, but don’t do work you care about in one. For everything in this book, install the <strong>stable</strong> release.</p>
+<p>The download is the whole KiCad suite: every application, the documentation, and the standard libraries of symbols, footprints, and templates, even a few demo projects. Once it’s installed, start KiCad to confirm it’s up and running. The window that greets you is the project manager, and that’s exactly where we’re headed next.</p>
+<h2 id="sec:c1-apps">The Project Manager and the Apps</h2>
+<p>KiCad is not a single program. It’s a suite of applications that work together, and the window you see first (the ‘project manager’) is the hub that launches them and keeps your project’s files in one place (Figure 1.13). You don’t need to learn every corner of it today; I just want the workspace to feel familiar before you start using it in earnest in the next chapter.</p>
+
+<div class="figure-pending">
+Figure coming soon
+</div>
+<p>Figure 1.13: The KiCad project manager, the hub that launches the other applications.</p>
+<p>The project manager has three regions worth recognising: a toolbar for creating, opening, and archiving projects; a file browser in the middle showing everything inside your project folder; and a set of buttons that launch the individual applications. You can open most editors straight from here, either by clicking their button or by double-clicking the matching file in the browser.</p>
+<p>You won’t touch most of these applications in Volume 1, but it’s worth knowing they exist so the names aren’t a mystery later:</p>
+<ul>
+<li><strong>Schematic Editor.</strong> Where you draw the schematic: the circuit diagram built from symbols. It’s the first app you’ll use on any project. This is the focus of the next chapter.</li>
+<li><strong>PCB Editor.</strong> Where you design the physical layout: placing footprints, routing copper tracks, and shaping the board. It includes an interactive router and a built-in <strong>3D Viewer</strong> that shows you a realistic rendering of the finished board.</li>
+<li><strong>Symbol Editor</strong> and <strong>Footprint Editor.</strong> For creating or modifying the symbols and footprints that represent your components. You’ll lean on the standard libraries for now and learn to author your own parts in Volume 2.</li>
+<li><strong>Gerber Viewer.</strong> A quality-control tool that lets you inspect the Gerber files before you send them to a fab house, layer by layer, so you don’t pay for a board with a mistake in it.</li>
+<li><strong>Image Converter</strong>, <strong>Calculator Tools</strong>, and the <strong>Drawing Sheet Editor.</strong> Handy extras: turning a logo into a footprint, working out track widths and other quantities, and customising the title block on your schematic sheet. We’ll meet these at the point where a project actually needs them.</li>
+<li><strong>Plugin and Content Manager.</strong> Where you install add-ons and extra content from KiCad’s official and third-party repositories, for example an autorouter.</li>
+</ul>
+<p>KiCad’s official documentation covers every one of these in depth and stays current with the software, so I’ll link to it rather than duplicate it whenever you want to go deeper.</p>
+<p>That’s the lay of the land: you know what a PCB is made of, how a design becomes a finished board, and where the tools live. Enough reading. In the next chapter we’ll open the Schematic Editor and make something. Let’s begin.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>

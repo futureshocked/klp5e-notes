@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Two Workflows, Formalized — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">The Two Workflows, Formalized</h1>
+<p>You have now done the whole thing once. In Chapter 2 you drew a complete schematic, in Chapter 3 you turned it into a manufacturable board, and in Chapter 4 you saw why it all works the way it does. Along the way you walked two workflows, the eight steps of the schematic and the eight steps of the layout, but you walked them on one specific circuit, with me telling you which button to click. This chapter does a single job: it lifts those two walks off the blinker and pins them down as the durable checklist you will reuse on every project from here on.</p>
+<p>So there is nothing new to learn in this chapter. That is the point. This is the page to dog-ear, the one you will come back to at the start of every design when you want to remember “what comes next, and how do I know this step is finished?” Everything else in the book hangs off the spine you are about to see.</p>
+<p>What follows is the workflow model I actually use, the same order I follow whether I am building a two-part test board or a busy controller. I am laying it out as a fixed sequence because, especially while you are learning, a fixed sequence keeps you out of trouble: each step leaves the design in a known state that the next step expects. Once it is second nature you will bend the order to suit yourself, skipping ahead and doubling back as real work demands. Use it as it is to begin with, and modify it as you see fit later.</p>
+<p>Each step below is written as a small reference entry rather than a tutorial. For every step I give you three things: what the step is and why it sits where it does in the order, and then, in bold, <strong>how you know the step is finished</strong>, the concrete “tell” you can look for before you move on. Where a step has one mistake that catches almost everybody, I call it out too. The mechanics of <em>how</em> to click through each step are exactly what you practised in Chapters 2 and 3, so I will point back there rather than repeat them.</p>
+<h2 id="sec:c5-overview">The Whole Journey at a Glance</h2>
+<p>Before the two checklists, here is the entire path on one picture (Figure 5.1). Read it as two lanes. The top lane is the schematic workflow, eight numbered steps that answer <em>what connects to what</em>. The bottom lane is the layout workflow, eight numbered steps that answer <em>where everything physically goes</em>. Between them sits a single one-way bridge, the “Update PCB from Schematic” command, carrying your finished circuit down into the board. That bridge is the same one-way flow you met in Chapter 4: the schematic is the source of truth, and the layout follows it, never the other way around.</p>
+<p>Two steps in the picture wear a different shape from the rest, and they are the two most valuable habits in the whole book: the checks. Step 7 of the schematic lane is the Electrical Rules Check (ERC), and step 6 of the layout lane is the Design Rules Check (DRC). Each is drawn as a gate with a small loop back to the steps before it, because a check is not a step you pass through once. You run it, fix what it finds, and run it again until it comes back clean. Notice where the two gates sit: each one guards the moment just before you commit, the ERC before you hand the circuit to the board, the DRC before you send the board to a factory. That placement is deliberate. A mistake caught at a gate costs you seconds; the same mistake caught after you have paid for boards costs you the whole order.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch05/ch05_workflow-spine_v10.png" /></p>
+<p>Figure 5.1: The whole of Volume 1 on one map. The schematic workflow feeds the layout workflow through a one-way bridge, and each lane has a check-gate near its end.</p>
+<h2 id="sec:c5-schematic">The 8-Step Schematic Workflow</h2>
+<p>The schematic is where every design begins and where its truth lives. These eight steps take you from an empty project to a checked circuit ready to become a board (Figure 5.2). You met all eight in Chapter 2; here they are as the reusable checklist.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch05/ch05_schematic-flow_v10.png" /></p>
+<p>Figure 5.2: The eight schematic steps. The ERC at step 7 is a gate you re-run until it is clean.</p>
+<h3 id="step-1-create-the-project-and-schematic">Step 1: Create the project and schematic</h3>
+<p>Every design lives in a project, a single folder that holds the schematic, the board, and their supporting files under one shared name. You begin here so that everything you make from this point has a home and stays together. Open the Schematic Editor onto its blank sheet and you are ready to build. <strong>You’re done when</strong> the project folder exists (with its <code>.kicad_pro</code>, <code>.kicad_sch</code>, and <code>.kicad_pcb</code> files) and the Schematic Editor is open on an empty sheet.</p>
+<h3 id="step-2-place-symbols">Step 2: Place symbols</h3>
+<p>Now you drop a symbol onto the sheet for each part in the circuit, plus the power symbols that mark which pins go to the supply and to ground. A symbol stands for a part’s function, not its physical shape, so at this stage you are describing <em>what the circuit is made of</em>, not what the board will look like. Leave the footprint question alone for now; that is step 6. <strong>You’re done when</strong> every part in your circuit, and every power connection, has a symbol on the sheet. One thing the tour glossed over: every part we needed happened to live in KiCad’s standard library. When a part you need is <em>not</em> in the standard library, you have a clear path to follow (use the standard library, import a part from a reliable source, or author one yourself), and that path is the subject of the next chapter.</p>
+<h3 id="step-3-annotate">Step 3: Annotate</h3>
+<p>Annotation gives every part a unique name, its ‘reference designator,’ like <code>R1</code>, <code>C2</code>, or <code>U1</code>. You do this so that you (and KiCad’s own tools) can refer to each part without ambiguity for the rest of the project, and you do it before wiring so each part already carries that name while you connect and check the circuit. KiCad often numbers parts as you place them, but running the annotation tool once makes sure none was missed. <strong>You’re done when</strong> no part still shows a question mark in its name (no <code>R?</code> or <code>U?</code> remain).</p>
+<h3 id="step-4-set-component-values">Step 4: Set component values</h3>
+<p>Now you tell each part what it actually is, turning the generic <code>R</code> or <code>C</code> it was born with into a <code>10k</code> or a <code>10nF</code>. Setting the value field makes the schematic a precise description of the circuit, and the beginning of its bill of materials. Double-click a part (or select it and press “E”) and type into the “Value” field; the Symbol Fields Table from the “Tools” menu lets you set them all in one grid and spot any you missed. Parts whose name already says what they are, a chip or a connector, need nothing here. <strong>You’re done when</strong> no part that should carry a value still reads the bare <code>R</code> or <code>C</code> it started with.</p>
+<h3 id="step-5-wire-and-label">Step 5: Wire and label</h3>
+<p>Here you turn a scattering of parts into a circuit by connecting their pins, and you give the connections that matter a name. Remember that a wire in a schematic does not draw a physical wire; it declares that two pins are the same electrical point, a ‘net.’ Naming a net with a label, or tying pins together by a shared power symbol, connects them by name without a line crossing the whole sheet. <strong>You’re done when</strong> every pin’s small unconnected-end square has vanished and the signals you care about carry labels. If a connection refuses to take, it is almost always because one end sits a hair off the grid; nudge it back on and the join will form.</p>
+<h3 id="step-6-assign-footprints">Step 6: Assign footprints</h3>
+<p>This is the bridge between the circuit and the physical board. Each symbol stands for a function; before a board can be built, every symbol has to know which real-world footprint, the actual pattern of pads and holes, it will become. You met in Chapter 4 why the two are kept separate: one symbol can be paired with many different footprints, and that freedom is exactly what you are exercising here. <strong>You’re done when</strong> every symbol on the sheet has a footprint assigned to it.</p>
+<h3 id="step-7-electrical-rules-check">Step 7: Electrical rules check</h3>
+<p>The first of the two gates. The ERC reads your whole schematic and flags the logical mistakes that are easy to make and easy to miss: a pin left floating, a power input with nothing driving it, two outputs wired together. It checks <em>intent</em>, which is why it lives in the editor that owns intent. This is not a step you pass once and forget; it is a loop. Run the check, click each violation so the editor pans straight to it, fix it, and run again. One flag catches almost everybody on their first powered board: if your circuit takes its supply through a connector rather than a chip, the ERC cannot tell the power rails are genuinely fed and reports a “power input not driven” error on each. The cure is a small marker called a <code>PWR_FLAG</code> on the supply and ground nets, which tells the checker that real power enters there; the first project walks you through it. <strong>You’re done when</strong> the report shows zero violations, or when every remaining warning is one you have read, understood, and judged harmless. The skill is not an empty report at any cost; it is understanding every line in it.</p>
+<h3 id="step-8-hand-off-to-layout">Step 8: Hand off to layout</h3>
+<p>With the circuit drawn, named, valued, footprinted, and checked, you carry it across to the board with one command, “Update PCB from Schematic.” This is the one-way bridge from Figure 5.1: it copies every part and every net into the PCB Editor so you never re-enter any of it. Save the schematic first, because the bridge carries across whatever is saved. <strong>You’re done when</strong> the PCB Editor has opened and every part and connection from the schematic has landed on the board. This same command is also step 1 of the layout workflow, so the two lanes meet here; the schematic’s last step and the board’s first step are the two ends of one bridge.</p>
+<h2 id="sec:c5-layout">The 8-Step Layout Workflow</h2>
+<p>The layout is where your circuit becomes a physical object: copper of a real width, parts in real positions, a board of a real shape, and at the very end the files a factory needs to build it. These eight steps take you from a fresh import to a folder of manufacturing files (Figure 5.3). You walked all eight in Chapter 3.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch05/ch05_layout-flow_v10.png" /></p>
+<p>Figure 5.3: The eight layout steps. The DRC at step 6 is a gate you re-run until it is clean, and step 8 produces the files a factory needs.</p>
+<h3 id="step-1-import-from-the-schematic">Step 1: Import from the schematic</h3>
+<p>The board starts empty, and you fill it with the very command that ended the schematic workflow, “Update PCB from Schematic” (the “F8” key is the shortcut). Every part arrives already knowing its footprint, laced together by the thin lines of the ratsnest, KiCad’s to-do list of connections still to be made. <strong>You’re done when</strong> all the parts have landed on the canvas and the ratsnest is showing. Don’t be put off that they arrive in an overlapping clump; tidying them is the next two steps.</p>
+<h3 id="step-2-set-up-the-board-outline">Step 2: Set up the board outline</h3>
+<p>Before you arrange anything, give the board a shape by drawing its physical edge on the special <code>Edge.Cuts</code> layer, the layer a factory reads as “cut the board out along this line.” You do this early so the parts have a frame to be placed inside. The only rule is that the outline must be a single closed shape that does not cross itself; a plain rectangle satisfies it easily, and you can always drag an edge later to make room. <strong>You’re done when</strong> a single closed outline on <code>Edge.Cuts</code> surrounds the area where your parts will sit.</p>
+<h3 id="step-3-place-components">Step 3: Place components</h3>
+<p>Now you arrange the footprints, and this is the first step where your judgement really shapes the board. The goal is simple: position the parts so the wiring in the next step is as easy as possible. Your guide is the ratsnest; as you slide a part, its lines stretch and follow, and a good placement is one where those lines end up short and untangled rather than long and crossed. <strong>You’re done when</strong> the parts sit where you want them, the ratsnest looks as calm as you can make it, and no two parts’ courtyards (the breathing room drawn around each footprint) overlap. Every crossing you remove now is a track you will not have to fight later.</p>
+<h3 id="step-4-route-the-tracks">Step 4: Route the tracks</h3>
+<p>Routing is the heart of layout: you replace each ratsnest line with a real copper track. Set two things before your first track: the layer you are routing on, and the track width (our small, low-current boards are happy with a generous, easy-to-make width). Then draw from one pad to the other, and watch the ratsnest line it replaces disappear. Where two tracks need to cross on a two-layer board, send one to the other side through a via. <strong>You’re done when</strong> every connection you mean to route by hand is copper, and the only ratsnest lines still showing are the ground ones you are deliberately leaving for the copper fill in the next step. Watch the “Unrouted” count in the status line at the bottom-left as it falls: on a board with a ground pour it settles on those few ground connections and only reaches zero after Step 5 fills them; on a board with no pour, it should read “Unrouted: 0” right here.</p>
+<h3 id="step-5-add-copper-fills">Step 5: Add copper fills</h3>
+<p>Rather than thread a thin track to every pad that needs ground, you flood a whole side of the board with copper and let that pour tie the ground pads together. A ground pour gives every grounded part a short, solid path back to ground, and it is good practice on nearly every board. Draw the zone, tell it which net it belongs to (usually <code>GND</code>) and which layer it sits on, then fill it. <strong>You’re done when</strong> the zone is drawn and filled, with the copper neatly carved around the pads it should not touch and joined to the ground pads through thermal-relief spokes. Watch out for one habit: KiCad does not refill zones by itself, so press “B” to refill after any change, before you check or export.</p>
+<h3 id="step-6-design-rules-check">Step 6: Design rules check</h3>
+<p>The second gate, and the layout’s equivalent of the ERC. Where the ERC studied the circuit’s logic, the DRC studies the board’s physical reality against what a factory can actually make: copper too close to other copper, a track that misses its pad, a hole too near the edge, courtyards that overlap. As with the ERC, it is a loop, not a one-shot: run it, click each violation to jump straight to it, fix it, and run again. Leave the “Refill all zones before performing DRC” box ticked so your pour is always fresh when it checks. <strong>You’re done when</strong> the report shows zero violations, or when every item left is one you have read and judged harmless, exactly as with the ERC. The common harmless one is a “schematic parity” warning about a board-only part — such as a mounting hole you added straight on the board, with no symbol behind it — which is expected, not a fault. (Keep the zones freshly refilled so the pour is current when it checks.)</p>
+<h3 id="step-7-add-text-and-silkscreen">Step 7: Add text and silkscreen</h3>
+<p>Now make the board friendlier for the humans who will build and use it. The silkscreen is the printed lettering and outlines on the board’s surface; it carries no electricity and exists purely to label things. Most of it is already there, since every footprint brought its reference designator (<code>R1</code>, <code>U1</code>, and so on) across from the schematic. What I add by hand is the board’s own name and version, so that a year from now I can pull a board from a drawer and know exactly what it is. <strong>You’re done when</strong> the board carries its name and version on the silkscreen. Adding silkscreen touches no copper, so it cannot create an electrical fault, but it is a good reflex to run the DRC once more after any change.</p>
+<h3 id="step-8-generate-the-gerbers">Step 8: Generate the Gerbers</h3>
+<p>The last step produces the files a factory needs. Before exporting, it is worth opening the 3D Viewer for a free sanity check: a part facing the wrong way or a connector hanging off the edge is far cheaper to spot here than on a real board. Then plot the Gerber files (one plain-text file per layer) and generate the drill file (which lists every hole and its size). <strong>You’re done when</strong> your output folder holds one Gerber per layer you need (the copper layers, <code>Edge.Cuts</code>, the soldermask, and the silkscreen) plus the drill file. That folder is, quite literally, a board waiting to be made.</p>
+<h2 id="one-card-to-keep">One Card to Keep</h2>
+<p>That is the entire spine of Volume 1, and of every project after it. Strip away the explanations and it fits on a single card you can keep beside you:</p>
+<p><strong>Schematic (what connects to what):</strong> 1) create the project, 2) place symbols, 3) annotate, 4) set component values, 5) wire and label, 6) assign footprints, 7) run the ERC until clean, 8) hand off with “Update PCB from Schematic.”</p>
+<p><strong>Layout (where everything goes):</strong> 1) import from the schematic, 2) set up the board outline, 3) place components, 4) route the tracks, 5) add copper fills, 6) run the DRC until clean, 7) add text and silkscreen, 8) generate the Gerbers.</p>
+<p>Two things are worth committing to memory more than the lists themselves. The first is the shape of the journey: you build, you check, you hand on. The second is the two gates. The ERC and the DRC are where this workflow earns its keep, because they are how you find a mistake while it is still free to fix. Run them early, run them often, and run them until they are clean.</p>
+<p>One more thing about that bridge, because the projects ahead will have you cross it more than once. The eight-then-eight order reads as a single pass, and your first time through it is. But real design loops: partway through a layout you will spot something to change, and the place to change it is always the schematic, never the board. Edit the schematic, save, and run “Update PCB from Schematic” again; KiCad carries the change down and reports exactly what moved. The board is where connections are <em>realised</em>, not where they are <em>decided</em>, so the schematic stays the source of truth however many times you return to it. Editing connectivity straight on the board is the one habit this workflow asks you to avoid.</p>
+<p>For your first few solo projects, keep this page open beside you and follow the order as written; it will keep the design in a sensible state at every step. As the steps become second nature, you will start to move around inside them freely, and that is exactly as it should be. The order is a scaffold for learning, not a cage.</p>
+<p>With the spine in hand, the rest of the book simply hangs new skills off these fifteen steps. The very first thing to fill in is something both tours quietly took for granted: that every part we needed was already waiting in KiCad’s standard library. That is often true, but not always, and knowing what to do when a part is missing is what separates a smooth project from a stalled one. In the next chapter we tackle exactly that: finding, importing, and managing the parts your designs are built from. Let’s go find some parts.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Editor Orientation (Just Enough) — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">Editor Orientation (Just Enough)</h1>
+<p>You have already driven both of KiCad’s main editors. In Chapter 2 you drew a complete schematic, and in Chapter 3 you turned it into a finished board. Each time, I told you to take ten seconds to get your bearings and promised we would come back and explore the editors properly. This is that chapter. We are going to slow down just enough to put names to the parts of each window, so that when a later project says “open the Appearance panel” or “use the selection filter,” you know exactly where to look and what it does.</p>
+<p>Let me be clear about what this chapter is, and what it is not. It is a map, not a catalogue. I am not going to march you through every button on every toolbar; that would be a wall of lookup material, and worse, it would go stale the moment KiCad changes an icon. Instead I will show you the regions of each editor, explain what each one is <em>for</em>, and, most importantly, teach you how to find any tool quickly when you need it. The exhaustive, button-by-button detail already exists, and it is excellent: KiCad’s official documentation is thorough, current, and free, and I will point you to it whenever you want to go deeper. Think of this chapter as the orientation that makes that reference easy to use, rather than a replacement for it.</p>
+<p>A reassuring word before we start. Both editors are large, capable programs, and you will never need all of either one on a given day. The goal here is not to memorise anything. It is to make the windows feel familiar, so that nothing on screen is a mystery and you always know roughly where to reach. You will pick up the details by using them, exactly as you did on the tour.</p>
+<h2 id="sec:c7-shared">The Two Editors Are Siblings</h2>
+<p>Here is the single most useful thing to know before we look at either editor in detail: the Schematic Editor and the PCB Editor are built on the same frame. They share the same layout, the same way of getting around, and most of the same panels. Once you are comfortable in one window, you are most of the way to being comfortable in the other. So let me cover what they have in common once, here, and then each editor’s own section can focus on what makes it different.</p>
+<p>Every KiCad editor window is laid out the same way. Around the outside sit the toolbars and panels; in the middle sits the drawing. The pieces you will meet by name throughout the book are these:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Region</th>
+<th>What it is for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top toolbars</td>
+<td>Opening and saving files, zoom controls, and editor-wide tools</td>
+</tr>
+<tr>
+<td>Left toolbar</td>
+<td>How things <em>look</em>: the grid, the units, the cursor, the display</td>
+</tr>
+<tr>
+<td>Right toolbar</td>
+<td>The tools that <em>build</em> the design: parts, wires, tracks, and so on</td>
+</tr>
+<tr>
+<td>Editing canvas</td>
+<td>The large central area where your schematic or board is drawn</td>
+</tr>
+<tr>
+<td>Properties panel</td>
+<td>Edit the properties of whatever you have selected, in place</td>
+</tr>
+<tr>
+<td>Message panel and status bar</td>
+<td>Information about the selection, plus the cursor coordinates, grid, and units</td>
+</tr>
+<tr>
+<td>Selection filter</td>
+<td>Controls which <em>types</em> of object the mouse is allowed to select</td>
+</tr>
+</tbody>
+</table>
+<p>Table 7.1: The regions every KiCad editor shares.</p>
+<p>A habit worth forming early: the <strong>left</strong> toolbar changes what you <em>see</em>, and the <strong>right</strong> toolbar changes what you <em>make</em>. If you are hunting for a way to draw something, look right. If you are hunting for a way to change the view, look left. That one distinction will save you a surprising amount of searching.</p>
+<p>Getting around the canvas is identical in both editors, and you already know it from the tour. To save you flipping back, here it is in one place:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>To do this</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pan around the drawing</td>
+<td>Hold the middle or right mouse button and drag</td>
+</tr>
+<tr>
+<td>Zoom in or out</td>
+<td>Roll the mouse wheel; the view zooms toward the pointer</td>
+</tr>
+<tr>
+<td>Fit everything back into view</td>
+<td>Press the “Home” key</td>
+</tr>
+<tr>
+<td>Switch the display units</td>
+<td>Click the units button on the left toolbar</td>
+</tr>
+<tr>
+<td>See every available hotkey</td>
+<td>Press “Ctrl+F1”</td>
+</tr>
+</tbody>
+</table>
+<p>Table 7.2: Getting around, the same in both editors.</p>
+<p>That last row is the key to this whole chapter, so let me dwell on it. You do not have to remember where every command lives, because KiCad will tell you. There are three reliable ways to find anything:</p>
+<ul>
+<li><strong>The menu bar.</strong> The menus across the top are grouped by purpose, and the grouping is consistent. “File” handles projects and saving; “Edit” handles undo, copy, and bulk changes; “View” controls zoom and which panels are showing; “Place” holds the things you add to the design; “Inspect” holds the checkers (the rules checks you ran on the tour live here); “Tools” holds the bigger operations like annotation and the schematic-to-board handoff; and “Preferences” is where you set the program up to your taste. When you are not sure where a command is, the menu it belongs to is usually the one you would guess.</li>
+<li><strong>The right-click menu.</strong> Right-click on the canvas, or on a selected item, and KiCad shows a context menu of the actions that make sense right now. This is often the fastest route to a command, because it only offers what is relevant to what you are pointing at.</li>
+<li><strong>The hotkey list.</strong> Press “Ctrl+F1” at any time and KiCad shows the complete, current list of keyboard shortcuts for the editor you are in. This is better than any printed cheat sheet, because it always matches your version and any shortcuts you have customised. When you find yourself reaching for a tool often, look up its hotkey here once, and your hands will remember it.</li>
+</ul>
+<p>Between those three, you can locate almost anything without memorising it. Now let us look at each editor in turn.</p>
+<h2 id="sec:c7-schematic-editor">Schematic Editor Essentials</h2>
+<p>The Schematic Editor is where every design begins, and it is the window you met first, in Chapter 2. Open it now if you would like to follow along: launch KiCad, open any project, and double-click its <code>.kicad_sch</code> file. Figure 7.1 shows the whole window with its regions labelled.</p>
+
+<p><img src="/assets/klp5e-vol1/ch07/ch07-schematic-1-editor.png" /></p>
+<p>Figure 7.1: The Schematic Editor, with its main regions labelled.</p>
+<p>Most of what you see matches the shared layout from the last section, so let me walk only the parts that are particular to drawing schematics (the numbers refer to the callouts in Figure 7.1). The <strong>right toolbar</strong> (3) is the one you reached for constantly on the tour: it holds the symbol tool, the power-symbol tool, the wire tool, the label tool, and the rest of the kit for building a circuit. The <strong>left toolbar</strong> (2) controls the display: the grid, the measurement units, the cursor style, and the line-drawing mode that keeps your wires at tidy right angles. The <strong>Properties panel</strong> (6) shows the editable fields of whatever you have selected, so you can change a value without opening a separate dialog. The <strong>Hierarchy Navigator</strong> (7) lists the sheets in your design; on a small single-sheet schematic like the blinker it has just one entry, but on a larger project it becomes the table of contents you click through to move between sheets.</p>
+<p>The <strong>selection filter</strong> (8) sits in the lower-left corner and is worth knowing about now, because it solves a frustration before you hit it. It lists the kinds of object on a schematic (symbols, wires, labels, and so on), each with a checkbox. Turning one off tells KiCad “do not let me select this type with the mouse.” On a busy schematic where you are trying to grab a wire but keep catching the symbol behind it, switching off everything except wires makes the job effortless. Leave it with everything ticked for now; just remember it is there for the day a crowded sheet fights back.</p>
+<p>The tools you used most on the tour all live on that right toolbar, and each has a hotkey. You do not need to learn them as a list, but having them in one place helps, and you will absorb the common ones simply by using them:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Add a symbol</td>
+</tr>
+<tr>
+<td>P</td>
+<td>Add a power symbol</td>
+</tr>
+<tr>
+<td>W</td>
+<td>Draw a wire</td>
+</tr>
+<tr>
+<td>L</td>
+<td>Add a net label</td>
+</tr>
+<tr>
+<td>M</td>
+<td>Move the selected item (wires do not follow)</td>
+</tr>
+<tr>
+<td>G</td>
+<td>Drag the selected item (wires stay attached)</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Rotate the selected item</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Edit the selected item’s properties</td>
+</tr>
+<tr>
+<td>Esc</td>
+<td>Put the current tool down</td>
+</tr>
+</tbody>
+</table>
+<p>Table 7.3: The schematic hotkeys you will reach for most often.</p>
+<p>Two of those deserve a reminder, because they trip people up. “M” (move) and “G” (drag) look similar but differ in one important way: drag keeps a part’s wires attached and stretches them to follow, while move leaves the wires where they were. On the tour I told you to favour “G” once a circuit is wired, and that is the reason. The other pair to keep straight is the menus you will visit for the bigger jobs. The checks and operations you ran in Chapter 2 are not on a toolbar; they live in the menus, exactly where the grouping rule predicts. The Electrical Rules Check, KiCad’s tool for catching wiring mistakes, is under “Inspect.” Annotation, footprint assignment, and the “Update PCB from Schematic” handoff are all under “Tools.” Adding a symbol or label from a menu rather than a hotkey is under “Place.”</p>
+<p>That is genuinely most of what you need to be at home in the Schematic Editor. Everything else, the deeper features we set aside on the tour like buses, hierarchical sheets, and the simulator, is covered fully in the official Schematic Editor documentation when you are ready for it.</p>
+<h2 id="sec:c7-pcb-editor">PCB Editor Essentials</h2>
+<p>The PCB Editor is where the design becomes physical, and you met it in Chapter 3. Open a project’s <code>.kicad_pcb</code> file to follow along. Figure 7.2 shows the window with its regions labelled. You will notice straight away how much it resembles the Schematic Editor: same top toolbars, same left display toolbar, same right tools toolbar, same canvas and status bar. That family resemblance is real, and it is why the tour felt familiar even though you had switched editors.</p>
+
+<p><img src="/assets/klp5e-vol1/ch07/ch07-layout-2-editor.png" /></p>
+<p>Figure 7.2: The PCB Editor, with its main regions labelled.</p>
+<p>The big addition, the one thing that has no equivalent in the Schematic Editor, is the <strong>Appearance panel</strong> (6), down the right side. You met it briefly in Chapter 3, where you used it to choose which layer you were drawing on. It earns proper attention now, because you will use it on every board you make. The panel has three tabs, shown in Figure 7.3, and each controls a different aspect of what you see.</p>
+
+<p><img src="/assets/klp5e-vol1/ch07/ch07-layout-3-editor-appearance.png" /></p>
+<p>Figure 7.3: The Appearance panel’s three tabs: Layers, Objects, and Nets.</p>
+<p>The <strong>Layers</strong> tab lists every layer the board is made from: the copper layers, the silkscreen, the soldermask, the board edge, and the rest. Each row has a visibility control, so you can hide a layer to unclutter the view, and clicking a layer’s <em>name</em> makes it the <strong>‘active layer,’</strong> the one your next action will land on. Remember that on the tour, drawing the board outline began by clicking “Edge.Cuts” to make it active, and routing began by clicking “F.Cu.” An arrow next to a layer marks the active one, so a glance tells you where your next track or shape will go. The <strong>Objects</strong> tab does the same job for kinds of objects rather than layers: it lets you dim or hide tracks, vias, pads, and zones, and it is where the slider lives that makes filled zones translucent so you can see through them. The <strong>Nets</strong> tab lists the board’s nets and lets you colour or hide their ratsnest lines, which is a quiet luxury on a busy board when you want to see just the ground connections, say.</p>
+<p>At the bottom of the panel sit two conveniences worth knowing by name even if you skip them at first. <strong>‘Layer presets’</strong> save a particular combination of visible layers so you can recall it in one click, handy when you routinely want to see “just the front copper” or “just the silkscreen.” <strong>‘Viewports’</strong> do the same for a position and zoom level, so you can jump back to a corner of the board you keep returning to. Neither is essential on a small board; both pay off on a large one.</p>
+<p>The <strong>right toolbar</strong> (3) holds the building tools, just as in the schematic, but the tools themselves are the physical ones you used on the tour: route a track, add a via, draw a copper zone, place a footprint, add text. The <strong>selection filter</strong> (7) works exactly as its schematic cousin does, only here it lists board objects (footprints, tracks, vias, pads, zones), and it sits in the lower-<em>right</em> corner rather than the lower-left. On a dense board it is invaluable: switch off everything but tracks when you want to tidy routing, and you will stop grabbing footprints by accident.</p>
+<p>The hotkeys you will use most on a board are these. As before, learn them by using them, not by memorising the table:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>X</td>
+<td>Route a track</td>
+</tr>
+<tr>
+<td>V</td>
+<td>Drop a via while routing</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Fill all copper zones</td>
+</tr>
+<tr>
+<td>M</td>
+<td>Move a footprint</td>
+</tr>
+<tr>
+<td>G</td>
+<td>Drag a footprint (tracks stay attached)</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Rotate a footprint</td>
+</tr>
+<tr>
+<td>F8</td>
+<td>Update the board from the schematic</td>
+</tr>
+<tr>
+<td><code>`</code></td>
+<td>Highlight the net under the cursor</td>
+</tr>
+<tr>
+<td>Esc</td>
+<td>Put the current tool down</td>
+</tr>
+</tbody>
+</table>
+<p>Table 7.4: The PCB hotkeys you will reach for most often.</p>
+<p>Two PCB-only features round out the orientation. The first is <strong>net highlighting</strong>: hover over a piece of copper and press the backtick key (<code>`</code>), and KiCad lights up the entire net that copper belongs to while dimming everything else. It is the quickest way to answer “where does this connection actually go?” on a tangled board. The second is <strong>cross-probing</strong>, and it is one of my favourite things about working in KiCad. The schematic and the board stay linked, so selecting a part in one selects the same part in the other. Click a symbol in the Schematic Editor and KiCad jumps to its footprint on the board; click a footprint on the board and it finds the symbol on the schematic. The link reaches the 3D Viewer too. When you are placing parts and lose track of which resistor is which, cross-probing from the schematic is how you find it instantly, no guessing required.</p>
+<p>As with the schematic, the bigger operations live in the menus where you would expect them. The Design Rules Check, the board’s equivalent of the ERC, is under “Inspect.” The interactive router and its options are under “Route” (a menu the Schematic Editor does not have, since only boards get routed). Exporting the manufacturing files with “Plot” is under “File.” And everything we set aside on the tour, the push-and-shove router, differential pairs, length tuning, blind and buried vias, is documented in full in the official PCB Editor manual when a project calls for it.</p>
+<h2 id="sec:c7-preferences">Preferences That Matter</h2>
+<p>KiCad has a generous Preferences dialog, and the good news is that you can ignore almost all of it. The defaults are sensible, chosen by people who use the program every day, and a beginner can leave the whole dialog alone and lose nothing. So this section is deliberately short: just the handful of settings worth knowing about early, and a clear signal to skip the rest until you have a reason.</p>
+<p>Open the dialog from the “Preferences” menu, or with “Ctrl+,” (on macOS, look under “KiCad” then “Settings”). It is shared across all of KiCad’s tools: some pages apply everywhere, and some apply only to a particular editor. Figure 7.4 shows it open. The settings I would actually look at, sooner or later, are these:</p>
+
+<p><img src="/assets/klp5e-vol1/ch07/ch07-4-editor-preferences.png" style="width:65.0%" /></p>
+<p>Figure 7.4: The Preferences dialog, open at the Mouse and Touchpad page.</p>
+<ul>
+<li><strong>Mouse and Touchpad.</strong> This is the page most worth a visit, especially if the default panning and zooming do not feel right under your hand. You can set what the mouse buttons do when you drag them (pan or zoom), change the zoom speed, and turn on “center and warp cursor on zoom” so the view stays centred where you are working. If you use a trackpad rather than a mouse, this is where you make KiCad comfortable.</li>
+<li><strong>Hotkeys.</strong> Every shortcut in every editor can be changed here, and there is a search box so you can find a command by name. More useful than rebinding keys, though, is the import button: hotkey settings live in a file you can carry to another computer, so you can set KiCad up once and bring your shortcuts with you. This is the same list that “Ctrl+F1” shows you while you work.</li>
+<li><strong>Project backups (under “Common”).</strong> KiCad can quietly keep snapshots of your project as you go, so a slip or a crash never costs you much. Backups are on by default, and you can browse and restore earlier snapshots from “View” then “Panels” then “Local History.” It is worth knowing this safety net exists, so that the first time you wish you could undo an hour ago, you remember you can.</li>
+</ul>
+<p>Two small settings round out the list. The first is a gotcha rather than a preference you must change: hiding the grid (with the grid button on the left toolbar) does <em>not</em> turn off grid snapping, so your parts and wires still snap even when the grid is invisible. If you ever want the hiding and the snapping tied together, the Display Options page is where that lives. The second is “First hotkey selects tool,” in the Common page: by default, pressing a tool’s hotkey starts the tool immediately at your cursor, which is usually what you want; if you would rather the first press only <em>select</em> the tool and a second press begin it, this is the switch. Try the defaults first. Change a setting only when something nags at you, not before, and you will avoid the trap of fiddling with a program you have not yet learned.</p>
+<p>Everything else in that dialog can wait. When you do want to understand a particular page in full, the official documentation describes every option, and it is the right place to look.</p>
+<p>That completes the tour of the tools. You now have a working map of both editors: you know what each region of each window is for, you know the few panels that make the PCB Editor different from the Schematic Editor, you know the handful of preferences worth a look, and, above all, you know how to find any command you need without memorising it. That last skill is the one that lasts. From here on, when a chapter says “open the Appearance panel” or “run the DRC from the Inspect menu,” none of it will be a mystery.</p>
+<p>We have now spent seven chapters getting ready: you have seen what a PCB is, walked both workflows end to end, understood why they work, turned them into checklists, learned to find parts, and oriented yourself in the editors. It is time to put all of it to work on a real project. In the next chapter you will build your first complete board from scratch, a small breadboard power supply, applying both workflows on a design that is genuinely useful. Let’s build something real.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>
