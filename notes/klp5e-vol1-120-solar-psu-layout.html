@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Solar PSU - Layout — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">Solar PSU - Layout</h1>
+<h2 id="sec:c9-layout">Laying Out the Board</h2>
+<p>You are on the eight-step layout workflow from Chapter 5 now, and you know every move from the breadboard supply. I will name each step, flag what is special about a mostly surface-mount board, and weave in the new moves this project brings. Here is the board you are heading for (Figure 9.29).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-17-final-layout.png" style="width:100.0%" /></p>
+<p>Figure 9.29: The finished layout. Small and two layers, with the surface-mount parts grouped on the top copper, the connectors and switch along the edges, and a solid ground pour on the bottom that a single via stitches the converter’s ground pad down to.</p>
+<p><strong>Step 1, import and look at the design rules.</strong> If the handoff worked, the PCB Editor already holds your parts in a clump laced with the ratsnest (Figure 9.30); if not, press “F8” to bring them across.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-1-import.png" style="width:65.0%" /></p>
+<p>Figure 9.30: The parts arrive from the schematic in a single clump, every pad tied to its neighbours by the thin lines of the ratsnest. Untangling that clump into a board is what the rest of this chapter is about.</p>
+<p>This project promised a closer look at the design rules, so open “Board Setup” from the “File” menu and find them now, under “Design Rules → Constraints” (Figure 9.31). The ‘design rules’ are the safety limits KiCad measures your board against: the smallest gap allowed between two pieces of copper, the narrowest a track may be, the size of a via’s hole, how close copper may come to the board’s edge. The defaults are deliberately conservative, comfortably inside what any ordinary fab can make, and for a small, low-current board like this one they need no change at all. Two numbers here are worth a glance, because you will meet them again before the chapter is out: the copper-to-edge clearance, set to 0.5 mm, which is the rule the design rules check will catch us breaking later; and the minimum thermal relief spoke count, set to 2, which has a hand in how firmly the ground pour grips each pad. You would tighten any of these only when a board grew dense enough to need finer copper or carried enough current to need wider, and that judgement waits for a later volume. For now, read them once so they are not a mystery, and leave them as they are.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-2-design-rules.png" style="width:85.0%" /></p>
+<p>Figure 9.31: The design rules, under “Design Rules → Constraints” in Board Setup. These conservative defaults — minimum clearances, track width, via and drill sizes, the 0.5 mm copper-to-edge spacing, and the thermal relief spoke count — are the limits every later check measures the board against. On a board this small you read them once and leave them alone.</p>
+<p>While Board Setup is open, glance at the stackup too, because a two-layer board is right here as it was before. Under “Board Stackup → Physical Stackup” you can see the two copper layers, F.Cu on top and B.Cu on the bottom, with a 1.6 mm FR4 core between them (Figure 9.32). That bottom layer is where the ground pour will go.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-3-physical-stackup.png" style="width:85.0%" /></p>
+<p>Figure 9.32: The physical stackup of a plain two-layer board: a copper layer on each face of a 1.6 mm FR4 core. The top carries the parts and their signal tracks; the bottom will hold a solid ground pour.</p>
+<p><strong>Step 2, the board outline.</strong> This project has no dimensions handed to it from outside, so the goal is simply to make the board as small as the parts allow. Sketch a rough rectangle on <code>Edge.Cuts</code> to work inside — the same move from Chapter 3, on a 0.5 mm grid so the edges land on round millimetres (Figure 9.33) — then place the parts, and come back at the end to pull the outline in tight around them. I drew mine generously at first and shrank it once everything had a home.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-4-outline-draft.png" style="width:100.0%" /></p>
+<p>Figure 9.33: A first rough rectangle on <code>Edge.Cuts</code>, drawn on a 0.5 mm grid. It is only a working boundary; once the parts are placed you pull it in to make the board as small as it can be.</p>
+<p>One decision belongs here, before you settle on a size: how the finished board will be held in its box. On the breadboard supply you met the screw-down ‘mounting hole,’ and you could add four of them at the corners here too. But a small board like this one does not have to be bolted down. It can drop into a moulded enclosure and be held by clips, or by a pair of slots in the box — no holes, no screws, and a little more board freed up for parts. That is the route I have taken, so this board carries no mounting holes at all; the outline simply has to fit the enclosure’s inside. It is worth knowing that not every board needs mounting holes, and that the choice is best made early, because it shapes the outline you draw.</p>
+<p><strong>Step 3, place the components.</strong> A few parts have to meet the outside world in set places, so start with them: put <code>J3</code> (solar) and <code>J2</code> (battery) along the left edge, <code>J1</code> (output) at the right edge, and the slide switch <code>SW1</code> toward the middle where a thumb can reach it. Then arrange the rest between them.</p>
+<p>This is the first board busy enough that it pays to be sure, as you nudge a part, exactly which part you are holding. KiCad has a quiet feature for that called ‘cross-probing,’ on by default (you will find its switch under “Preferences → Schematic Editor → Display Options → Cross-probing”). Put the schematic and the layout side by side, and the two editors talk to each other: click a part in one and its twin lights up, centred, in the other (Figure 9.34). Click <code>C2</code> on the schematic and <code>C2</code>’s footprint jumps into view on the board; click a footprint you cannot name on the board and the schematic shows you which part it is and what it does. On a sheet of near-identical resistors and capacitors that is a real relief, and it keeps you placing the part you mean to place.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-5-positioning-1.png" style="width:100.0%" /></p>
+<p>Figure 9.34: Cross-probing between the two editors. With the schematic (left) and the layout (right) side by side, clicking <code>C2</code> in one centres <code>C2</code> in the other (the arrows), so you always know which part you are working with.</p>
+<p>A word on how to arrange the parts, since the breadboard supply did not ask for much thought here and this board does. There is no single right answer, but a few habits serve you well. Let the board echo the schematic: signals tend to flow left to right on a well-drawn sheet, so I kept the inputs on the left — the solar panel <code>J3</code> and the battery <code>J2</code> — and the output <code>J1</code> on the right, with the converter doing its work in between. Inside that frame, place by connection rather than by tidiness: keep each capacitor hard against the part it steadies, gather the converter with its inductor and its diodes so the busy loop between them stays short, and let the ratsnest be your guide — every time a part finds a better home the thin lines pull shorter and cross less. Then temper all of that with a thought for the hand that will build the board, and leave enough air between the surface-mount pads that a soldering iron can reach one without melting its neighbour. Short tracks and a buildable board usually want the same thing, so the two goals rarely fight. Nudge until the ratsnest is short and untangled and every part can be reached, and the placement is done (Figure 9.35).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-6-positioning-draft-2.png" style="width:100.0%" /></p>
+<p>Figure 9.35: The placement settled. The inputs <code>J2</code> and <code>J3</code> sit at the left edge and the output <code>J1</code> at the right, the switch <code>SW1</code> falls in the middle, and the surface-mount parts are grouped between them with room to solder — the ratsnest pulled short and untangled throughout.</p>
+<p><strong>Step 4, route the tracks.</strong> Route as you did on the breadboard supply: press “X,” set your layer and width, and turn each ratsnest line into copper. Keep every signal track on the top copper, where the surface-mount parts live. This board has room enough that no track needs to dive to the other side to slip past another, so you will not reach for a via in this step at all. (One via does appear on the finished board, but it belongs to the ground pour in step 5, and I will come to it there.)</p>
+<p>With room to spare there is no need to juggle widths either: set a single track width of 0.5 mm and draw every line at it. Why 0.5 mm, though, and not some other number? The width you give a track is governed by the current it must carry: wider copper carries more current, with less heating and less voltage drop along the way. The currents here are small — the whole board runs on what a solar panel and a little battery can give — so even a much thinner track would carry them safely; 0.5 mm simply buys comfortable margin and keeps the drop low on the power path, where a supply repays you with efficiency. It is also well inside what any fab can make, so manufacturing sets no limit either. One width, no fuss.</p>
+<p>Rather than retype that width on every track, set it up once where KiCad keeps such things. Open “Board Setup → Design Rules → Pre-defined Sizes” and add the track widths you mean to use — I listed 0.25 mm, 0.35 mm, and 0.5 mm — and, in the same dialog, the via size you will want in the next step: a 0.5 mm pad on a 0.3 mm drill (Figure 9.36). Once they are defined they wait for you in the dropdowns on the toolbar, so you pick a width or a via from a short menu instead of typing a number and trusting that you typed the same one as last time.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-7-track-and-via-sizes.png" style="width:100.0%" /></p>
+<p>Figure 9.36: Pre-defined track widths and via sizes, set once under “Board Setup → Design Rules → Pre-defined Sizes.” With 0.25, 0.35, and 0.5 mm tracks and a 0.5 mm / 0.3 mm via defined here, each is a click away on the toolbar while you route, with no retyping.</p>
+<p>There is a tidier way still to handle track width when a board really needs it, worth knowing even though we skip it here. KiCad can set widths automatically by the role a track plays, through a feature called ‘net classes’: you sort the nets into groups, the power nets into one class with a wide track and the signal nets into another with a thin one, and KiCad then draws each track at the width its class dictates, with no choosing as you go. On a board this simple that is overkill, so we route at a single width and move on; but it is a clean, scalable habit, and we will put net classes to work on the next project, in Volume 2.</p>
+<p>With one width chosen and every signal track laid on the top copper, the front of the board fills in (Figure 9.37). Keep going until the status line reads “Unrouted: 0” — but leave the ground connections alone for now; we will handle every ground at once with a pour in the next step.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-8-top-side-routed.png" style="width:100.0%" /></p>
+<p>Figure 9.37: The top copper fully routed at 0.5 mm. Every signal track lies on the front of the board; the ground connections are left deliberately bare for the pour that comes next.</p>
+<p><strong>Step 5, add a copper fill, and stitch the ground down.</strong> Pour a ground plane on the back copper, just as in Chapter 3: make <code>B.Cu</code> active, draw a filled zone over the whole board, and in the Copper Zone Properties that open, set the zone’s net to <code>GND</code> (Figure 9.38). Press “B” and KiCad floods every empty corner of the bottom layer with copper tied to ground.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-9-bottom-GND-copper-pour-settings.png" style="width:65.0%" /></p>
+<p>Figure 9.38: The Copper Zone Properties for the ground pour: net <code>GND</code>, on <code>B.Cu</code>. The ‘thermal relief’ settings lower down — the gap and the spoke width — govern how the pour reaches each pad it touches, which matters more than it looks; we come to it below.</p>
+<p>Here is the wrinkle a surface-mount board adds, and it is worth understanding because you will meet it on every board like this. Your through-hole ground pads — the <code>GND</code> pins on the headers, on the switch, on the resistors and capacitors — pass right through the board and touch the pour on the bottom directly, so the flood ties them in for free. But the converter <code>U1</code> is surface-mount: it sits on the <em>top</em> layer, and its ground pad has no leg reaching through to the bottom, so the pour cannot find it on its own. The two need joining, and this is where the board earns its single via.</p>
+<p>A ‘via’ is a plated hole that carries a connection from one copper layer to another — a tiny lift shaft for a signal, dropping it from the top of the board to the bottom. This is the first one we have placed. Rather than route a ground track all the way across the top copper to find the pour’s edge, click <code>U1</code>’s ground pad, draw a very short stub off it, and while you are still routing press “V” to drop a via on the end of the stub (the 0.5 mm pad on a 0.3 mm drill you predefined a moment ago). The via bores straight down to the pour on the bottom layer and carries the pad’s ground with it. That is the whole move: one short segment and one via, and the converter is grounded, with no long top-side detour to clutter the board (Figure 9.39). It is a humble trick, but it is exactly how ground is reached on dense, high pin-count boards, where dropping straight down to a ground plane through a via is the normal — and often the only practical — way in.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-9b-GND-via-detail.png" style="width:45.0%" /></p>
+<p>Figure 9.39: The converter’s ground stitch, up close. Pad 2 (<code>GND</code>) runs a short stub of top copper to a single via — the gold ring with its drill at the centre — which carries the connection straight down to the ground pour on the bottom layer. The converter’s other pads keep their own signal tracks on top.</p>
+<p>Now back to those thermal reliefs, because the pour does not simply weld itself solid to every pad it surrounds. Look closely at a grounded pad after the fill and you will see the copper reach it through a few narrow spokes, with a thin moat of clearance around it otherwise (Figure 9.40). That is a ‘thermal relief,’ and it is there for the soldering iron: a pad welded straight to a large copper plane sheds heat so fast that solder can be hard to make flow, so KiCad deliberately necks the connection down to a handful of spokes that still carry the current but no longer drain the iron’s heat. The number of spokes matters. Too few — one, or two on opposite sides — and the joint is mechanically and electrically weaker, and KiCad will warn you if it drops below the minimum spoke count you saw set to two back in the design rules. The trap is the board’s edge: where a ground pad sits too close to the outline, the pour cannot wrap all the way around it and a spoke or two is lost. So I kept the <code>GND</code> pads a little clear of the edges, enough that each one keeps at least three spokes. You can steer this with two handles — the thermal relief gap and spoke width in the zone’s properties (Figure 9.38), and the minimum spoke count in the design rules — but the simplest lever on a small board is just to give the grounded pads room to breathe away from the edge.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-10-bottom-GND-copper-pour-complete.png" style="width:100.0%" /></p>
+<p>Figure 9.40: The ground pour filled on the bottom copper. Each grounded pad connects to the plane through a thermal relief — the few narrow spokes that bridge the clearance moat — and the pads were kept clear of the board edge so every relief keeps at least three spokes.</p>
+<p><strong>Step 6, the design rules check.</strong> Run the DRC from the “Inspect” menu, leaving “Refill all zones before performing DRC” ticked so the pour is fresh when it checks, and “Test for parity between PCB and schematic” ticked so nothing has drifted from the schematic. Click any violation to jump straight to it on the board, fix it, and run again — the same loop as before.</p>
+<p>On this board the check caught one real error, and it is a common one: a board-edge clearance violation, “Pad 1 of L1” too close to the edge (Figure 9.41). The design rules ask for at least 0.5 mm of breathing room between any copper and the board’s outline — the number you read in step one — and the inductor’s first pad had crept inside it. There were two honest fixes: nudge the bottom edge of the board down a millimetre or two to make room, or move <code>L1</code> up and away from the edge. There was ample space above, so I moved the part rather than grow the board, and the re-run came back clean (Figure 9.42).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-12a-DRC-error.png" style="width:65.0%" /></p>
+<p>Figure 9.41: The Design Rules Checker reporting one error — “Board edge clearance violation… Pad 1 of L1” — with the offending pad picked out at the board’s edge (the arrow). Clicking the line jumps to the pad so you can see exactly what the rule is unhappy about.</p>
+<p>One caution when you fix a clearance error by moving a part: the part is already routed, so its tracks, and any via on its pads, move with it, and a track that was straight can end up stretched, kinked, or pulled tight against a neighbour. After you nudge a routed part, look at the segments that start and end on its pads and redraw any that the move has left awkward — a clean short track is worth the half-minute it takes to lay again.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-12b-DRC-error-fixed.png" style="width:65.0%" /></p>
+<p>Figure 9.42: After moving <code>L1</code> clear of the edge and re-running, the checker reports zero violations. The two remaining warnings are harmless silkscreen overlaps, which we tidy in the next step.</p>
+<p>Read each remaining line, clear the real ones, and confirm in passing that the converter’s ground via took — an unconnected <code>GND</code> pad here would mean the single stitch from step five never quite landed. You may set aside the harmless silkscreen-overlap warnings for the next step.</p>
+<p><strong>Step 7, add text and silkscreen.</strong> Most of your silkscreen rode across as reference designators. Add the board’s name and version by hand on <code>F.Silkscreen</code>; I am labelling mine <code>solar psu v2</code>. As on the breadboard supply, print the polarity beside each header, <code>+</code> and <code>−</code>, so a future you cannot wire the panel, the battery, or the output backwards, and a short <code>on</code>/<code>off</code> by the switch and a word at each port — <code>solar</code>, <code>bat</code>, <code>OUT</code> — do the same kindness. On the back, it is only right to credit the original: I add a line reading “Tiny Solar Power Supply, after Clemens Valens for Elektor.” Nudge any label the DRC grumbled about clear of the pads as you go, and the front of the board reads cleanly (Figure 9.43).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-11-silkscreen-complete.png" style="width:100.0%" /></p>
+<p>Figure 9.43: The silkscreen finished. The board’s name sits on the copper, <code>+</code> and <code>−</code> mark the polarity at each header, and <code>solar</code>, <code>bat</code>, <code>on</code>/<code>off</code>, and <code>OUT</code> name the ports — so the board explains itself to whoever builds or wires it.</p>
+<p><strong>Step 8, dress the board in 3D, and generate the Gerbers.</strong> The chapter promised 3D models, and here is where they pay off. Open the 3D Viewer from the “View” menu and KiCad renders the board as a solid object, every part standing at its true height above the copper. It is the quickest sanity check there is: a part facing the wrong way, a footprint that does not match its real shape, or two tall parts about to collide all leap out here in a way they never do on the flat layout.</p>
+<p>But the render is only as good as the models behind it, and this is the part that takes a little setting up. A ‘3D model’ is a small STEP file describing a part’s real shape; KiCad pairs one with a footprint so the viewer knows what to draw. The imported parts you fetched from SnapEDA already carry theirs — the converter, the inductor, and the diodes each brought a STEP file along inside the download, so they appear correctly with no further work. The trouble is the everyday parts. KiCad’s own library of 3D models is large, and a default install does not always keep every model on disk, so a resistor or a pin header can come up as a bare footprint with nothing to show.</p>
+<p>The fix is to fetch the official model library once and point KiCad at it. The models live in the KiCad project on GitLab, at <code>gitlab.com/kicad/libraries/kicad-packages3D</code>; open that page, use the green “Code” button, and download the whole library as a zip (Figure 9.44). Unzip it somewhere permanent on your disk — I keep mine under a <code>KiCad_shared</code> folder — and the generic models become available to assign.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-15-kicad-3D-models-library-download.png" style="width:100.0%" /></p>
+<p>Figure 9.44: The KiCad 3D model library on GitLab. Open <code>gitlab.com/kicad/libraries/kicad-packages3D</code> (❶), use the “Code” button (❷), and download the library as a zip (❸). Unzip it somewhere permanent, and KiCad’s generic models — resistors, capacitors, pin headers — are there to render in the viewer.</p>
+<p>With the library in place, attaching a model to a part is a short ritual. Double-click a footprint to open its Footprint Properties, choose the “3D Models” tab, and use the folder button to browse for a STEP file; pick the one that matches — here the right-angle pin header for <code>J2</code> — and the preview shows it before you commit with OK (Figure 9.45).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-13-3D-model-PinHeader_1x02_P2.54.png" style="width:100.0%" /></p>
+<p>Figure 9.45: Adding a 3D model to a footprint. In Footprint Properties → “3D Models,” browse the unzipped library (❶, ❷) for the matching STEP file and confirm with OK (❸). The preview on the right shows the model before you commit it.</p>
+<p>A model rarely lands perfectly aligned the first time. The same tab gives you Scale, Rotation, and Offset boxes to nudge the model until it sits squarely on its pads — a right-angle header that imports facing the wrong way, for instance, may want a half-turn about the Z axis and a small offset to seat it (Figure 9.46). And once you have one part configured you need not browse the file system again for its twins: copy the model’s full path from the configured part and paste it into the next, so the three identical headers, or all four resistors, take the same model in seconds.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-14-3D-model-scale-rotate-offset-copy-model-path.png" style="width:65.0%" /></p>
+<p>Figure 9.46: The Scale, Rotation, and Offset boxes (❶) align a model with its pads; here the right-angle header is turned 180° about Z and offset to seat on its footprint. Copy the full model path (❷) from one part and paste it into the next that uses the same model, and you skip the file browser entirely.</p>
+<p>The model each part ends up with is collected below, grouped by where it comes from, so you can configure yours to match. Most of the everyday parts take a model straight from the library you just downloaded; the four imported parts use the STEP files that came with their SnapEDA downloads; and the slide switch wears a manufacturer model of its own.</p>
+<p><strong>From the KiCad 3D library you just downloaded</strong> (the everyday parts):</p>
+<ul>
+<li><code>Q1</code>, the 2N7002 MOSFET — <code>SOT-23.step</code></li>
+<li><code>R1</code>–<code>R4</code>, the resistors — <code>R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal.step</code></li>
+<li><code>C1</code> and <code>C3</code>, the ceramic discs — <code>C_Disc_D5.0mm_W2.5mm_P2.50mm.step</code></li>
+<li><code>C2</code>, the radial electrolytic — <code>C_Radial_D5.0mm_H11.0mm_P2.00mm.step</code></li>
+<li><code>J1</code>, <code>J2</code>, <code>J3</code>, the 2-pin right-angle headers — <code>PinHeader_1x02_P2.54mm_Horizontal.step</code> (the right-angle model, turned 180° about Z)</li>
+</ul>
+<p><strong>From the SnapEDA downloads</strong> (bundled with each imported part, so already in place):</p>
+<ul>
+<li><code>U1</code>, the AP3015A converter — <code>AP3015AKTR-G1.step</code></li>
+<li><code>D1</code> and <code>D2</code>, the SS14 diodes — <code>SS14.step</code></li>
+<li><code>L1</code>, the ASPI-0630LR inductor — <code>ASPI-0630LR-100M-T15.step</code></li>
+</ul>
+<p><strong>A manufacturer model of its own:</strong></p>
+<ul>
+<li><code>SW1</code>, the slide switch — the KiCad default <code>SW_Slide-03_Wuerth-WS-SLTV…</code> model, or the Würth <code>450301014042</code> model</li>
+</ul>
+<p>With every part modelled, the viewer shows the finished board whole (Figure 9.47): the converter with its inductor and diodes at their true heights, the through-hole headers and the slide switch standing along the edges, the tall electrolytic <code>C2</code> beside them. If every model sits where you expect and nothing fouls anything else, you are done. Plot the Gerbers the way Chapter 3 showed, with “Plot” from the “File” menu, and tuck the files away.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-16-3D-model-full.png" style="width:100.0%" /></p>
+<p>Figure 9.47: The 3D Viewer renders every model in place. A part facing the wrong way or fouling a neighbour shows itself here at once — the surest last look before you order the board.</p>
+<p>You have built a second board, and a more grown-up one: a surface-mount design that minds itself in sun and shade, sourced and checked and stitched and seen in three dimensions, all on the same fifteen steps you have now used twice. In the next chapter we stop designing and start ordering, taking a folder of Gerbers like this one to a fab and turning it into boards you can hold. For now, save your work and continue with the next chapter.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>
