@@ -114,14 +114,105 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
 <h1 class="note-title">Editor Orientation (Just Enough)</h1>
+
+<h1 id="editor-orientation-just-enough">Editor Orientation (Just Enough)</h1>
 <p>You have already driven both of KiCad’s main editors. In Chapter 2 you drew a complete schematic, and in Chapter 3 you turned it into a finished board. Each time, I told you to take ten seconds to get your bearings and promised we would come back and explore the editors properly. This is that chapter. We are going to slow down just enough to put names to the parts of each window, so that when a later project says “open the Appearance panel” or “use the selection filter,” you know exactly where to look and what it does.</p>
 <p>Let me be clear about what this chapter is, and what it is not. It is a map, not a catalogue. I am not going to march you through every button on every toolbar; that would be a wall of lookup material, and worse, it would go stale the moment KiCad changes an icon. Instead I will show you the regions of each editor, explain what each one is <em>for</em>, and, most importantly, teach you how to find any tool quickly when you need it. The exhaustive, button-by-button detail already exists, and it is excellent: KiCad’s official documentation is thorough, current, and free, and I will point you to it whenever you want to go deeper. Think of this chapter as the orientation that makes that reference easy to use, rather than a replacement for it.</p>
-<p>A reassuring word before we start. Both editors are large, capable programs, and you will never need all of either one on a given day. The goal here is not to memorise anything. It is to make the windows feel familiar, so that nothing on screen is a mystery and you always know roughly where to reach. You will pick up the details by using them, exactly as you did on the tour.</p>
+<p>A reassuring word before we start. Both editors are large, capable programs, and you will never need all of either one on a given day. The goal here is not to memorise anything. It is to make the windows feel familiar, so that nothing on screen is a mystery and you always know roughly where to reach. You will pick up the details by using them, exactly as you did on the tour. </p>
 <h2 id="sec:c7-shared">The Two Editors Are Siblings</h2>
 <p>Here is the single most useful thing to know before we look at either editor in detail: the Schematic Editor and the PCB Editor are built on the same frame. They share the same layout, the same way of getting around, and most of the same panels. Once you are comfortable in one window, you are most of the way to being comfortable in the other. So let me cover what they have in common once, here, and then each editor’s own section can focus on what makes it different.</p>
 <p>Every KiCad editor window is laid out the same way. Around the outside sit the toolbars and panels; in the middle sits the drawing. The pieces you will meet by name throughout the book are these:</p>
@@ -211,14 +302,12 @@
 <li><strong>The right-click menu.</strong> Right-click on the canvas, or on a selected item, and KiCad shows a context menu of the actions that make sense right now. This is often the fastest route to a command, because it only offers what is relevant to what you are pointing at.</li>
 <li><strong>The hotkey list.</strong> Press “Ctrl+F1” at any time and KiCad shows the complete, current list of keyboard shortcuts for the editor you are in. This is better than any printed cheat sheet, because it always matches your version and any shortcuts you have customised. When you find yourself reaching for a tool often, look up its hotkey here once, and your hands will remember it.</li>
 </ul>
-<p>Between those three, you can locate almost anything without memorising it. Now let us look at each editor in turn.</p>
-<h2 id="sec:c7-schematic-editor">Schematic Editor Essentials</h2>
+<p>Between those three, you can locate almost anything without memorising it. Now let us look at each editor in turn.  ## Schematic Editor Essentials {#sec:c7-schematic-editor}</p>
 <p>The Schematic Editor is where every design begins, and it is the window you met first, in Chapter 2. Open it now if you would like to follow along: launch KiCad, open any project, and double-click its <code>.kicad_sch</code> file. Figure 7.1 shows the whole window with its regions labelled.</p>
 
 <p><img src="/assets/klp5e-vol1/ch07/ch07-schematic-1-editor.png" /></p>
 <p>Figure 7.1: The Schematic Editor, with its main regions labelled.</p>
-<p>Most of what you see matches the shared layout from the last section, so let me walk only the parts that are particular to drawing schematics (the numbers refer to the callouts in Figure 7.1). The <strong>right toolbar</strong> (3) is the one you reached for constantly on the tour: it holds the symbol tool, the power-symbol tool, the wire tool, the label tool, and the rest of the kit for building a circuit. The <strong>left toolbar</strong> (2) controls the display: the grid, the measurement units, the cursor style, and the line-drawing mode that keeps your wires at tidy right angles. The <strong>Properties panel</strong> (6) shows the editable fields of whatever you have selected, so you can change a value without opening a separate dialog. The <strong>Hierarchy Navigator</strong> (7) lists the sheets in your design; on a small single-sheet schematic like the blinker it has just one entry, but on a larger project it becomes the table of contents you click through to move between sheets.</p>
-<p>The <strong>selection filter</strong> (8) sits in the lower-left corner and is worth knowing about now, because it solves a frustration before you hit it. It lists the kinds of object on a schematic (symbols, wires, labels, and so on), each with a checkbox. Turning one off tells KiCad “do not let me select this type with the mouse.” On a busy schematic where you are trying to grab a wire but keep catching the symbol behind it, switching off everything except wires makes the job effortless. Leave it with everything ticked for now; just remember it is there for the day a crowded sheet fights back.</p>
+<p>Most of what you see matches the shared layout from the last section, so let me walk only the parts that are particular to drawing schematics (the numbers refer to the callouts in Figure 7.1). The <strong>right toolbar</strong> (3) is the one you reached for constantly on the tour: it holds the symbol tool, the power-symbol tool, the wire tool, the label tool, and the rest of the kit for building a circuit. The <strong>left toolbar</strong> (2) controls the display: the grid, the measurement units, the cursor style, and the line-drawing mode that keeps your wires at tidy right angles. The <strong>Properties panel</strong> (6) shows the editable fields of whatever you have selected, so you can change a value without opening a separate dialog. The <strong>Hierarchy Navigator</strong> (7) lists the sheets in your design; on a small single-sheet schematic like the blinker it has just one entry, but on a larger project it becomes the table of contents you click through to move between sheets.  The <strong>selection filter</strong> (8) sits in the lower-left corner and is worth knowing about now, because it solves a frustration before you hit it. It lists the kinds of object on a schematic (symbols, wires, labels, and so on), each with a checkbox. Turning one off tells KiCad “do not let me select this type with the mouse.” On a busy schematic where you are trying to grab a wire but keep catching the symbol behind it, switching off everything except wires makes the job effortless. Leave it with everything ticked for now; just remember it is there for the day a crowded sheet fights back.</p>
 <p>The tools you used most on the tour all live on that right toolbar, and each has a hotkey. You do not need to learn them as a list, but having them in one place helps, and you will absorb the common ones simply by using them:</p>
 <table>
 <thead>
@@ -347,6 +436,88 @@
 <p>That completes the tour of the tools. You now have a working map of both editors: you know what each region of each window is for, you know the few panels that make the PCB Editor different from the Schematic Editor, you know the handful of preferences worth a look, and, above all, you know how to find any command you need without memorising it. That last skill is the one that lasts. From here on, when a chapter says “open the Appearance panel” or “run the DRC from the Inspect menu,” none of it will be a mystery.</p>
 <p>We have now spent seven chapters getting ready: you have seen what a PCB is, walked both workflows end to end, understood why they work, turned them into checklists, learned to find parts, and oriented yourself in the editors. It is time to put all of it to work on a real project. In the next chapter you will build your first complete board from scratch, a small breadboard power supply, applying both workflows on a design that is genuinely useful. Let’s build something real.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {

@@ -114,11 +114,102 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
 <h1 class="note-title">The Concepts Behind What You Did</h1>
+
+<h1 id="the-concepts-behind-what-you-did">The Concepts Behind What You Did</h1>
 <p>You’ve now done something a lot of people never get around to: you drew a complete schematic in one editor, then turned it into a real board layout in another, all the way to files a factory could build. You did it by following along, and that was the point. In these last two chapters I asked you to act first and understand later.</p>
 <p>Now let’s close the loop. This short chapter explains the <em>why</em> behind the actions you just performed. None of it is busywork: the handful of ideas here are exactly what turn KiCad from a set of buttons you follow into a tool you understand. Once these click, everything later in the book, and every project you ever design, rests on them. I’ll keep each idea brief and point you to the Mini Encyclopedia at the back of the book whenever you want more depth.</p>
 <h2 id="sec:c4-two-editors">Why KiCad splits the work in two</h2>
@@ -140,8 +231,7 @@
 
 
 <p><img src="/assets/klp5e-vol1/ch04/ch04-schematic-intent-layout-physically.png" /></p>
-<p>Figure 4.1: The same blinker, shown as two separate worlds. The schematic (1) captures the design intent; the routed board (2) realises it physically. Information flows one way, from schematic to layout.</p>
-<h2 id="sec:c4-symbols-footprints">Two faces of a part, and a likeness</h2>
+<p>Figure 4.1: The same blinker, shown as two separate worlds. The schematic (1) captures the design intent; the routed board (2) realises it physically. Information flows one way, from schematic to layout.  ## Two faces of a part, and a likeness {#sec:c4-symbols-footprints}</p>
 <p>That two-editor split is also why every component in your design wore two faces, and why you had to deal with each one separately.</p>
 <p>In the schematic you placed a ‘symbol.’ A symbol stands for a component’s <em>function</em>: a resistor’s symbol is the same zig-zag (or rectangle) no matter how big the actual resistor is. In the layout you placed a ‘footprint’: the real pattern of pads, holes, and silkscreen outline that the physical part solders onto. Remember the step in the layout tour where each part already knew its footprint? That’s because, back in the schematic, every symbol was paired with one.</p>
 <p>Here’s the idea worth holding onto: <strong>one symbol can be paired with many different footprints.</strong> A resistor is a resistor in the circuit, but on the board it might be a tiny surface-mount chip, a larger one, or a through-hole part with its leads bent to fit. The symbol (the function) doesn’t change; the footprint (the physical reality) is your choice. Keeping the two separate is what lets you make that choice freely, and it’s the same separation you met in the previous section, now applied to individual parts.</p>
@@ -175,6 +265,88 @@
 <p>The bigger picture is how easy all of this has become. A modern fab will build your two-layer board in the colour and surface finish of your choice, for the price of a coffee or two, and will increasingly assemble it for you as well, fabrication, stencil, and pick-and-place under one roof. The factory side of PCB design has quietly turned into a commodity. That leaves the interesting part, the design, to you and to KiCad.</p>
 <p>You now understand not just <em>what</em> you did in the last two chapters but <em>why</em> it works the way it does: one circuit, two editors, parts with two working faces and a likeness, connections carried by nets, and two checks guarding the path to a board you can hold. In the next chapter we’ll take these ideas and pin down the durable, repeatable workflow, the eight schematic steps and eight layout steps, that every project in the rest of the book will follow. Let’s formalise the two workflows.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {
