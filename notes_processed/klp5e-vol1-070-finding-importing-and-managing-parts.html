@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Finding Importing and Managing Parts — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<title>Finding, Importing, and Managing Parts — KiCad Like a Pro, 5th Edition — Volume 1</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -209,9 +209,8 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
-<h1 class="note-title">Finding Importing and Managing Parts</h1>
+<h1 class="note-title">Finding, Importing, and Managing Parts</h1>
 
-<h1 id="finding-importing-and-managing-parts">Finding, Importing, and Managing Parts</h1>
 <p>In Chapter 2 you placed every symbol your blinker needed, and in Chapter 3 you gave each one a footprint, without once leaving KiCad or opening a web browser. That was not luck. I chose that circuit precisely so that every part lived in KiCad’s standard library, the large collection of symbols and footprints that ships with the program. Both tours leaned on that convenience and said almost nothing about it. This chapter is where we give it proper attention, because the day will come, probably sooner than you expect, when you reach for a part and KiCad does not have it.</p>
 <p>When that happens, you are not stuck. There is a clear path to follow, and walking it with confidence is one of the small skills that separates a smooth project from a stalled one. That path is what this chapter is about: where parts come from, how to bring a missing one into your design from a trustworthy source, and how to manage the parts you collect so a project still opens cleanly years from now. We are going to <em>use</em> libraries here, not build them; authoring a symbol or footprint from scratch is a craft of its own, and it waits for you in Volume 2.</p>
 <h2 id="the-sourcing-decision-tree">The sourcing decision tree</h2>
@@ -222,7 +221,8 @@
 
 
 <p><img src="/assets/klp5e-vol1/ch06/ch06_sourcing-tree_v10.png" /></p>
-<p>Figure 6.1: The sourcing decision tree. Ask the same three questions of every part: is it standard, is it available from a reliable source, and only then, must I make it myself?  ## Finding Parts in the Standard Library {#sec:find-standard}</p>
+<p>Figure 6.1: The sourcing decision tree. Ask the same three questions of every part: is it standard, is it available from a reliable source, and only then, must I make it myself? </p>
+<h2 id="sec:find-standard">Finding Parts in the Standard Library</h2>
 <p>Most of the time, stage one is the whole story, so let us make sure you can work it quickly. You already met the main tool in Chapter 2: the ‘symbol chooser,’ the window that opens when you press “A” or pick “Add Symbol” from the “Place” menu. It has a twin you have also used without dwelling on it, the ‘footprint chooser,’ which opens when you assign a footprint to a part. The two work the same way, and between them they cover both halves of a part (Figure 6.2). I will not repeat the full tour from Chapter 2 here; instead, let me give you the search habits that make the standard library feel small even though it is enormous.</p>
 <p>Search by what the part <em>is</em>, not by a guess at its exact name. Type a few letters and KiCad matches them against both the symbol’s name and its description, so <code>regulator</code> finds parts whose name never contains that word, and <code>usb c</code> finds the USB Type-C connectors even though their library names are more formal. When too many results come back, add a second word to narrow them; when too few come back, shorten what you typed, because you may be guessing at a name the library spells differently. The preview pane on the right is your confirmation step: never place a part you have not looked at, because two symbols with similar names can be wired very differently inside.</p>
 <p>It helps to know roughly what the standard library holds, so you can predict when stage one will succeed. The generic building blocks are all there and deep: resistors, capacitors, inductors, diodes, LEDs, transistors, and the like live in a library called <code>Device</code>, and you will return to it constantly. Connectors of every common kind, including USB, headers, and terminal blocks, fill the <code>Connector</code> libraries. Thousands of common integrated circuits have symbols, grouped into libraries by function (amplifiers, logic, microcontrollers, regulators, and so on). On the footprint side, the standard library is just as broad: the common through-hole and surface-mount packages are all present, named by their physical form (<code>SOT-23</code>, <code>DIP-8_W7.62mm</code>, <code>R_0805_2012Metric</code>, and so on) rather than by any one part that uses them. And here is a quiet convenience worth naming: most standard footprints arrive with a 3D model already attached, so when you open the 3D Viewer your board is populated for free, with no extra work on your part.</p>

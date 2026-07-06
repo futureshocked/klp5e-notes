@@ -211,7 +211,6 @@
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
 <h1 class="note-title">The Concepts Behind What You Did</h1>
 
-<h1 id="the-concepts-behind-what-you-did">The Concepts Behind What You Did</h1>
 <p>You’ve now done something a lot of people never get around to: you drew a complete schematic in one editor, then turned it into a real board layout in another, all the way to files a factory could build. You did it by following along, and that was the point. In these last two chapters I asked you to act first and understand later.</p>
 <p>Now let’s close the loop. This short chapter explains the <em>why</em> behind the actions you just performed. None of it is busywork: the handful of ideas here are exactly what turn KiCad from a set of buttons you follow into a tool you understand. Once these click, everything later in the book, and every project you ever design, rests on them. I’ll keep each idea brief and point you to the Mini Encyclopedia at the back of the book whenever you want more depth.</p>
 <h2 id="sec:c4-two-editors">Why KiCad splits the work in two</h2>
@@ -233,7 +232,8 @@
 
 
 <p><img src="/assets/klp5e-vol1/ch04/ch04-schematic-intent-layout-physically.png" /></p>
-<p>Figure 4.1: The same blinker, shown as two separate worlds. The schematic (1) captures the design intent; the routed board (2) realises it physically. Information flows one way, from schematic to layout.  ## Two faces of a part, and a likeness {#sec:c4-symbols-footprints}</p>
+<p>Figure 4.1: The same blinker, shown as two separate worlds. The schematic (1) captures the design intent; the routed board (2) realises it physically. Information flows one way, from schematic to layout. </p>
+<h2 id="sec:c4-symbols-footprints">Two faces of a part, and a likeness</h2>
 <p>That two-editor split is also why every component in your design wore two faces, and why you had to deal with each one separately.</p>
 <p>In the schematic you placed a ‘symbol.’ A symbol stands for a component’s <em>function</em>: a resistor’s symbol is the same zig-zag (or rectangle) no matter how big the actual resistor is. In the layout you placed a ‘footprint’: the real pattern of pads, holes, and silkscreen outline that the physical part solders onto. Remember the step in the layout tour where each part already knew its footprint? That’s because, back in the schematic, every symbol was paired with one.</p>
 <p>Here’s the idea worth holding onto: <strong>one symbol can be paired with many different footprints.</strong> A resistor is a resistor in the circuit, but on the board it might be a tiny surface-mount chip, a larger one, or a through-hole part with its leads bent to fit. The symbol (the function) doesn’t change; the footprint (the physical reality) is your choice. Keeping the two separate is what lets you make that choice freely, and it’s the same separation you met in the previous section, now applied to individual parts.</p>

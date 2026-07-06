@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Project 2 Tiny Solar Power Supply — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<title>Project 2: Tiny Solar Power Supply — KiCad Like a Pro, 5th Edition — Volume 1</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -209,9 +209,8 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
-<h1 class="note-title">Project 2 Tiny Solar Power Supply</h1>
+<h1 class="note-title">Project 2: Tiny Solar Power Supply</h1>
 
-<h1 id="project-2-tiny-solar-power-supply">Project 2: Tiny Solar Power Supply</h1>
 <p>You built a whole board of your own in Chapter 8, from an empty project to a folder of manufacturing files, and the workflow walked beside you the entire way. This chapter builds a second board the same way, and it is a gentle step up rather than a leap. The circuit is a little cleverer, most of its parts are surface-mount rather than through-hole, and along the way you will meet a few things the breadboard supply did not need: 3D models, so you can see the finished board in the round before you order it; a closer look at the design rules KiCad hands you for free; and a handful of new moves in the layout — your first via, a ground pour stitched down to it, and cross-probing between the two editors. None of this is new territory in the workflow sense. You still take the eight schematic steps and the eight layout steps in the order you already know, and each one leaves the design ready for the next. Keep the one-page checklist from Chapter 5 beside you, and let’s build a second real thing.</p>
 <p>The design is not mine. It is a neat little circuit called the Tiny Solar Supply, drawn by Clemens Valens for Elektor, and I am rebuilding it in KiCad with only a few small changes of my own. Following someone else’s good schematic is exactly how a great deal of real PCB work begins, so it is a fair and useful thing to practise.</p>
 <p>Here is what we are building (Figure 9.1): a power supply that runs from a small solar panel. In daylight the panel charges a rechargeable battery; when the panel falls dark, the board draws on that stored charge instead, so the 3.3 volts it delivers never blink out. That makes it a tidy supply for a low-power project left to fend for itself on a windowsill, in a garden, or anywhere a wall socket will not reach.</p>
@@ -227,7 +226,8 @@
 <li>three <strong>2-pin headers</strong>, for the solar panel (<code>J3</code>), the battery (<code>J2</code>), and the 3.3 volt output (<code>J1</code>);</li>
 <li>a <strong>slide switch</strong> (<code>SW1</code>) to cut the whole thing off by hand.</li>
 </ul>
-<p>Two of these deserve a word before we start. The first is <code>Q1</code>, the part I called the clever heart. I will come back to exactly what it does when we wire it, because it is the one piece of this circuit that is not obvious. The second is simply that most of this board is surface-mount. On the breadboard supply only the USB-C connector was, and every other part was the friendly through-hole kind. Here the boost converter, the inductor, the diodes, and the transistor are all surface-mount, because that is the only sensible way those particular parts come. I have kept the resistors and capacitors as through-hole so the board stays kind to a hand with a soldering iron, but the surface-mount parts are nothing to fear. They change nothing about how you <em>design</em> the board, and with a little practice they are every bit as manageable as their through-hole counterparts. If soldering the smallest of them still does not appeal, you can ask the fab to place them for you when you order the boards. For now, designing it is all that matters. Let’s gather the parts.  ## Sourcing the Parts {#sec:c9-source}</p>
+<p>Two of these deserve a word before we start. The first is <code>Q1</code>, the part I called the clever heart. I will come back to exactly what it does when we wire it, because it is the one piece of this circuit that is not obvious. The second is simply that most of this board is surface-mount. On the breadboard supply only the USB-C connector was, and every other part was the friendly through-hole kind. Here the boost converter, the inductor, the diodes, and the transistor are all surface-mount, because that is the only sensible way those particular parts come. I have kept the resistors and capacitors as through-hole so the board stays kind to a hand with a soldering iron, but the surface-mount parts are nothing to fear. They change nothing about how you <em>design</em> the board, and with a little practice they are every bit as manageable as their through-hole counterparts. If soldering the smallest of them still does not appeal, you can ask the fab to place them for you when you order the boards. For now, designing it is all that matters. Let’s gather the parts. </p>
+<h2 id="sec:c9-source">Sourcing the Parts</h2>
 <p>Before you draw a single wire, gather your parts, exactly as you did in Chapter 8. Run the ‘sourcing decision tree’ from Chapter 6 across the board: for each part, ask in order whether it lives in the standard library, and if not whether a reliable source can give it to you, and only if neither is true do you author it yourself, which still waits for Volume 2. Stop at the first yes.</p>
 <p>Here is the full parts list, with the value you will give each part as you place it. Keep it beside you, because the values matter: the pair <code>R1</code> and <code>R2</code> in particular sets the output voltage, so they are worth getting exactly right.</p>
 <table>
