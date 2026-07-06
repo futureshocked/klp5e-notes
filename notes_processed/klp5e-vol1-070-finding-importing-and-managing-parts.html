@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Finding, Importing, and Managing Parts — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">Finding, Importing, and Managing Parts</h1>
+<p>In Chapter 2 you placed every symbol your blinker needed, and in Chapter 3 you gave each one a footprint, without once leaving KiCad or opening a web browser. That was not luck. I chose that circuit precisely so that every part lived in KiCad’s standard library, the large collection of symbols and footprints that ships with the program. Both tours leaned on that convenience and said almost nothing about it. This chapter is where we give it proper attention, because the day will come, probably sooner than you expect, when you reach for a part and KiCad does not have it.</p>
+<p>When that happens, you are not stuck. There is a clear path to follow, and walking it with confidence is one of the small skills that separates a smooth project from a stalled one. That path is what this chapter is about: where parts come from, how to bring a missing one into your design from a trustworthy source, and how to manage the parts you collect so a project still opens cleanly years from now. We are going to <em>use</em> libraries here, not build them; authoring a symbol or footprint from scratch is a craft of its own, and it waits for you in Volume 2.</p>
+<h2 id="the-sourcing-decision-tree">The sourcing decision tree</h2>
+<p>Every time you need a part, you are really asking the same question in three stages (Figure 6.1). First: is it in the standard library? If it is, use it, and you are done in seconds. Second: if it is not, can you get it from a reliable source, a library that someone trustworthy has already made and published? If so, import it. Third: if no reliable source has it either, you author it yourself, drawing the symbol and footprint by hand from the part’s datasheet.</p>
+<p>I call this the ‘sourcing decision tree,’ and it runs as a through-line across the whole series. It matters because the alternative, assuming a part will simply be there, quietly lets you down. The standard library grows every release, but its contents also <em>move</em>: a part gets renamed, reorganised into a different library, or retired. So any promise that a project uses “only standard-library parts” rots a little with every KiCad update, and nothing on screen warns you when it breaks. The decision tree replaces that fragile promise with a durable habit. You stop hoping a part is there and start knowing what to do whichever way the answer falls.</p>
+<p>In this volume we work through the first two stages, and between them they cover the overwhelming majority of parts you will ever place. The third stage, authoring a part from nothing, has a home of its own in Volume 2. Think of it as the hook at the far end of this chapter: the day no library has your part is the day you will build it yourself, and you will be glad to have the skill. For now, two stages are plenty.</p>
+<p>One thing to hold in mind before we start, carried over from Chapter 4. A part in KiCad is not a single object but a small family. There is the ‘symbol,’ which stands for the part’s function on the schematic; there is the ‘footprint,’ the physical pattern of pads and holes the real part solders onto; and there is usually a ‘3D model,’ the little three-dimensional shape that shows up in the 3D Viewer. When I say “find a part,” I mean find all three, or at least the symbol and the footprint, because a symbol with no footprint cannot become a board, and a footprint with the wrong pads will not fit the part you bought. Keep the family in view, and most of the mistakes in this chapter never happen.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06_sourcing-tree_v10.png" /></p>
+<p>Figure 6.1: The sourcing decision tree. Ask the same three questions of every part: is it standard, is it available from a reliable source, and only then, must I make it myself?</p>
+<h2 id="sec:find-standard">Finding Parts in the Standard Library</h2>
+<p>Most of the time, stage one is the whole story, so let us make sure you can work it quickly. You already met the main tool in Chapter 2: the ‘symbol chooser,’ the window that opens when you press “A” or pick “Add Symbol” from the “Place” menu. It has a twin you have also used without dwelling on it, the ‘footprint chooser,’ which opens when you assign a footprint to a part. The two work the same way, and between them they cover both halves of a part (Figure 6.2). I will not repeat the full tour from Chapter 2 here; instead, let me give you the search habits that make the standard library feel small even though it is enormous.</p>
+<p>Search by what the part <em>is</em>, not by a guess at its exact name. Type a few letters and KiCad matches them against both the symbol’s name and its description, so <code>regulator</code> finds parts whose name never contains that word, and <code>usb c</code> finds the USB Type-C connectors even though their library names are more formal. When too many results come back, add a second word to narrow them; when too few come back, shorten what you typed, because you may be guessing at a name the library spells differently. The preview pane on the right is your confirmation step: never place a part you have not looked at, because two symbols with similar names can be wired very differently inside.</p>
+<p>It helps to know roughly what the standard library holds, so you can predict when stage one will succeed. The generic building blocks are all there and deep: resistors, capacitors, inductors, diodes, LEDs, transistors, and the like live in a library called <code>Device</code>, and you will return to it constantly. Connectors of every common kind, including USB, headers, and terminal blocks, fill the <code>Connector</code> libraries. Thousands of common integrated circuits have symbols, grouped into libraries by function (amplifiers, logic, microcontrollers, regulators, and so on). On the footprint side, the standard library is just as broad: the common through-hole and surface-mount packages are all present, named by their physical form (<code>SOT-23</code>, <code>DIP-8_W7.62mm</code>, <code>R_0805_2012Metric</code>, and so on) rather than by any one part that uses them. And here is a quiet convenience worth naming: most standard footprints arrive with a 3D model already attached, so when you open the 3D Viewer your board is populated for free, with no extra work on your part.</p>
+<p>So the standard library is broad, well organised, and, for a beginner’s projects, usually enough. What it is not is <em>permanent</em>. Because its contents shift between releases, I never tell a reader “this project uses only standard parts” as if that were a guarantee you can lean on forever. It is true today and may be a little less true after the next update. That is not a flaw in KiCad; it is simply how a living, growing library behaves. It is also exactly why the rest of this chapter exists, and why, at the very end, we will copy the parts a project uses into the project itself so it never depends on the library staying still.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-symbol-and-footprint-chooser.png" /></p>
+<p>Figure 6.2: The symbol chooser (left) and the footprint chooser (right). Finding a part means finding both halves, and the gesture is the same on each side: you type into the search box (1, 4), pick from the library-and-item list (2, 5), and confirm your choice in the preview pane (3, 6) before you place it.</p>
+<h2 id="sec:import-libraries">Importing Libraries from Reliable Sources</h2>
+<p>When stage one comes up empty, you move to stage two: import the part from a reliable source. A handful of services exist precisely to hand you a ready-made symbol, footprint, and 3D model for a specific manufacturer’s part, downloaded in KiCad’s own format and dropped straight into your design. Used well, they turn a missing part from a half-hour of work into a two-minute errand. The trick is knowing which source to reach for first, and how to treat what it gives you.</p>
+<p>My default, and the one I reach for first, is <strong>SnapMagic</strong> (formerly SnapEDA). It is the closest thing to a one-stop catalogue: you search for a manufacturer part number, and if someone has modelled it, you download the symbol and footprint, usually with a 3D model alongside, in a KiCad-ready package. The coverage is broad, the workflow is quick, and for the kind of parts a Volume 1 project needs, it almost always has something. That is why I start there. I will give you the honest caveat in a moment, but for sheer “I just need this part now,” SnapMagic is hard to beat.</p>
+<p>When SnapMagic does not have a part, or when a part is important enough that I want the most authoritative model I can get, I go to the <strong>manufacturer’s own library</strong>. Many component makers now publish KiCad files for their parts directly, and a model drawn by the people who designed the chip is as trustworthy as it gets. It is the gold standard when it exists, which is not always. Sitting alongside these are the <strong>distributor libraries</strong>: DigiKey, for instance, publishes KiCad libraries for large swathes of its catalogue, which is handy because you are often shopping there for the part anyway. And there is <strong>Ultra Librarian</strong>, another long-running service that exports to KiCad among many other formats. Any of these is a reasonable source; I simply reach for them in that order, easiest first, most authoritative when it matters.</p>
+<p>Now the caveat, and it is the most important sentence in this chapter: <strong>always check a downloaded footprint against the part’s datasheet before you trust it.</strong> A symbol can be a little untidy and still work, because it only has to carry the right pins with the right names. A footprint is physical, and a wrong one is a board that does not fit the part you soldered onto, or worse, fits but connects the wrong pins. So when a footprint arrives, open the datasheet’s “recommended land pattern” and confirm three things: the number of pads, their spacing (the ‘pitch’), and which pad is pin 1. This takes a minute and saves a ruined board. Community-contributed models range from excellent to careless, and the only way to tell which you have is to look. Trust, then verify; mostly verify.</p>
+<p>What actually lands on your disk when you download is worth understanding, because it maps onto the part-family idea from earlier. The symbol comes as a <code>.kicad_sym</code> file. The footprint comes as a <code>.kicad_mod</code> file, usually inside a folder whose name ends in <code>.pretty</code> (KiCad treats such a folder as one footprint library). The 3D model, if included, comes as a <code>.step</code> or <code>.wrl</code> file. A KiCad symbol library, then, is just a <code>.kicad_sym</code> file, and a footprint library is just a <code>.pretty</code> folder. Knowing that demystifies the next step, because “adding a library” turns out to mean nothing more than telling KiCad where one of these files lives.</p>
+<p>These formats also have a history worth knowing, because sooner or later you will meet the older ones. The <code>.kicad_sym</code> symbol library and the <code>.pretty</code> footprint folder are the modern formats, the ones KiCad 10 writes, and both are plain text you could open in an editor if you were ever curious. Symbol libraries were not always stored this way. Before KiCad 6 they used a ‘legacy’ format, a <code>.lib</code> file, often paired with a <code>.dcm</code> file that carried the part descriptions, and a great many libraries are still shared online in that older form. Footprints have used the <code>.pretty</code> folder for much longer, but you may occasionally run into an old single-file <code>.mod</code> footprint library too. The reassuring part is that KiCad 10 reads all of these. When you add a library that is in a legacy format, KiCad notices and offers to bring it up to date: select it and click the “Migrate Libraries” button in the same dialog, and KiCad rewrites it in the modern format while leaving your original files untouched. A legacy library, then, is never a dead end. It is one button away from being current.</p>
+<p>KiCad finds libraries through two lists called the ‘library tables’: one for symbols and one for footprints. Open the symbol one from “Preferences → Manage Symbol Libraries…” and you will see it has two tabs (1) (Figure 6.3). The “Global Libraries” tab is the list that is available in <em>every</em> project you ever open; this is where KiCad’s own standard libraries already sit, carried in as a single nested entry you should leave alone. The “Project Specific Libraries” tab is a second list that belongs only to the project currently open, and it is the tab shown here. To add a downloaded symbol library, look at the small row of buttons at the bottom left. Two of them add a library, and it is worth knowing which is which. The one you will almost always want is the <strong>folder button</strong> (4): it opens a file browser so you can point KiCad at the <code>.kicad_sym</code> file you downloaded, and it fills in the nickname and path for you. Its neighbour, the <strong>“+” button</strong>, adds a blank row instead and leaves you to type the nickname and path by hand; you rarely need it, but it is there for the times you want to build an entry from scratch. Either way, each library gets a short ‘nickname’ (2), the name you will see in the chooser, and a library path (3) that records where the file lives. In the screenshot that path begins with <code>${KIPRJMOD}</code>, a placeholder that always stands for the current project’s own folder; hold that thought, because it is the key to the last section of this chapter. That is the whole operation. The footprint side works exactly the same way: “Preferences → Manage Footprint Libraries…” opens a dialog with the same two tabs and the same buttons, and you point it at the <code>.pretty</code> folder instead of a file. Because it is identical in every way that matters, I am not going to spend a second screenshot on it; once you can manage a symbol library, you already know how to manage a footprint library. And the “Migrate Libraries” button (5) is the one we met a moment ago, waiting there for any legacy library you add.</p>
+<p>The choice between the two tabs is the choice you will make over and over, so let me put it plainly. Add a library to the <strong>global</strong> table when it is something you expect to use across many projects, and to the <strong>project-specific</strong> table when it belongs to the one design in front of you. (If the same nickname appears in both tables, the project’s copy wins, which is a sensible default: a project can override a global library without disturbing it.) For a part you just downloaded for the current board, the project-specific table is almost always the right home, and the final section of this chapter explains why that choice is what keeps a project healthy over the years. We will introduce the global option fully in Volume 2, where building up a personal library starts to pay off; here, lean toward project-specific.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-Manage-Symbol-Libraries-dialog.png" /></p>
+<p>Figure 6.3: The Manage Symbol Libraries dialog. The two tabs decide a library’s reach: global libraries are available everywhere, project-specific libraries belong to this design alone. The footprint dialog looks and works the same way.</p>
+<h2 id="sec:not-in-standard">When the Part Isn’t in the Standard Library</h2>
+<p>Let us run the decision tree once, end to end, on a real part. Suppose I am building a small board that takes its power in over a ‘USB Type-C’ connector, the now-common reversible USB connector. I want a specific power-only, surface-mount Type-C receptacle that I have already chosen from a distributor, a particular manufacturer’s part with a particular part number, because I care that the footprint matches the exact connector I am going to solder down.</p>
+<p><strong>Stage one: look in the standard library.</strong> I open the symbol chooser and search <code>usb c</code>. KiCad has Type-C symbols, including a power-only receptacle, and its footprint library even carries land patterns for a number of specific Type-C parts, which is reassuring; for many designs one of those is genuinely all you need. But two things still send a careful designer on to stage two. The first is coverage: a library cannot hold every connector ever made, and sooner or later the exact part you have chosen simply will not be there. The second is quieter and catches people out: a footprint sitting in the library tells you someone drew it, not that you can still <em>buy</em> the part, and a beautiful land pattern for a component nobody stocks any more is a trap. Reaching for a reliable source settles both at once, and it is the moment to pick up the manufacturer’s own model too, the gold standard I mentioned earlier. So I move on to stage two.</p>
+<p><strong>Stage two: import it from a reliable source.</strong> I go to SnapMagic and type the connector’s manufacturer part number into the search box (1). SnapMagic returns a list of candidates; a column of small icons (2) shows at a glance whether a symbol, footprint, and 3D model are available, and each row gives the exact part number (3) and a short description (4), so I can confirm I have the right variant (Figure 6.4). I open the part’s page, where the symbol and footprint are previewed so I can eyeball them before committing, and click “Download Symbol and Footprint” (Figure 6.5). SnapMagic asks which CAD tool the files are for, and I choose KiCad from the list (Figure 6.6); it then asks which KiCad version, and I pick “V6 &amp; Later” to match a modern install (Figure 6.7). What comes back is a package containing the symbol, the footprint, and a 3D model. I unzip it somewhere sensible. Because this part belongs to the board in front of me, I am going to add it to the <em>project</em>, not to my global setup. I open “Preferences → Manage Symbol Libraries…”, switch to the “Project Specific Libraries” tab, add the <code>.kicad_sym</code> file with a clear nickname like <code>USB_C_Local</code>, and then do the matching thing for the footprint under “Manage Footprint Libraries…”, pointing it at the downloaded <code>.pretty</code> folder.</p>
+<p>Now the part behaves exactly like a standard one. I place its symbol from the chooser, where my new library now appears by its nickname, and I assign its footprint the same way you learned in Chapter 2. The import has, in effect, extended KiCad’s library with precisely the one part I was missing. Figure 6.8 shows that effect on a different imported part, a slide switch I pulled from the DigiKey distributor library: its library appears in the chooser’s tree under its own name, the switch selects like any other symbol, and the symbol and footprint preview exactly as a standard part would. Because an imported library genuinely adds to what KiCad already ships, your new part even turns up alongside the standard-library equivalents when you search. In Figure 6.9, a search for “slide switch” lists the DigiKey slide switches and KiCad’s own in the same set of results, so you can weigh them side by side and pick whichever suits the board.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-snapeda-usbc-1-search.png" /></p>
+<p>Figure 6.4: Searching SnapMagic by manufacturer part number. Type the part number in the search box (1); the results show which CAD data is available (2) alongside each part number (3) and description (4), so you can confirm the exact variant. (SnapMagic lives at snapmagic.com; the exact page will look a little different by the time you read this.)</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-snapeda-usbc-2-part-page-download.png" /></p>
+<p>Figure 6.5: The part page previews the symbol and footprint before you commit. When they look right, click “Download Symbol and Footprint” (1).</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-snapeda-usbc-3-download-kicad.png" /></p>
+<p>Figure 6.6: SnapMagic offers the part in many CAD formats. Choose KiCad from the list.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-snapeda-usbc-4-download-kicad6plus.png" /></p>
+<p>Figure 6.7: Then pick the KiCad version. Choose “V6 &amp; Later” for any modern KiCad install, and you get the symbol, footprint, and 3D model in one package.</p>
+<p><strong>The check that earns its keep.</strong> Before I trust this connector, I do the one thing the previous section insisted on: I open the manufacturer’s datasheet to its recommended land pattern and lay it beside the footprint KiCad now shows me. I count the pads and confirm the number matches. I check the pitch. And I find pin 1 on the datasheet and confirm it is pin 1 on the footprint, because a connector that is correct in every way except a mirrored or rotated pin assignment is one of the most frustrating faults to chase later. Only when those three agree do I consider the part sourced. The technique is the same for any part. Figure 6.10 shows it on a small FRAM memory chip I imported from the DigiKey library: with the component selected in the chooser (1), the datasheet’s pin-assignment diagram sits alongside, so the symbol’s pin numbers and roles (2) and the footprint’s pads (3) can be checked against it at a glance.</p>
+<p>This is also where the classic stage-two mistakes hide, so let me name them before they catch you. The first is grabbing the wrong <em>variant</em>: many real parts come in several footprints (different mounting styles, different pad shapes), and a download site may offer more than one, so match the variant to the exact part you will buy. The second is mismatched pin numbering between a community symbol and its footprint, which the datasheet check above is designed to catch. The third is simple over-trust: a footprint that looks plausible on screen but was modelled carelessly. None of these survive a one-minute look at the datasheet, which is the whole reason I keep insisting on it.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06a-imported-switch-symbol-chooser.png" /></p>
+<p>Figure 6.8: An imported part in the symbol chooser. Once added through the library table, a downloaded slide switch (here the EG1218 from the DigiKey library) appears under its own library name and places exactly like a standard part, symbol and footprint alike.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06b-imported-vs-built-in-switch-symbol-chooser.png" /></p>
+<p>Figure 6.9: An imported library sits beside the standard one. Searching “slide switch” turns up the DigiKey slide switches together with KiCad’s built-in slide switches in the same result list, a reminder that importing adds to the standard library rather than replacing it.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-footprint-datasheet-verification.png" /></p>
+<p>Figure 6.10: Verifying a downloaded part against its datasheet. With the MB85RS64 selected in the chooser (1), lay the datasheet’s pin-assignment diagram beside it and confirm that the symbol’s pin numbers and roles (2) and the footprint’s pad count and pin 1 (3) all agree. Do this before you trust any imported part.</p>
+<p><strong>Where stage two ends, for now.</strong> Almost always, one of stage two’s sources has your part, and the tree stops here. But imagine a part so new, so obscure, or so specialised that no reliable source has modelled it. Then, and only then, you reach stage three: you author the symbol and footprint yourself, from the datasheet, by hand. That is real, useful work, and it is genuinely satisfying the first time a part you drew yourself solders down and fits. It is also a chapter’s worth of craft, so it lives in Volume 2. Keep it as a promise rather than a worry: the day no library has your part is the day you will make your own, and by then you will have every tool you need to do it well.</p>
+<h2 id="sec:self-contained">Making Your Project Self-Contained</h2>
+<p>You have now found parts, imported them, and checked them. One job remains, and it is the one that protects all that effort over time. Right now, the USB connector your board depends on lives in a library you downloaded into some folder, referenced by your project’s library table. That arrangement works perfectly today. The question is whether it will still work in two years, on a different computer, after a few KiCad updates, when that download folder has long since been tidied away. The answer, unless you take one more step, is “maybe not,” and the failure is quiet: the project opens, but a footprint has gone missing.</p>
+<p>The good news is that KiCad already protects half of this for you. Since version 6, the symbols a schematic uses are stored <em>inside</em> the schematic file itself, so even if a symbol library vanishes, your schematic still draws correctly. That is a real comfort, and it means the drift we are guarding against is mostly on the <em>footprint</em> side, plus the library-table references that point at your downloads. So the goal of this last step is narrow and achievable: make the project carry its own footprints (and the 3D models that go with them) so it no longer depends on anything outside its own folder.</p>
+<p>The way to do that is to give the parts a home <em>inside the project</em> and copy them there. KiCad has a tidy convention for this, a path variable called <code>${KIPRJMOD}</code> that always points at the current project’s folder, whichever machine the project is on. A library added to the project-specific table with a path built on <code>${KIPRJMOD}</code> is a library that travels with the project automatically. So the recipe is: create a footprint library (a <code>.pretty</code> folder) and, if you like, a symbol library (a <code>.kicad_sym</code> file) inside the project folder, add them to the <em>project-specific</em> tables, and then copy the parts the project actually uses into them. You copy a symbol from within the Symbol Editor (open the source symbol, then save a copy into your project library) and a footprint the same way in the Footprint Editor. The 3D models deserve the same treatment: copy the <code>.step</code> or <code>.wrl</code> files into the project too, and in the footprint’s properties, on its “3D Models” tab, set the model path using <code>${KIPRJMOD}</code> so it points at the project’s own copy rather than your Downloads folder. KiCad 10 even offers a one-click convenience for the models, “Tools → Collect and Embed 3D Models,” which gathers every model the board references and tucks it into the board file; that feature is part of a larger ‘embedded files’ capability we explore properly in Volume 2.</p>
+<p>It is worth pausing on those 3D models, because KiCad treats them differently from the other two members of the part family, and the difference surprises people. Symbols and footprints each have a library manager, the dialogs you met earlier in this chapter. 3D models have none. There is no “Manage 3D Model Libraries” to open, and at first that looks like an oversight. The reason is that a 3D model carries no electrical weight at all. It changes nothing about the board you actually manufacture: not a pad, not a net, not a track. It is purely visual, the shape that shows up in the 3D Viewer so you can see what the finished board will look like and check that nothing collides. Because a model only has to be <em>found</em> when KiCad renders that view, it does not need a library table the way symbols and footprints do. A footprint simply stores a path to its model file, and that file can sit anywhere on your disk; you can attach one by hand on the footprint’s “3D Models” tab, pointing it at any <code>.step</code> or <code>.wrl</code> file you like. What KiCad gives you instead of a library manager is a shortcut. In “Preferences → Configure Paths” you can define an environment variable, <code>KICAD10_3DMODEL_DIR</code>, that points at a folder of models (Figure 6.11), and KiCad then jumps straight there when you open the model browser, so you are not forever navigating up from your home directory. It works, and once set it saves real time. I will be honest, though: even in version 10, the way KiCad handles 3D models still feels a little like an afterthought bolted onto the side, and you will notice the seams. Knowing that in advance saves you from thinking you have done something wrong.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06-configure-paths.png" /></p>
+<p>Figure 6.11: The “Configure Paths” dialog. Registering a folder of 3D models here as <code>KICAD10_3DMODEL_DIR</code> (highlighted) is the closest thing KiCad has to a 3D-model library: it does not manage the models, but it lets the model browser jump straight to them.</p>
+<p>When this is done, the test is simple and worth running: a self-contained project is one you could zip up, send to a friend with a fresh KiCad install, and have them open with every symbol, footprint, and 3D model intact. No missing parts, no hunting, no “where did I get that connector.” That is the standard every project in this series is built to meet, and it is the direct, durable answer to library drift. I do this for every board I expect to keep, and you will thank yourself the first time you reopen an old project and find it whole.</p>
+<p>There is a second home for a part, and knowing when to use each is the last distinction to draw (Figure 6.12). Everything above puts a part in the project, which is right for a connector you chose for this one board. But some parts you reach for again and again, the regulator you always use, a favourite microcontroller, the connectors you standardise on. Re-importing those into every new project is wasted effort. For these, build a ‘personal library’: a <code>.kicad_sym</code> file and a <code>.pretty</code> folder kept in a stable folder of your own (something like a <code>KiCad/MyLibraries</code> directory that you back up and never casually move), added once to the <em>global</em> library table so it is available in every project you start. Then a good rule of thumb falls out naturally: a part proves itself in a project-specific library first, and once you have used it on a second or third board, you promote it to your personal library so it is always at hand. Project-local for what belongs to one design, personal-and-global for what you reuse; and when you ship a project, the self-contained copy is what makes it whole.</p>
+
+
+<p><img src="/assets/klp5e-vol1/ch06/ch06_two-homes_v10.png" /></p>
+<p>Figure 6.12: Two homes for a part. Copy a part into the project (through the project-specific table) to make the design self-contained; keep the parts you reuse in a personal library (through the global table). Promote a part from the first to the second once it has earned its place.</p>
+<p>You now have the full sourcing skill: you can find a part in the standard library, import one from a reliable source when the standard library falls short, check that an imported footprint is honest, and store what you collect so a project stays whole for years. This is the missing piece both early tours quietly relied on, and from here it simply becomes part of how you work. In the next part of the book we put it to use on real boards, starting with a complete power-supply project where you will source every part with exactly these steps and copy them into the project as you go. And when, one day, you meet the part that no library has, you will already know what stage three asks of you, and Volume 2 will be waiting. Let’s go build something with the parts you can now find anywhere.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>
