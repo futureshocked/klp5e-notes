@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>A Hands-On Tour: Schematic — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">A Hands-On Tour: Schematic</h1>
+<p>Enough reading. In this chapter you will open the Schematic Editor and draw a real circuit, the same way you would on a paying job, only smaller. By the end you will have a finished, error-checked ‘schematic’ for a little blinking-LED board, ready to be turned into a real PCB in the next chapter. Think of this as a gentle, guided first lap. I will tell you exactly which button to click and why, and you will follow along. The deeper ideas behind what you are doing come later: Chapter 4 explains <em>why</em> it all works, and Chapter 5 turns these steps into a checklist you will reuse on every future project. For now, we act first and understand later.</p>
+<p>A quick word of reassurance before we start. The Schematic Editor is a fully featured, powerful tool, and it is where all PCB design begins. Professionals draw schematics with hundreds of parts spread across many sheets in this same editor. We are going to use a small, friendly slice of it today, and you will grow into the rest over the course of the book. So we will leave the advanced corners alone for now: multi-sheet and hierarchical designs, creating your own symbols and libraries, importing schematics from other tools, design blocks, the built-in simulator, and buses. KiCad’s official documentation covers every one of those in depth when you are ready. Today, we make something.</p>
+<p>Here is what we are building (Figure 2.1). It is a classic circuit: a 555 timer wired as an ‘astable multivibrator,’ which is a fancy way of saying it switches on and off all by itself, over and over. We use that steady on-off signal to flash an LED a couple of times a second. Press nothing, flip no switch; give it power and it blinks. It is the kind of circuit that has launched a million electronics hobbies, and it is the perfect size for a first tour: a handful of parts, a few connections, nothing exotic.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-12-completed-labeled-schematic.png" style="width:100.0%" /></p>
+<p>Figure 2.1: The finished schematic for our 555 blinker. This is where we are headed.</p>
+<p>The circuit uses only parts from KiCad’s standard libraries, so you will not have to hunt anything down on the internet. It is built from:</p>
+<ul>
+<li>a <strong>555 timer</strong> chip, the brain of the blinker;</li>
+<li>three <strong>resistors</strong>: two that set how fast it blinks, and one that protects the LED;</li>
+<li>two <strong>capacitors</strong>: one that sets the blink rate with the resistors, and one that steadies the chip;</li>
+<li>an <strong>LED</strong>, the part that actually lights up;</li>
+<li>a <strong>2-pin connector</strong> where a battery plugs in (a 9 V block, or four AA cells, suits the 555 well).</li>
+</ul>
+<p>Don’t worry if you can’t yet read the circuit or work out the blink rate. That is electronics, not KiCad, and it is not what this chapter is about. Our job here is to learn the <em>editor</em>, by drawing this circuit step by step.</p>
+<h2 id="sec:c2-overview">The Schematic Workflow at a Glance</h2>
+<p>Drawing a schematic in KiCad is not a free-for-all. There is a natural order to it, and following that order keeps you out of trouble. Throughout this book we will lean on the same eight steps, in the same sequence, for every schematic we draw. Here they are, so you have the whole map before we zoom in on any one part:</p>
+<ol type="1">
+<li><strong>Create the project and schematic.</strong> Make a home for your design and open the editor.</li>
+<li><strong>Place symbols.</strong> Drop a ‘symbol’ onto the sheet for each part in the circuit.</li>
+<li><strong>Annotate.</strong> Let KiCad give every part a unique number (R1, R2, U1, and so on).</li>
+<li><strong>Set component values.</strong> Tell each part what it actually is (10 kΩ, 10 nF, and so on).</li>
+<li><strong>Wire and label.</strong> Connect the symbols’ pins, and give the important connections names.</li>
+<li><strong>Assign footprints.</strong> Tell each symbol which physical part it will become on the board.</li>
+<li><strong>Electrical rules check.</strong> Ask KiCad to find your mistakes while they are still free to fix.</li>
+<li><strong>Hand off to layout.</strong> Save, and pass the design to the PCB Editor.</li>
+</ol>
+<p>Don’t try to memorise the list. You will have walked all eight by the end of this chapter, and we will pin them down properly as a reusable checklist in Chapter 5. For now, just notice the shape: you build the circuit, you check it, then you hand it on. Let’s walk through it.</p>
+<h2 id="sec:c2-pass">The 8-Step Pass</h2>
+<h3 id="step-1-create-the-project-and-schematic">Step 1: Create the project and schematic</h3>
+<p>Every KiCad design lives inside a ‘project,’ a folder that holds the schematic, the board, and a handful of supporting files, all sharing one name. We met the project manager in the previous chapter; now we will use it.</p>
+<p>Start KiCad so the project manager window appears. Choose “File” then “New Project,” pick a sensible folder, and give the project a name. I am calling mine <code>ch02-blinky</code>, but any name without spaces will do. KiCad creates the folder for you and, inside it, the project file along with an empty schematic and an empty board, all named to match (Figure 2.2). You will see them appear in the file browser on the left of the window: the <code>.kicad_pro</code> project file at the top, with the <code>.kicad_pcb</code> board and the <code>.kicad_sch</code> schematic nested under it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-1-new-project.png" style="width:100.0%" /></p>
+<p>Figure 2.2: A fresh project. KiCad makes the schematic and board files for you, and lists the editors you can open on the right.</p>
+<p>Now open the Schematic Editor. You can click its button on the right of the project manager, or simply double-click the schematic file (the one ending in <code>.kicad_sch</code>) in the file browser. The editor opens onto a large blank sheet (Figure 2.3). This is your drawing canvas, and it is where the circuit will take shape.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-2-schematic-editor-empty.png" style="width:100.0%" /></p>
+<p>Figure 2.3: The Schematic Editor, ready for a new design. The numbered callouts mark the parts you will use today.</p>
+<p>Take ten seconds to get your bearings; we will explore the editor properly in Chapter 7, so a quick orientation is all you need now. Four areas are worth knowing, and they are numbered in Figure 2.3. The toolbar across the <strong>top</strong> (1) carries the everyday commands: save, undo, zoom, and the check tools you will meet later. The toolbar down the <strong>left</strong> edge (2) controls how things look: the grid, the measurement units, and the cursor. The tall toolbar down the <strong>right</strong> edge (3) holds the tools you use to build a circuit: add a symbol, draw a wire, place a label, and so on. Down in the bottom-right corner sits the title block (4), where a design records its name, date, and revision. Two movements will serve you for the whole tour. To <strong>pan</strong> around the sheet, press and hold the middle (or right) mouse button and drag. To <strong>zoom</strong>, roll the mouse wheel; the view zooms toward wherever the pointer sits. If you ever lose your drawing off the edge of the screen, press the “Home” key to fit everything back into view.</p>
+<p>One last thing worth knowing before we place a part: the canvas has a ‘grid,’ an invisible lattice that your parts and wires snap to. The standard schematic grid is 50 ‘mil’ (a mil is one-thousandth of an inch), and you should leave it alone. KiCad 10 reports the grid in millimetres down in the status bar, where you will see <code>grid 1.27 mm</code>; that is the same spacing, since 1.27 mm equals exactly 50 mil (Figure 2.3). The grid matters more than it looks: KiCad only treats two things as connected when their ends land on exactly the same point, and keeping everything on the grid is what makes that happen reliably. We will see why that is handy in Step 5.</p>
+<h3 id="step-2-place-symbols">Step 2: Place symbols</h3>
+<p>A schematic is built from ‘symbols.’ A symbol is a small drawing that stands for a real component: the zig-zag (or rectangle) of a resistor, the triangle-and-bar of an LED, the numbered box of a chip. Each symbol shows the part’s ‘pins,’ the points where wires attach. Our first real job is to drop a symbol onto the sheet for every part in the blinker.</p>
+<p>To add a symbol, press the “A” hotkey, or choose “Place Symbols” from the “Place” menu, or click the symbol button (the one that looks like an op-amp triangle) at the top of the right toolbar. The two arrows in Figure 2.4 point to the menu entry and the toolbar button; any of the three routes opens the ‘symbol chooser,’ the window you use to find a part and preview it before placing it (Figure 2.5).</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-3-add-symbol.png" style="width:65.0%" /></p>
+<p>Figure 2.4: Three ways to start placing a symbol: the “A” hotkey, the “Place” menu’s “Place Symbols” entry, or the symbol button on the right toolbar.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-4-find-ne555p-in-symbol-chooser.png" style="width:100.0%" /></p>
+<p>Figure 2.5: The symbol chooser, here searching for the 555 timer.</p>
+<p>The chooser packs a lot into one window, so let me point out the parts you will use (the numbers match the callouts in Figure 2.5). You search for a part by typing a few letters of its name in the search box (1); as you type, the list below narrows to symbols whose name or description matches. Click an item in the list, here <code>NE555P</code> (2), and it appears in the symbol preview pane (3) so you can confirm it is the part you want. The lower-right pane (4) previews a physical ‘footprint’ for the part, and the dropdown just above it (5) lets you choose which one; we will ignore footprints for now and pick them later, in Step 6, so leave that dropdown alone. When the part is the one you want, click “OK” (6). Two checkboxes sit along the bottom: leave “Place all units” ticked, and you can ignore “Place repeated copies” for now.</p>
+<p>Let’s place the 555 first, since it sits at the heart of the circuit. Type <code>NE555</code> in the search box, click the <code>NE555P</code> symbol so it shows in the preview, and click “OK” (or just double-click the part in the list). The window closes and the symbol is now glued to your mouse pointer. Move it to a roomy spot near the middle of the sheet and left-click once to drop it (Figure 2.6). Give it plenty of space; this chip has eight pins and you will be running several wires to it. Notice that the part arrives carrying the name <code>U?</code>: the letter tells you its family (a <code>U</code> is an integrated circuit), and the question mark is a placeholder for a number it does not have yet. We will deal with that in Step 3.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-5-ne555p-in-editor.png" style="width:65.0%" /></p>
+<p>Figure 2.6: The 555 placed near the middle of the sheet. Its name reads <code>U?</code>, and the status bar at the foot of the window echoes the part’s reference, value, and other details.</p>
+<p>A couple of handy moves while a symbol is on your cursor, or after it is placed and selected (you will see a faint blue halo around a selected part). Press “R” to rotate it, which is often the quickest way to make the wiring tidy later. To move a part you have already placed, hover over it and drag with the left mouse button held down. To deselect, left-click any empty space.</p>
+<p>Now add the rest of the parts the same way. Press “A,” search, place, and repeat:</p>
+<ul>
+<li>the <strong>LED</strong>: search for <code>LED</code> and choose the plain <code>LED</code> from the <code>Device</code> library;</li>
+<li>the three <strong>resistors</strong>: search for <code>R</code> and choose the <code>R</code> symbol from <code>Device</code> (place it three times);</li>
+<li>the <strong>timing capacitor</strong>: search for <code>CP</code> and choose the polarised capacitor <code>CP</code> (this is the electrolytic one);</li>
+<li>the <strong>steadying capacitor</strong>: search for <code>C</code> and choose the plain <code>C</code>;</li>
+<li>the <strong>power connector</strong>: search for <code>Conn_01x02</code> and choose that 2-pin connector.</li>
+</ul>
+<p>A small time-saver for the three resistors: place the first one, then with it still selected press “Ctrl+D” (“Cmd+D” on macOS) to drop an identical copy, and press it once more for the third. Duplicating this way also copies anything you have already configured on the part, such as its value or footprint, so the same trick saves even more time later when you are repeating a part you have already set up. When you are done placing a part, press “Esc” to put the tool down.</p>
+<p>If you grab the wrong part, no harm done. Select it and press the “Delete” key, then place the right one. You can also turn on the interactive delete tool from the right toolbar and click items to remove them. Mistakes here cost you nothing, so place freely and tidy up after.</p>
+<p>There is one more kind of symbol our circuit needs, and it works a little differently: the ‘power symbol.’ A power symbol is a small flag that marks a pin as connected to a power rail, such as the positive supply (we will call ours <code>VCC</code>) or the ground (<code>GND</code>). It is not a physical component; it is a label that says “this pin belongs to the power net.” Power symbols have a tool of their own. Click the “Add Power Symbol” button on the right toolbar (1 in Figure 2.7), or press “P,” to open a chooser much like the one for ordinary symbols. Type a name in the search box (2), pick the symbol from the list (3), here <code>GND</code>, and click “OK” (4). Place a few <code>GND</code> flags near the pins that go to ground, then search for <code>VCC</code> and place a few near the pins that need the positive supply. Don’t worry about exact positions yet; we will wire them up later.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-6-power-symbol-chooser.png" style="width:65.0%" /></p>
+<p>Figure 2.7: The power-symbol chooser. Power symbols mark which pins connect to the supply and to ground.</p>
+<p>With every part and a scattering of power symbols on the sheet, your drawing will look busy and unconnected (Figure 2.8). That is exactly right; right now it is just a collection of parts. Look closely and you will see that every component still wears a question mark in place of a number: <code>R?</code>, <code>C?</code>, <code>D?</code>, <code>J?</code>, and the <code>U?</code> we already met. The letter marks the kind of part (<code>R</code> for a resistor, <code>C</code> for a capacitor, <code>D</code> for a diode or LED, <code>J</code> for a connector, <code>U</code> for a chip), and the question mark means KiCad has not yet given it a number of its own. Before we wire anything, we will turn those question marks into real, unique names like <code>R1</code> and <code>C2</code>, because every part needs a label that no other part shares. That is what lets you, and KiCad’s own tools, point to one exact part without ambiguity when you wire, check, and build the board. Giving out those names is the very next step.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-7-components-in-editor-no-references.png" style="width:100.0%" /></p>
+<p>Figure 2.8: All the parts are on the sheet, not yet connected and not yet numbered. Every one still shows a question mark (<code>R?</code>, <code>C?</code>, <code>U?</code>) instead of a unique designator.</p>
+<h3 id="step-3-annotate">Step 3: Annotate</h3>
+<p>Every part is on the sheet, and every one still carries a question mark in its name: <code>R?</code>, <code>C?</code>, <code>U?</code>. Giving each part a unique label, like <code>R1</code>, <code>R2</code>, or <code>U1</code>, is called ‘annotation,’ and KiCad can do it for you in one click. We do it now, before wiring, so that every part already has the name we will use to talk about it while we connect and check the circuit.</p>
+<p>Depending on your settings, KiCad may have been numbering parts automatically as you placed them, in which case you will already see <code>R1</code>, <code>R2</code>, and so on. Either way, it is good practice to run the annotation tool once to make sure every part is numbered cleanly and none was missed.</p>
+<p>Open the tool from the “Tools” menu by choosing “Annotate Schematic,” or click its button on the top toolbar. The dialog (Figure 2.9) offers a few choices about how to number, such as sorting the parts by their X or Y position on the sheet, but the defaults are sensible and you can leave them. Click “Annotate,” and every question mark turns into a real number (Figure 2.10). That is all there is to it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-8-annotate.png" style="width:65.0%" /></p>
+<p>Figure 2.9: The Annotate Schematic dialog. The defaults are sensible, so just click “Annotate.”</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-9-components-annotated.png" style="width:100.0%" /></p>
+<p>Figure 2.10: Every question mark is now a real, unique number (<code>R1</code>, <code>R2</code>, <code>R3</code>, <code>C1</code>, <code>C2</code>, <code>D1</code>, <code>U1</code>, <code>J1</code>). The parts still carry their generic values, which we set next.</p>
+<p>Why bother, and why now? Because from here on, every part needs a unique name so we can refer to it without ambiguity, both to each other and to KiCad’s own tools. The wiring you are about to draw is easier to follow when you can say “the wire from <code>U1</code> pin 3 to <code>R3</code>”; the check we run in Step 7 reports each finding by designator; and the board we build in the next chapter relies on each part having one. Annotation is quick, and doing it before wiring keeps the rest of the workflow smooth.</p>
+<h3 id="step-4-set-component-values">Step 4: Set component values</h3>
+<p>Numbering tells the parts apart; now we say what each one actually is. Look at your resistors and capacitors and you will see they still wear the generic value they were born with: a resistor that just reads <code>R</code>, a capacitor that just reads <code>C</code>. Setting the ‘value’ field turns the schematic into a precise description of the circuit, the difference between “a resistor” and “a 10 kΩ resistor.”</p>
+<p>To set a value, double-click a part (or select it and press “E”) to open its Properties, and type into the “Value” field. Work through the parts that need one:</p>
+<ul>
+<li><code>R1</code>: <code>10k</code></li>
+<li><code>R2</code>: <code>47k</code></li>
+<li><code>R3</code>: <code>470</code></li>
+<li><code>C1</code>: <code>10nF</code></li>
+<li><code>C2</code>: <code>10uF</code></li>
+</ul>
+<p>The 555 (<code>U1</code>), the LED (<code>D1</code>), and the connector (<code>J1</code>) have no value to set in this sense; their name already says what they are. If you would rather set them all in one place, the Symbol Fields Table from the “Tools” menu lays every part’s value out in a grid. Where these particular numbers come from, and why they make the LED blink at the rate it does, is the subject of “Going Deeper” at the end of the chapter; for the tour, just enter them. With every part valued, the sheet reads as a precise shopping list (Figure 2.11), and we are ready to wire.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-10-component-values-added.png" style="width:100.0%" /></p>
+<p>Figure 2.11: Every resistor and capacitor now declares its value (<code>10k</code>, <code>47k</code>, <code>470</code>, <code>10 nF</code>, <code>10 µF</code>). The sheet now says exactly what the circuit is made of.</p>
+<h3 id="step-5-wire-and-label">Step 5: Wire and label</h3>
+<p>Now we draw the connections. In a schematic, a wire is not really a drawing of a physical wire; it is a way of declaring that two pins are electrically joined. Draw a wire from one pin to another and you have told KiCad, “these two points are the same node.” That node has a name (KiCad calls it a ‘net’), and in the next chapter the board will use those nets to know what to connect to what.</p>
+<p>To start wiring, press the “W” hotkey, or click the wire tool (the green diagonal line) on the right toolbar. Move the pointer to the end of a pin (you will see the cursor snap to it) and left-click to begin a wire. Click again at each corner you want, and finish on the destination pin. Double-click, or press “Esc,” to end the wire. As you connect pins, notice the small squares that sit at the unconnected end of every pin: when a wire properly lands on a pin, that little square disappears. Those squares are a quiet, reliable hint. If you finish wiring and a square is still showing, something there is not actually connected, even if it looks close.</p>
+<p>Work your way around the circuit, following the finished schematic in Figure 2.1 as your guide. Connect the 555’s pins to the resistors and capacitors, run the output through the LED’s resistor to the LED, and bring the connector to the supply. Where a wire crosses a spot that another wire already occupies and the two should join, KiCad drops a small ‘junction’ dot automatically to show they are connected. Where wires merely cross without a junction dot, they are <em>not</em> connected, which is exactly how you draw two signals that pass over each other without touching.</p>
+<p>A few moves make wiring painless:</p>
+<ul>
+<li>To <strong>move a part without breaking its wires</strong>, hover over it and press “G” (the drag tool). The wires stretch and stay attached.</li>
+<li>To <strong>move a part and leave its wires behind</strong>, press “M” (the move tool) instead. Use “G” most of the time; it keeps the circuit intact.</li>
+<li>If a wire ever refuses to connect, it is almost always because an end is a hair off the grid. Nudge the wire or the part slightly so everything lands on the grid, and the connection will take. This is the payoff of the grid we met in Step 1.</li>
+</ul>
+<p>That handles every connection except the ones we drew as power symbols, and here is a small piece of magic worth pausing on. You placed several <code>GND</code> symbols around the sheet, near different pins, without any wire running between them. KiCad treats every pin attached to a <code>GND</code> symbol as part of the same ground net, by <em>name</em>, even though no wire visibly joins them. The same goes for <code>VCC</code>. That is why power symbols exist: they let you connect the supply and ground all over a busy sheet without dragging long wires across the whole drawing. Connecting by name, instead of by a drawn line, keeps the schematic readable.</p>
+<p>That same trick has a manual version called a ‘net label,’ and it is worth meeting now because you will use it constantly. A net label is a name you stick onto a wire. Any two wires that carry the same label are connected, by name, just like the power symbols. Let’s name the wire that carries the blinking signal from the 555’s output to the LED’s resistor. Press the “L” hotkey (or click the label tool on the right toolbar); a small Label Properties dialog opens where you type the name (Figure 2.12). Type <code>BLINK</code>, click “OK,” and drop the label onto that wire. The wire now has a friendly name, which makes the schematic easier to read and, later, easier to find that same signal over on the board.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-11-adding-blink-net-label.png" style="width:65.0%" /></p>
+<p>Figure 2.12: Naming the output net “BLINK” in the Label Properties dialog, with the wiring taking shape behind it.</p>
+<p>Take your time here. Wiring is the part of schematic work that rewards a little patience, and it is far and away the most satisfying once it clicks. When every pin’s little square has vanished and the drawing matches Figure 2.1, the circuit is complete. Save your work with “Ctrl+S.” The circuit is drawn, numbered, valued, and named; next we tell each symbol which physical part it will become.</p>
+<h3 id="step-6-assign-footprints">Step 6: Assign footprints</h3>
+<p>Here we reach the bridge between the circuit and the physical board. Every symbol on your sheet stands for a part’s <em>function</em>: a resistor’s symbol is the same zig-zag whether the real resistor is a tiny surface-mount chip or a fat through-hole part with long legs. Before we can lay out a board, we have to tell each symbol which physical part it will actually become. That physical pattern of pads and holes is the ‘footprint,’ and pairing a symbol with one is called ‘assigning a footprint.’ We will dig into why symbols and footprints are kept separate in Chapter 4; for now, just know that the board cannot be built until each symbol knows its footprint.</p>
+<p>The most convenient way to assign footprints to a whole circuit at once is the Footprint Assignment tool. Open it from the “Tools” menu by choosing “Assign Footprints,” or from its button on the top toolbar (1 in Figure 2.13). A three-pane window appears: the available footprint libraries on the left (2), your symbols and their assignments in the middle (4), and the footprints inside the selected library on the right (3). To make an assignment, click a symbol in the middle, find a suitable footprint on the right, and double-click it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-13-set-footprints-editor.png" style="width:100.0%" /></p>
+<p>Figure 2.13: The Footprint Assignment tool pairs each symbol with a physical footprint.</p>
+<p>A few of the window’s controls make the job quicker, and they are numbered in Figure 2.13. The footprint filters at the top (5) narrow the long list on the right: type part of a name, here <code>c_disc</code>, and only the matching footprints remain, so you are not scrolling through thousands. The viewer button on the tool’s own toolbar (6) opens a window that draws the selected footprint at full size, a good habit for confirming you have the right pad pattern before you commit to it. As you work, “Apply, Save Schematic &amp; Continue” (7) saves your progress without closing the tool. When every symbol has a footprint, click “OK” (8) to save the assignments and return to the schematic.</p>
+<p>Because every part in our blinker is a through-hole component (the friendlier kind to solder by hand, as we saw in Chapter 1), the footprints are easy to choose. Use exactly these:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 38%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>What it is</th>
+<th>Footprint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>U1</code></td>
+<td>The 555 (8-pin DIP)</td>
+<td><code>Package_DIP:DIP-8_W7.62mm</code></td>
+</tr>
+<tr>
+<td><code>R1</code>, <code>R2</code>, <code>R3</code></td>
+<td>Axial resistors</td>
+<td><code>Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal</code></td>
+</tr>
+<tr>
+<td><code>C1</code></td>
+<td>Small ceramic (10 nF)</td>
+<td><code>Capacitor_THT:C_Disc_D3.0mm_W2.0mm_P2.50mm</code></td>
+</tr>
+<tr>
+<td><code>C2</code></td>
+<td>Electrolytic (10 µF)</td>
+<td><code>Capacitor_THT:C_Radial_D4.0mm_H5.0mm_P1.50mm</code></td>
+</tr>
+<tr>
+<td><code>D1</code></td>
+<td>5 mm LED</td>
+<td><code>LED_THT:LED_D5.0mm</code></td>
+</tr>
+<tr>
+<td><code>J1</code></td>
+<td>2-pin pin header</td>
+<td><code>Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</code></td>
+</tr>
+</tbody>
+</table>
+<p>If you ever want to assign a footprint to a single part instead of the whole circuit, you can: double-click the symbol on the sheet (or select it and press “E”) to open its Properties, and set the “Footprint” field there. The Footprint Assignment tool is just the faster way when you have several parts to do at once.</p>
+<h3 id="step-7-electrical-rules-check">Step 7: Electrical rules check</h3>
+<p>Before we hand the design to the board, we ask KiCad to check our work. The ‘Electrical Rules Check,’ or ERC, reads the whole schematic and flags the kinds of mistakes that are easy to make and easy to miss: a pin left unconnected, a power input with nothing driving it, two outputs wired together. It cannot tell you whether your circuit is a good idea, but it is excellent at catching the slips that would otherwise follow you onto the board.</p>
+<p>One small piece of housekeeping comes first, and it is one almost every board needs. Our blinker takes its power in through the connector, J1, not from a chip that announces itself as a supply, so KiCad cannot tell that the <code>VCC</code> and <code>GND</code> rails are genuinely fed; left alone, the check would raise exactly the “power input with nothing driving it” flag mentioned a moment ago. The cure is a small marker called a <code>PWR_FLAG</code>, which simply tells the checker “real power enters the net here.” You add it just as you added <code>VCC</code> and <code>GND</code>: open the power-symbol chooser (the “Add Power Symbol” button, or press “P”), search for <code>PWR_FLAG</code>, and drop one on the <code>VCC</code> net and one on <code>GND</code>, near the connector. With those in place, the check comes back clean. We will not make more of the ERC than that today; in a later project, on a busier board, we will slow down and walk through a couple of the violations it most often reports and how to read them.</p>
+<p>Open the ERC from the button on the top toolbar (1 in Figure 2.14), or from the “Inspect” menu by choosing “Electrical Rules Check,” then click “Run ERC” (2) in the window that appears. On a clean schematic the Violations tab reads zero and the “Errors” and “Warnings” counts both show 0 (3), and you can move on. (The neighbouring “Ignored Tests” tab lists a handful of checks KiCad skips by default; leave it as it is.) If you do see violations, don’t panic; that is the tool doing its job.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-14-ERC-no-errors.png" style="width:65.0%" /></p>
+<p>Figure 2.14: A clean ERC. No errors, no warnings.</p>
+<p>It is worth seeing the ERC catch something, so let’s break the circuit on purpose. Go back to the sheet, select the wire that joins <code>C1</code> to the 555’s CONT pin (pin 5), and delete it. Now re-run the ERC. This time it reports two violations (Figure 2.15), both reading “Pin not connected”: one on <code>C1</code> pin 1, and one on <code>U1</code> pin 5, the two ends the deleted wire used to join. Click a violation in the list, and the editor pans in the background to the exact spot and drops a marker arrow on the trouble, so you can see precisely where the problem is. There is no guessing.</p>
+
+<p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-15-ERC-errors.png" style="width:45.0%" /></p>
+<p>Figure 2.15: With a wire missing, the ERC points straight at the two unconnected pins, <code>C1</code> pin 1 and <code>U1</code> pin 5 (CONT).</p>
+<p>Now fix it: redraw the wire you deleted and run the ERC once more. The violations clear. This is the habit to build, run the ERC, click each violation, fix it, and re-run until the report is clean. Do it now, while the circuit is small and the fixes take seconds. The very same mistake found <em>after</em> you have paid a factory and waited two weeks for boards would cost you the whole order.</p>
+<p>One note on warnings, as opposed to errors. You may sometimes see a yellow warning rather than a red error, for example a wire end sitting slightly off the grid, or a part with a spare unit you didn’t use. Warnings are KiCad pointing at something it wants you to look at, not necessarily something broken. Read each one, and once you understand it and are sure it does not affect your circuit, it is safe to let it stand. The skill is not making the report empty at all costs; it is understanding every line in it.</p>
+<h3 id="step-8-hand-off-to-layout">Step 8: Hand off to layout</h3>
+<p>That is the whole schematic: every part placed, numbered, and valued, every connection drawn, the important net named, footprints assigned, and the ERC clean. Save the design one more time with “Ctrl+S.” You have just completed the first half of designing a PCB, and it is genuinely the half that matters most. The schematic is the source of truth for the entire project; everything the board does, it does because the schematic said so.</p>
+<p>All that remains is to carry this design across to the PCB Editor and start placing the real parts. KiCad makes the handoff a single command. From the “Tools” menu, choose “Update PCB from Schematic.” KiCad opens the board editor and brings every part and every connection across, so you never have to re-enter any of it. We will not actually lay out the board in this chapter; that is the whole of the next one. But it is worth seeing where the bridge is, because you will cross it on every project from here on.</p>
+<h2 id="sec:c2-going-deeper">Going Deeper: How the Blinker Works</h2>
+<p>Everything in this section is optional. The tour is about the <em>editor</em>, not the electronics, and you can turn to Chapter 3 without reading a word of it. But many readers will want to know what the circuit they just drew actually does, and where a design this classic comes from. This is for them.</p>
+<p><strong>What the 555 is doing.</strong> Inside the chip sit two voltage comparators and a memory element called a flip-flop. The timing capacitor, C2, charges up through the two timing resistors, R1 and R2, toward the supply voltage. The moment it reaches two-thirds of the supply, the chip flips its output (pin 3) low and quietly drains the capacitor back down, this time through R2 alone. When the capacitor falls to one-third of the supply, the chip flips the output high and lets it charge again. That endless climb-and-drain is the “astable” in <em>astable multivibrator</em>: no button, no trigger, just a circuit that will not sit still. The LED, wired off the output through R3, lights while the output is high and goes dark while it is low, and so it blinks.</p>
+<p><strong>Setting the blink rate.</strong> The two timing resistors and the capacitor set the speed, by a tidy rule worth knowing: the blink frequency, in hertz, is about 1.44 ÷ ((R1 + 2 × R2) × C2). The values you set in Step 4 are a classic, friendly choice: R1 = 10 kΩ, R2 = 47 kΩ, and C2 = 10 µF blink the LED a little over once a second. Halve C2 to blink twice as fast; double it to blink half as fast. R3, the LED’s resistor, is not fussy (470 Ω is safe across the whole supply range), and C1, the small capacitor on pin 5, sets nothing at all: it just steadies an internal reference, for which 10 nF is the usual value.</p>
+<p><strong>Running it on less.</strong> The part you placed, the NE555, is the original bipolar chip, and it likes a supply of about 4.5 V and up, so a 9 V battery or four AA cells suits it perfectly. If you would rather run the blinker from something smaller, a pair of AA cells or a coin cell, swap the NE555 for a CMOS version such as the TLC555 or ICM7555. It is pin-for-pin identical, drops straight into the same footprint, and works down to around 2 V. Nothing else in the circuit changes.</p>
+<p><strong>Where this circuit comes from.</strong> None of it is original to this book; the 555 astable is one of the most reproduced circuits in all of electronics, and it is worth meeting the primary sources.</p>
+<p><strong>The 555’s own datasheet is the authority.</strong> The chip was designed by Hans Camenzind at Signetics in the early 1970s, and the astable circuit you drew is, almost pin for pin, the “astable operation” figure from that original datasheet. Texas Instruments still publishes the modern descendant (the very document your schematic already links to), and it carries the same frequency formula and the timing curves that go with it. Read it at <a href="https://www.ti.com/lit/ds/symlink/ne555.pdf" class="uri">https://www.ti.com/lit/ds/symlink/ne555.pdf</a>.</p>
+<p><strong>Forrest M. Mims III’s <em>555 Timer IC Circuits</em> is the hobbyist’s classic.</strong> Mims’s hand-drawn mini-notebooks taught a generation of makers, and his LED flasher is, near enough, the board you are building. If any single source is “the original” a maker would point to, it is this one; it began life as a Radio Shack <em>Engineer’s Mini-Notebook</em> and is still in print today.</p>
+<p><strong>You can watch all of this happen.</strong> Everything described here (the capacitor climbing and draining, the output snapping between high and low) is just what a circuit simulator draws for you as a moving graph. KiCad has a built-in simulator, but it is a more advanced tool than this first tour needs, so we leave it for Volume 2. There we will come back to this very blinker, give the 555 a simulation model, and watch its waveforms on screen, a satisfying way to confirm with your own eyes that the timing capacitor really does swing between one-third and two-thirds of the supply.</p>
+<p>You have drawn a complete, checked schematic in the KiCad Schematic Editor, following the same eight steps you will use forever. Not bad for a first lap. In the next chapter we take this design into the PCB Editor and turn it into a real, manufacturable board. Let’s go make a board.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>
