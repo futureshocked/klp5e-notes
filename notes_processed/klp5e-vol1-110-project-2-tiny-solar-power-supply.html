@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Project 2: Tiny Solar Power Supply — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">Project 2: Tiny Solar Power Supply</h1>
+<p>You built a whole board of your own in Chapter 8, from an empty project to a folder of manufacturing files, and the workflow walked beside you the entire way. This chapter builds a second board the same way, and it is a gentle step up rather than a leap. The circuit is a little cleverer, most of its parts are surface-mount rather than through-hole, and along the way you will meet a few things the breadboard supply did not need: 3D models, so you can see the finished board in the round before you order it; a closer look at the design rules KiCad hands you for free; and a handful of new moves in the layout — your first via, a ground pour stitched down to it, and cross-probing between the two editors. None of this is new territory in the workflow sense. You still take the eight schematic steps and the eight layout steps in the order you already know, and each one leaves the design ready for the next. Keep the one-page checklist from Chapter 5 beside you, and let’s build a second real thing.</p>
+<p>The design is not mine. It is a neat little circuit called the Tiny Solar Supply, drawn by Clemens Valens for Elektor, and I am rebuilding it in KiCad with only a few small changes of my own. Following someone else’s good schematic is exactly how a great deal of real PCB work begins, so it is a fair and useful thing to practise.</p>
+<p>Here is what we are building (Figure 9.1): a power supply that runs from a small solar panel. In daylight the panel charges a rechargeable battery; when the panel falls dark, the board draws on that stored charge instead, so the 3.3 volts it delivers never blink out. That makes it a tidy supply for a low-power project left to fend for itself on a windowsill, in a garden, or anywhere a wall socket will not reach.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-layout-15-3D-model-full.png" style="width:100.0%" /></p>
+<p>Figure 9.1: The finished tiny solar power supply, rendered straight from its own design files. The small surface-mount parts sit on top, the three 2-pin headers and the slide switch stand along the edges, and a single board slips into its enclosure on clips. Sun in over one connector, a battery on another, a steady 3.3 volts out, day or night.</p>
+<p>The circuit is built from a modest pile of parts:</p>
+<ul>
+<li>a <strong>boost converter</strong> chip (<code>U1</code>, an AP3015A), the part that takes a low, wavering input voltage and steps it up to a steady 3.3 volts;</li>
+<li>an <strong>inductor</strong> (<code>L1</code>) and two <strong>Schottky diodes</strong> (<code>D1</code>, <code>D2</code>), the converter’s working partners that store and steer the energy as it is pumped up;</li>
+<li>four <strong>resistors</strong> (<code>R1</code> to <code>R4</code>) and three <strong>capacitors</strong> (<code>C1</code>, <code>C2</code>, <code>C3</code>) that set the output voltage, steady the rails, and bias the control parts;</li>
+<li>a small <strong>MOSFET</strong> (<code>Q1</code>, a 2N7002) that switches the converter on and off automatically, which is the clever heart of the design;</li>
+<li>three <strong>2-pin headers</strong>, for the solar panel (<code>J3</code>), the battery (<code>J2</code>), and the 3.3 volt output (<code>J1</code>);</li>
+<li>a <strong>slide switch</strong> (<code>SW1</code>) to cut the whole thing off by hand.</li>
+</ul>
+<p>Two of these deserve a word before we start. The first is <code>Q1</code>, the part I called the clever heart. I will come back to exactly what it does when we wire it, because it is the one piece of this circuit that is not obvious. The second is simply that most of this board is surface-mount. On the breadboard supply only the USB-C connector was, and every other part was the friendly through-hole kind. Here the boost converter, the inductor, the diodes, and the transistor are all surface-mount, because that is the only sensible way those particular parts come. I have kept the resistors and capacitors as through-hole so the board stays kind to a hand with a soldering iron, but the surface-mount parts are nothing to fear. They change nothing about how you <em>design</em> the board, and with a little practice they are every bit as manageable as their through-hole counterparts. If soldering the smallest of them still does not appeal, you can ask the fab to place them for you when you order the boards. For now, designing it is all that matters. Let’s gather the parts.</p>
+<h2 id="sec:c9-source">Sourcing the Parts</h2>
+<p>Before you draw a single wire, gather your parts, exactly as you did in Chapter 8. Run the ‘sourcing decision tree’ from Chapter 6 across the board: for each part, ask in order whether it lives in the standard library, and if not whether a reliable source can give it to you, and only if neither is true do you author it yourself, which still waits for Volume 2. Stop at the first yes.</p>
+<p>Here is the full parts list, with the value you will give each part as you place it. Keep it beside you, because the values matter: the pair <code>R1</code> and <code>R2</code> in particular sets the output voltage, so they are worth getting exactly right.</p>
+<table>
+<thead>
+<tr>
+<th>Reference</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>U1</code></td>
+<td>AP3015A</td>
+<td>boost converter, surface-mount</td>
+</tr>
+<tr>
+<td><code>L1</code></td>
+<td>10 µH, 680 mA</td>
+<td>inductor, surface-mount</td>
+</tr>
+<tr>
+<td><code>D1</code>, <code>D2</code></td>
+<td>SS14</td>
+<td>Schottky diodes, surface-mount</td>
+</tr>
+<tr>
+<td><code>Q1</code></td>
+<td>2N7002</td>
+<td>MOSFET, SOT-23 surface-mount</td>
+</tr>
+<tr>
+<td><code>R1</code>, <code>R4</code></td>
+<td>1 MΩ</td>
+<td></td>
+</tr>
+<tr>
+<td><code>R2</code></td>
+<td>604 kΩ, 1%</td>
+<td>sets the 3.3 V output together with <code>R1</code></td>
+</tr>
+<tr>
+<td><code>R3</code></td>
+<td>10 kΩ</td>
+<td>biases <code>Q1</code></td>
+</tr>
+<tr>
+<td><code>C1</code></td>
+<td>4.7 µF, 50 V</td>
+<td></td>
+</tr>
+<tr>
+<td><code>C2</code></td>
+<td>22 µF, 10 V</td>
+<td></td>
+</tr>
+<tr>
+<td><code>C3</code></td>
+<td>10 pF, 50 V</td>
+<td></td>
+</tr>
+<tr>
+<td><code>J1</code></td>
+<td>2-pin header</td>
+<td>3.3 V output</td>
+</tr>
+<tr>
+<td><code>J2</code></td>
+<td>2-pin header</td>
+<td>battery</td>
+</tr>
+<tr>
+<td><code>J3</code></td>
+<td>2-pin header</td>
+<td>solar panel</td>
+</tr>
+<tr>
+<td><code>SW1</code></td>
+<td>slide switch</td>
+<td>on/off</td>
+</tr>
+</tbody>
+</table>
+<p>Most of this board answers the first question. The four resistors, the three capacitors, the slide switch, and the three 2-pin headers all live in KiCad’s standard library, and you find them the way you have since Chapter 2: press “A,” type a few letters of what the part <em>is</em>, and confirm it in the preview before you place it. The transistor is there too. A <code>2N7002</code> sits in the <code>Device</code> library and pairs with a standard <code>SOT-23</code> footprint, so although it is surface-mount, it needs nothing imported.</p>
+<p>Three parts send us to the second question, and they are the three at the heart of the converter: the <code>AP3015A</code> boost chip, the two <code>SS14</code> Schottky diodes, and the <code>10 µH</code> inductor. KiCad does not carry these specific parts, so we fetch them from SnapEDA (snapeda.com, now branded SnapMagic), searching by the exact manufacturer part number (<code>AP3015AKTR-G1</code>, <code>SS14</code>, and <code>ASPI-0630LR-100M-T15</code> respectively) and downloading the KiCad package for each.</p>
+<p>SnapEDA is worth a word of explanation, because the choice is not arbitrary. KiCad’s built-in library does carry generic symbols for a Schottky diode or an inductor that might do for a rough prototype, but those generics give you neither the exact footprint for the specific manufacturer part nor a 3D model to check in the viewer. SnapEDA’s part pages show current stock levels and pricing from distributors alongside the download button, so one visit confirms that the part is actually obtainable before you commit it to your design. And each SnapEDA download bundles three things together: a <strong>symbol</strong> to wire on the schematic, a <strong>footprint</strong> matched to the real package, and a <strong>3D model</strong>, a little STEP file that shows the part’s true shape and height in space. You will not need the 3D model until late in the layout, when we open the 3D Viewer, but it rides along now inside the same download, so keep it with the rest. Save each part’s symbol, footprint, and STEP file together inside the project folder where the project can find them.</p>
+<p>The mechanics are the same ones Chapter 6 walked through, so here they are in brief, this time for the <code>AP3015AKTR-G1</code> boost converter. Type the part number into the search box (❶ in Figure 9.2) and pick the row from the right manufacturer, here Diodes Incorporated (❷); the “Data Available” icons (❸) confirm a symbol, footprint, and 3D model are all on offer. Open that part’s page and click “Download Symbol and Footprint” (Figure 9.3), choose KiCad from the list of CAD formats (Figure 9.4), and pick “V6 &amp; Later” to match a modern install (Figure 9.5). Repeat for the two <code>SS14</code> diodes and the <code>ASPI-0630LR-100M-T15</code> inductor.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-1-snapeda-search-dc-converter.png" style="width:100.0%" /></p>
+<p>Figure 9.2: Searching SnapMagic for the boost converter by its part number. Type <code>AP3015AKTR-G1</code> in the search box (❶) and choose the row from the right manufacturer, Diodes Incorporated (❷); the “Data Available” icons (❸) confirm a symbol, footprint, and 3D model are all on offer. (The site will look a little different by the time you read this.)</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-2-snapeda-download-symbol-footprint-step1.png" style="width:100.0%" /></p>
+<p>Figure 9.3: The part’s page previews its symbol and footprint before you commit. When they look right, click “Download Symbol and Footprint” (the button the arrow marks).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-3-snapeda-download-symbol-footprint-step2.png" style="width:65.0%" /></p>
+<p>Figure 9.4: SnapMagic offers the part in many CAD formats. Choose KiCad from the list (the arrow).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-4-snapeda-download-symbol-footprint-step3.png" style="width:45.0%" /></p>
+<p>Figure 9.5: Then pick the file version. Choose “V6 &amp; Later” (the arrow) for any modern KiCad install, and the symbol, footprint, and 3D model arrive together in one package.</p>
+<p>Do not skip the check Chapter 6 called the most important sentence in the chapter: lay the manufacturer’s recommended land pattern beside the footprint KiCad shows you and confirm the pad count, the pitch, and which pad is pin 1 before you trust it. This matters a little more here than it did on the breadboard supply, because almost every part on this board is surface-mount, and a surface-mount footprint leaves you no room to rescue a mirrored or miscounted pin by bending a leg. A minute of looking now saves an evening of chasing later.</p>
+<p>Finally, do the housekeeping that keeps a project healthy: copy the parts you are using into a project-local library, exactly as Chapter 6’s last section described, reached through the project-specific library table with a path built on <code>${KIPRJMOD}</code>. The imported converter, diodes, and inductor especially belong <em>inside</em> the project (Figure 9.6). The test is the same one you know: when you can zip the project folder, hand it to a friend with a fresh KiCad install, and have them open it whole, your parts are sourced. Now let’s draw.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-5-local-library-organisation.png" style="width:45.0%" /></p>
+<p>Figure 9.6: One tidy way to keep the imported parts inside the project. A <code>Libraries</code> folder holds <code>symbols</code>, <code>footprints</code>, and <code>3D-models</code> subfolders beside the project files, so the whole design travels as a single unit.</p>
+<h2 id="sec:c9-schematic">Drawing the Schematic</h2>
+<p>With the parts gathered, you are ready for the eight-step schematic workflow from Chapter 5. You know every move; I will name each step, give you the details particular to this board, and point you back to Chapter 2 for the mechanics. One thing is different on this project, though: because the board reproduces Clemens Valens’ design, you set the reference designators by hand to match his, rather than letting KiCad auto-annotate. Pinning each part to the designator it carries in the original, so your <code>R1</code> is his <code>R1</code>, lets you read his schematic straight onto yours, and once every part is named and valued the wiring is a direct trace from his drawing. Here is the schematic you are working toward (Figure 9.7); keep it beside you as your guide.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-5b-finished-schematic.png" style="width:100.0%" /></p>
+<p>Figure 9.7: The finished schematic for the tiny solar power supply, after Clemens Valens’ original. This is where the schematic half is headed: every part placed, named, valued, and wired, the three named nets (<code>SOLAR_P</code>, <code>BAT_P</code>, <code>OUT_P</code>) labelled, and plain-text notes beside the connectors and switch (the arrows mark <code>SOLAR</code>, <code>BATTERY</code>, <code>ON/OFF</code>, and <code>OUT</code>) so the sheet reads at a glance.</p>
+<p><strong>Step 1, create the project.</strong> Make a new project the way you did for the blinker and the breadboard supply, and give it a name without spaces. I am calling mine <code>klp5e-tiny-solar-supply</code> (Figure 9.8). Add your project-local libraries now, so the imported converter, diodes, and inductor are waiting in the chooser when you reach for them: open “Preferences → Manage Symbol Libraries…”, switch to the “Project Specific Libraries” tab, and add the three imported <code>.kicad_sym</code> files with paths built on <code>${KIPRJMOD}</code>, the substitution that always points at the project’s own folder (Figure 9.9). Do the matching thing for the footprints under “Manage Footprint Libraries…” (Figure 9.10). Then open the Schematic Editor onto its blank sheet.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-6-new-project-1.png" style="width:100.0%" /></p>
+<p>Figure 9.8: The new project in the KiCad project manager. The imported symbols, footprints, and 3D models sit in the <code>Libraries</code> folder beside the schematic and board files, all under one project.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-7-new-project-2-symbol-library-for-project.png" style="width:65.0%" /></p>
+<p>Figure 9.9: Adding the imported symbols on the “Project Specific Libraries” tab. Each library’s path is built on <code>${KIPRJMOD}</code>, shown at the foot of the dialog resolving to the project’s own folder, so the design carries its parts with it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-8-new-project-3-footprint-library-for-project.png" style="width:65.0%" /></p>
+<p>Figure 9.10: The same for footprints. A single project-specific <code>footprints</code> library, again on a <code>${KIPRJMOD}</code> path, holds the land patterns that rode along with the SnapEDA downloads.</p>
+<p><strong>Step 2, place the symbols.</strong> Press “A” and drop a symbol for each part: the converter, the inductor, and the two diodes from your imported library (Figure 9.11), then the four resistors, the three capacitors, the transistor, the slide switch, and the three headers from the standard library. Then press “P” and place your <code>GND</code> power symbols wherever ground belongs. The output rail and the two inputs earn names of their own as well, but those are net labels rather than power symbols, so you will add them when you wire the sheet in Step 5. When every symbol is down, the sheet looks like Figure 9.12: a loose scatter of parts, none yet wired.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-9-select-AP3015AKTR-G1-from-symbol-chooser.png" style="width:100.0%" /></p>
+<p>Figure 9.11: Finding a SnapEDA symbol in the chooser. The <code>AP3015AKTR-G1</code> sits in the project-local library added in Step 1, and the preview on the right confirms its five pins before placement. The arrows mark the “Add Symbol” tool on the toolbar (the “A” hotkey calls up the same dialog), the selected part, and the OK button that places it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-10-all-components-no-references-no-values.png" style="width:100.0%" /></p>
+<p>Figure 9.12: All symbols down, none yet wired. Every part is on the sheet with a question-mark designator and the generic value it was born with (<code>R</code>, <code>C</code>); the next step gives each one its real number and value from the original design.</p>
+<p><strong>Step 3, annotate to match the original.</strong> Because this board reproduces Clemens Valens’ design, you want your reference designators to match his part for part, so his <code>R1</code> is your <code>R1</code> and his schematic reads straight onto yours. That is the one job auto-annotation cannot do: it numbers parts by where they happen to sit on the sheet and pays no heed to anyone else’s scheme. So switch auto-annotation off and give each part the designator it carries in the original: double-click a part, or select it and press “E,” and type the designator into the “Reference” field. The “Annotate Schematic” tool from the “Tools” menu, the one you met on the blinker in Chapter 2, still works (Figure 9.13), but it would number the parts its own way and leave you renumbering by hand to match, so typing them in directly is simpler here. Work through every part (<code>U1</code>, <code>L1</code>, <code>D1</code>, <code>D2</code>, <code>Q1</code>, <code>R1</code> through <code>R4</code>, <code>C1</code> through <code>C3</code>, and the headers and switch) until a glance confirms no <code>R?</code> or <code>U?</code> is left.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-11-annotate-pane.png" style="width:65.0%" /></p>
+<p>Figure 9.13: The Annotate Schematic dialog. Left to itself it numbers parts by where they sit on the sheet, which is exactly what you do <em>not</em> want when matching someone else’s design — so here you set the designators by hand and leave this tool alone.</p>
+<p><strong>Step 4, set the component values.</strong> With each part named, give it its value while the designators are fresh, so the sheet becomes a precise drawing before a single wire is drawn. Double-click a part, or press “E,” and type the value into the “Value” field; or set them all at once in the Symbol Fields Table from the “Tools” menu (Figure 9.14), which lays every part’s value out in a grid and makes it easy to spot one you missed. Take each value straight from the original:</p>
+<ul>
+<li><strong><code>R1</code>: 1 MΩ, and <code>R2</code>: 604 kΩ, 1%.</strong> The feedback divider that sets the output to 3.3 V; the converter compares their ratio against its internal reference.</li>
+<li><strong><code>R3</code>: 10 kΩ, and <code>R4</code>: 1 MΩ.</strong> The bias pair that lets <code>Q1</code> read the panel’s voltage and drive the converter’s shutdown pin.</li>
+<li><strong><code>C1</code>: 4.7 µF, 50 V, and <code>C3</code>: 10 pF, 50 V.</strong> The small ceramics that steady the input and output.</li>
+<li><strong><code>C2</code>: 22 µF, 10 V.</strong> The larger reservoir capacitor.</li>
+<li><strong><code>L1</code>: 10 µH.</strong> The boost inductor, the <code>ASPI-0630LR-100M</code> you imported.</li>
+</ul>
+<p>The semiconductors carry their part numbers rather than a plain value: <code>U1</code> is the AP3015A, <code>D1</code> and <code>D2</code> the SS14, and <code>Q1</code> the 2N7002, each already named by the symbol you placed, so there is nothing to set on those. With every passive valued, the sheet reads as a precise shopping list, ready to wire (Figure 9.15).</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-11b-symbol-fields-table.png" style="width:100.0%" /></p>
+<p>Figure 9.14: The Symbol Fields Table after every value is set (the boxed <code>Reference</code>, <code>Qty</code>, and <code>Value</code> columns). Filling the grid in one place makes it easy to confirm no part was left with its generic value before you start wiring.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-12-all-components-references-values.png" style="width:100.0%" /></p>
+<p>Figure 9.15: Every part now carries the original design’s reference designator and its value, while the sheet is still unwired. Matching Valens’ numbers and values here makes the last job, wiring, a direct read from his schematic.</p>
+<p><strong>Step 5, wire and label.</strong> Connect the circuit following Figure 9.7, using the wiring moves from Chapter 2: “W” to draw, “G” to drag a part without breaking its wires, and the small square at a pin vanishing to tell you a join has taken. Because every part is already named and valued, you are simply tracing Valens’ connections onto a finished-looking sheet. Work across the whole circuit; when the last wire is in, the sheet matches Figure 9.16, fully connected with its <code>GND</code> and <code>PWR_FLAG</code> symbols placed, though the three named nets still wait for their labels.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-13-wired-no-nets-no-labels.png" style="width:100.0%" /></p>
+<p>Figure 9.16: The circuit fully wired, with the <code>GND</code> and <code>PWR_FLAG</code> symbols in place. The three named nets, <code>SOLAR_P</code>, <code>BAT_P</code>, and <code>OUT_P</code>, are not labelled yet; that is the next move.</p>
+<p>This board is busier than the breadboard supply, and a few wires have to cross one another without joining. KiCad 10 has a tidy new feature that keeps those crossings honest, called ‘hop-over.’ Open “Schematic Setup” from the “File” menu, choose “Formatting,” and under “Connections” set “Hop-over size” to “Small” (Figure 9.17). From now on, wherever one wire passes over another without connecting, KiCad draws a little hop in the upper wire, the way a footbridge steps over a path. A crossing with a hop is two separate nets; a crossing with a solid junction dot is a join. With the hops switched on you can read a dense sheet without second-guessing a single intersection.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-13b-hop-over.png" style="width:100.0%" /></p>
+<p>Figure 9.17: Turning on ‘hop-over’ in “Schematic Setup,” under “Formatting.” With “Hop-over size” set to “Small,” a wire that crosses another without joining shows a small hop, so a crossing is never mistaken for a connection.</p>
+<p>Three nets earn names, so give them labels with the “L” hotkey, which opens the Label Properties box: pick the label tool (❶ in Figure 9.18), type the net’s name such as <code>OUT_P</code> (❷), and click OK (❸) to drop it on the wire. Name <code>SOLAR_P</code> for the panel input at <code>J3</code>, <code>BAT_P</code> for the battery at <code>J2</code>, and <code>OUT_P</code> for the regulated output that feeds <code>J1</code>. Everything else ties together by being wired directly or by sharing a <code>GND</code> symbol, so you need not drag long wires across the sheet. Two more small badges go on now: place a <code>PWR_FLAG</code> where power enters the board and a second <code>PWR_FLAG</code> on the <code>GND</code> net, pressing “P” and searching for <code>PWR_FLAG</code> just as you would for any power symbol. What these two do, and why the design needs them, is the subject of the very next section; for now, place them and move on.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-14-create-out_p-net.png" style="width:100.0%" /></p>
+<p>Figure 9.18: Creating a net label. The label tool (❶) opens the Label Properties box; type the net’s name (❷), here <code>OUT_P</code>, and click OK (❸) to attach it to the wire. A label joins every wire that carries the same name, wherever it sits on the sheet, so naming a net is the same as wiring all its parts together.</p>
+<p>Before you wire <code>Q1</code>, let me explain it, because it is the one part of this circuit a beginner would never guess at and the reason the supply is more than a plain booster (Figure 9.19). The job is subtle: in bright daylight, when the panel has plenty to give, the battery should simply charge and the converter should rest, so it wastes nothing. When the panel falls dark, the converter should wake up and boost the battery’s charge up to 3.3 volts so the output keeps flowing. <code>Q1</code>, with the bias resistors <code>R3</code> and <code>R4</code>, is what makes that decision by itself. It senses the panel’s voltage and drives the converter’s shutdown pin: while the sun is up it holds the converter off, and as the panel fades it lets the converter run. Diode <code>D2</code> plays its own quiet part here, blocking current from leaking back out of the battery into the panel at night. You wire it once and the board manages day and night on its own, with no microcontroller and no firmware. The output voltage itself is set by the divider of <code>R1</code> and <code>R2</code>, whose ratio the converter compares against its internal reference to settle on very nearly 3.3 volts.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-13b-2N7002-closeup.png" style="width:65.0%" /></p>
+<p>Figure 9.19: The clever heart of the board. <code>Q1</code> reads the panel’s voltage through <code>R3</code> and <code>R4</code> and switches the converter off in daylight and on in the dark, with no firmware at all. Note too the small hop where one wire crosses another without joining, the hop-over you turned on a moment ago.</p>
+<p>With the wiring done and the three nets named, the sheet is electrically complete (Figure 9.20). Two finishing touches now make it easy for anyone to read, including a future you. First, drop a few plain-text notes beside the connectors and switch with the text tool (“T”): <code>SOLAR</code> at <code>J3</code>, <code>BATTERY</code> at <code>J2</code>, <code>ON/OFF</code> at <code>SW1</code>, and <code>OUT</code> at <code>J1</code>. These are tied to no net and change nothing electrically, but they say at a glance what each port is for, as you saw on the finished sheet in Figure 9.7. Second, fill in the sheet’s title block. Open “Page Settings” from the “File” menu and set the title, a revision, and a line or two of comment (Figure 9.21); it is only right to credit the original here, so mine reads “Designed by Clemens Valens for Elektor,” with a note that it is used with permission. KiCad prints what you type into the corner of the sheet (Figure 9.22), so the schematic carries its own provenance wherever it travels.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-15-nets-created.png" style="width:100.0%" /></p>
+<p>Figure 9.20: The schematic wired and its three nets named, <code>SOLAR_P</code>, <code>BAT_P</code>, and <code>OUT_P</code> (the arrows mark them). Because annotation and values were done in Steps 3 and 4, the wiring and these labels are all that is new on this sheet.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-19-Sheet-comments-1.png" style="width:100.0%" /></p>
+<p>Figure 9.21: The Page Settings dialog, where the sheet’s title block is filled in. A title, a revision, and a comment crediting Clemens Valens and Elektor turn an anonymous drawing into one that says where it came from.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-20-Sheet-comments-2.png" style="width:65.0%" /></p>
+<p>Figure 9.22: The title block as KiCad prints it in the corner of the sheet, carrying the title, the date, the revision, and the credit you typed.</p>
+<p><strong>Step 6, assign footprints.</strong> Open “Assign Footprints” from the “Tools” menu and pair each symbol with a physical part (Figure 9.23). The through-hole parts use the same friendly families you met on the breadboard supply:</p>
+<ul>
+<li><strong><code>R1</code> to <code>R4</code>:</strong> an axial through-hole resistor footprint (any of the <code>R_Axial_...</code> family);</li>
+<li><strong><code>C1</code>, <code>C3</code>:</strong> a small through-hole ceramic footprint (<code>C_Disc_...</code>);</li>
+<li><strong><code>C2</code>:</strong> a radial through-hole footprint for the larger value (<code>CP_Radial_...</code>);</li>
+<li><strong><code>J1</code>, <code>J2</code>, <code>J3</code>:</strong> 2-pin pin-header footprints (<code>PinHeader_1x02_...</code>);</li>
+<li><strong><code>SW1</code>:</strong> a through-hole slide-switch footprint.</li>
+</ul>
+<p>The four surface-mount parts are the reason you did the sourcing work first. Give <code>U1</code>, <code>L1</code>, <code>D1</code>, and <code>D2</code> the imported footprints you already checked against their datasheets, and give <code>Q1</code> the standard <code>SOT-23</code>.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-20b-footprint-associations.png" style="width:100.0%" /></p>
+<p>Figure 9.23: The Footprint Assignment tool, opened with the toolbar button (❶). Its three panes show the footprint libraries (❹), the symbol-to-footprint assignments in the middle (❸), and the footprints available in the selected library (❺), with the filter toggles (❷) to narrow that list. The through-hole parts take standard library footprints; the four imported parts (<code>U1</code>, <code>L1</code>, <code>D1</code>, <code>D2</code>) take the footprints that rode along with their SnapEDA downloads. Commit with “Apply, Save Schematic &amp; Continue” (❻) or OK (❼).</p>
+<p>Now open the Symbol Fields Table from the “Tools” menu, scroll right to the <strong>Datasheet</strong> column, and check the entry for each SnapEDA component. SnapEDA downloads sometimes leave the <code>Datasheet</code> field blank or fill it with only the part number string rather than a URL. If that is the case, fill it now. A datasheet can be had from many places, and the manufacturer’s own website is always the authority; but because you fetched the symbol and footprint from SnapEDA already, its part page is the convenient source. The page carries a “See Datasheet PDF” link straight to the manufacturer’s document, and the part page’s own web address serves perfectly well as the URL you paste into the field (Figure 9.24). Do this for <code>U1</code> (AP3015AKTR-G1, manufacturer Diodes Inc.), <code>D1</code> and <code>D2</code> (SS14, manufacturer Taiwan Semiconductor), and <code>L1</code> (ASPI-0630LR-100M-T15, manufacturer Abracon); each takes the SnapEDA address for its own part (Figure 9.25). The <code>Q1</code> (2N7002) built-in symbol already carries the OnSemi datasheet URL, so no action is needed there. A live URL in every <code>Datasheet</code> field pays off at BOM export time: KiCad can include a direct link to the spec sheet alongside each reference designator, so whoever picks or builds the board can reach the data without a search.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-20e-datasheet-source-snapeda.png" style="width:100.0%" /></p>
+<p>Figure 9.24: The component’s SnapEDA page is a ready datasheet source, since you are already there for the symbol and footprint. The “See Datasheet PDF” link on the left opens the manufacturer’s document, and the page’s own web address, shown in the browser bar, is what we copy into the <code>Datasheet</code> field.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-20d-datasheet-symbol-properties-example.png" style="width:65.0%" /></p>
+<p>Figure 9.25: The <code>Datasheet</code> field filled in for <code>U1</code>, the imported AP3015AKTR-G1, holding the part’s SnapEDA address. A real URL here rather than a blank or a bare part number string makes the BOM genuinely self-documenting.</p>
+<p>When every symbol has a footprint and the datasheet fields are populated, the parts side of the schematic is finished. Save your work with “Ctrl+S.” The next step is the Electrical Rules Check, and it is worth running slowly here, because this board is the one that shows you what the check is really for.</p>
+<h2 id="sec:c9-defect">Finding and Fixing a Design Defect</h2>
+<p>Run the Electrical Rules Check the way you learned in Chapter 2: open it from the “Inspect” menu and click “Run ERC.” This time the report comes back clean, with zero errors (Figure 9.26). That is not luck. It is the two <code>PWR_FLAG</code> badges you placed while wiring, doing their quiet job. A <code>PWR_FLAG</code> tells the ERC, on your honour, that real power enters the design at the net it sits on. Power reaches this board through connectors, the solar panel at <code>J3</code> and the battery at <code>J2</code>, and a connector’s pins look passive to KiCad, so without a little help the checker cannot tell that power truly arrives there. The flag on the incoming supply is that help, and a second flag sits on the <code>GND</code> net.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-20c-ERC-clear.png" style="width:65.0%" /></p>
+<p>Figure 9.26: With both <code>PWR_FLAG</code>s in place, the Electrical Rules Check comes back clean: zero violations, with only the handful of tests KiCad ignores by default set aside.</p>
+<p>A clean report is the goal, but it is worth understanding <em>why</em> those flags are needed, because that understanding is the part you carry to the next board. The surest way to understand a check is to watch it fail, so let us break the design on purpose. Find the <code>PWR_FLAG</code> on the <code>GND</code> net, delete it, and run the ERC again. Now the checker complains (Figure 9.27): “Input Power pin not driven by any Output Power pins,” with a marker dropped on the ground net.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-21-trigger-pwr-flag-error.png" style="width:65.0%" /></p>
+<p>Figure 9.27: Remove the <code>GND</code> flag and the complaint appears: “Input Power pin not driven by any Output Power pins” (boxed in the report), with a violation marker dropped on the <code>GND</code> symbol in the schematic behind it (the arrow).</p>
+<p>Why should deleting one small badge cause that? The answer is in how KiCad classifies every pin. Double-click the converter, <code>U1</code>, to open its symbol properties, and choose the “Pin Functions” tab (Figure 9.28). Each pin has an “Electrical Type,” and pin 2, <code>GND</code>, is set to “Power input.” The single pin on every <code>GND</code> power symbol is a power input too. KiCad’s rule is simple: any net carrying power-input pins must also carry something that promises power is genuinely delivered to it, either a pin set to “Power output,” or a <code>PWR_FLAG</code> standing in for one. While the <code>GND</code> flag was in place, it satisfied that rule. With it gone, the <code>GND</code> net is full of power inputs and nothing vouches that power reaches them, so the checker stops and points.</p>
+
+<p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-22-pwr-flag-error-source.png" style="width:65.0%" /></p>
+<p>Figure 9.28: The root of the complaint. In <code>U1</code>’s “Pin Functions” tab, the <code>GND</code> pin (pin 2) is typed “Power input” (boxed), and a net full of power inputs needs something to vouch that power truly arrives.</p>
+<p>The fix is to put the badge back. Place a <code>PWR_FLAG</code> on the <code>GND</code> net again, press “P” and search for <code>PWR_FLAG</code> as before, then run the ERC once more. The error clears and the report is clean again, exactly as it was in Figure 9.26.</p>
+<p>Notice what you never had to flag. The <code>OUT_P</code> rail carries no power-input pins clamouring to be driven, so the checker never asks you to vouch for it: the converter produces that rail, and the passive parts around it simply draw on it. A <code>PWR_FLAG</code> belongs only where power enters through something the checker sees as passive, a connector or a battery, or on a shared net like <code>GND</code> that has no driving source of its own. It never belongs on a rail an actual chip is producing. This is the same skill Chapter 8 first named: read every line the checker shows you rather than chase an empty report blindly. Knowing which complaints are real, and which would only be noise, is most of what makes the ERC worth running.</p>
+<p>With the schematic drawn, named, footprinted, and genuinely clean, complete the eighth and last schematic step: save once more, then choose “Update PCB from Schematic” from the “Tools” menu to carry the whole design across the one-way bridge into the PCB Editor. Time to make it physical.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>

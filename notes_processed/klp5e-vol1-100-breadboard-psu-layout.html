@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Breadboard PSU - Layout — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
+<h1 class="note-title">Breadboard PSU - Layout</h1>
+<h2 id="sec:c8-layout">Laying Out the Board</h2>
+<p>You are on the eight-step layout workflow from Chapter 5 now, and once again you know every move from the blinker in Chapter 3. I will name each step, flag what is special about laying out a power board, and trust you with the mechanics. This board, though, has something the blinker did not: it has to fit a real piece of hardware, the breadboard it will power, and that breadboard decides its shape.</p>
+<p>So look at the breadboard before you draw the board. Figure 8.12 shows the one this supply is made for. A power rail runs down each long side, a row of holes marked <code>+</code> beside a row marked <code>−</code>, the two rows a tidy 2.54 mm apart, and feeding those rails is your board’s whole job at this end. Rather than perch the supply on top of the breadboard, where it would bury the very holes you want to build on, you will stand it flush alongside one end and carry the power across in short jumper wires. Its output is a plain two-pin header, <code>J2</code>: two short jumpers take <code>+5V</code> and <code>GND</code> from it into the first <code>+</code> and <code>−</code> holes of the near rail, and a second pair carries them across to the rail on the far side, so the whole breadboard comes alive from one small connector while every working hole stays clear.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/ch08-psu-layout-breadboard_mini.JPEG" style="width:45.0%" /></p>
+<p>Figure 8.12: The breadboard this supply is built for. The <code>+</code> and <code>−</code> rails on each side sit 2.54 mm apart (marked). The supply stands beside the breadboard and feeds the near rail with short jumper wires from its two-pin output header; another pair feeds the rail on the far side.</p>
+<p>That settles how the board meets the breadboard, and it points straight at a shape: a tall, narrow rectangle that stands on its own beside one end of the breadboard, as tall as the breadboard is wide so a header at the top can reach the near rail and, later, one at the bottom can reach the far rail. Standing it alongside rather than on top keeps the USB-C cable out in clear air and leaves every hole on the breadboard open. Before you open the editor, sketch it. Five minutes with a pencil, deciding which part lives at which edge and how the power threads from the connector to the output, saves a long session of shoving parts around the canvas wondering where they belong. Figure 8.13 is exactly that kind of plan: the board drawn on paper, every major part given a home before a single footprint is placed.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/ch08_psu-layout-sketch_v10.png" /></p>
+<p>Figure 8.13: Plan the layout on paper first. The board stands beside the breadboard’s left end: the USB-C receptacle <code>J1</code> takes the left edge, opening out; the two-pin output header <code>J2</code> sits at the top-right corner, pins pointing up, a short jumper-hop from the first holes of the top power rail; the slide switch <code>SW1</code> and the indicator LED <code>D1</code> go where a thumb and an eye can reach them; and the power runs in a spine from the connector through the fuse and switch to <code>J2</code>. A second pair of jumpers carries <code>+5V</code> and <code>GND</code> to the far rail, with room at the bottom-right for a future second header, <code>J3</code>.</p>
+<p>Treat this sketch as a starting point, not a contract. Its job is to settle the big decisions — which part lives at which edge, and how the power threads from the connector to the output — before you wrestle with the canvas, and those rarely change. The finer placement almost always does. Once you are in the PCB Editor with the real footprints and the ratsnest in front of you, you will nudge parts to shorten a track or clear a courtyard, and the board will drift a little from the pencil drawing. On this one, for instance, I expect the real footprints to pack tighter than the pencil plan reserves room for, so once they are placed I will pull any unused board edge back in — trimming the height, and later the width — to end up with a smaller, cheaper board than the full-size sketch implies. The sketch gets you to a plan you trust; KiCad is where you tighten it.</p>
+<p>Here is the finished board that plan becomes (Figure 8.14).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-25b-final_outline_reduced_width_rounded_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.14: The finished layout for the breadboard power supply. This is where the layout half is headed: the USB-C receptacle <code>J1</code> hard against the left edge, the output header <code>J2</code> at the top-right corner, the power spine drawn wide, a <code>GND</code> pour on the back copper, rounded corners, and the <code>BB-PSU v1.0</code> silkscreen. We will build it in eight steps and return to this view at the end.</p>
+<p><strong>Step 1, import.</strong> If the handoff at the end of the last section worked, the PCB Editor is already open with your parts on the canvas. If not, bring them across now: click the <strong>Update PCB from Schematic</strong> button on the top toolbar (❶ in Figure 8.15), or press “F8.” KiCad opens the update dialog and lists everything it is about to add; check that it reports no warnings and no errors (❶ in Figure 8.16), then click <strong>Update PCB</strong> (❷). What lands is the same loose clump you met on the blinker — the footprints sitting on top of one another and laced with the ratsnest, KiCad’s to-do list of connections still to make (Figure 8.17). A two-layer board is right for this design, just as it was for the blinker, so the defaults need no change.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-1-import-nets_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.15: Start the layout by importing the schematic. ❶ marks the “Update PCB from Schematic” button on the top toolbar; pressing “F8” does the same thing.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-2-import-nets_v10.png" style="width:65.0%" /></p>
+<p>Figure 8.16: The update dialog lists every footprint it will add. Confirm it reports no warnings and no errors (❶) before you click “Update PCB” (❷).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-3-imported-bundle_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.17: The parts arrive clumped together and laced with the ratsnest — exactly what a fresh import looks like, just as on the blinker.</p>
+<p><strong>Step 2, the board outline.</strong> Switch the active layer to <code>Edge.Cuts</code> (❶ and ❷ in Figure 8.18) and draw a rectangle that comfortably surrounds the parts, the same way you did in Chapter 3. Switch to a 1 mm grid first so the edges land on round millimetres; KiCad shows the rectangle’s width and height as you drag (❸ and ❹), so you can read the size off straight away. Let the sketch from Figure 8.13 set it: make it about 55 mm tall, the same as the breadboard is wide from the top rail to the bottom one, so the header at the top reaches the near rail and a future header at the bottom could reach the far rail; the width only needs to fit the parts, so keep it narrow and the board takes little room beside the breadboard. You can always drag an edge later — wider if the parts feel cramped, or in to shed space they do not use, as we will do in a moment.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-4-draw_outline_edge_cuts_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.18: Draw the board outline on <code>Edge.Cuts</code>. Set the layer (❶) and pick it in the Layers panel (❷); the width and height readouts (❸, ❹) let you size the rectangle as you drag — a tall, narrow shape here, on a 1 mm grid.</p>
+<p><strong>Step 3, place the components.</strong> This is where a power board asks for a little more thought than the blinker did, because two of its parts have to meet the outside world in particular places, and you already settled both when you sketched Figure 8.13.</p>
+<p>Begin with the output header <code>J2</code>, because the breadboard fixes where it must sit. Switch to a 0.254 mm grid now for finer positioning (❷ in Figure 8.19); it lines up with the pitch of the breadboard’s power rails, so <code>J2</code> can land exactly where a pair of jumpers will reach. Put it at the top-right corner with its pins pointing up, so a pair of female jumper wires can drop onto it and run the short hop into the first <code>+</code> and <code>−</code> holes of the breadboard’s top rail. Two moves are worth meeting here, because both earn their keep on every board from now on. The first is the <strong>ruler</strong>, KiCad’s measuring tool: pick it from the right-hand toolbar and drag it across a gap to read the distance without changing anything on the board (❸), a quick way to confirm a clearance or a hop is what you think it is. The second is <strong>locking</strong>: once <code>J2</code> is exactly where you want it, right-click it and choose “Lock,” and a later stray drag can no longer nudge your one carefully placed part out of position. A small padlock then marks it as fixed.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-5-placement_of_J2_and_measurement_locked_v10.png" style="width:85.0%" /></p>
+<p>Figure 8.19: Place the output header <code>J2</code> at the top-right corner on the 0.254 mm grid (❷). The ruler tool measures a distance without altering the board (❸) — here confirming the hop to the rail — and <code>J2</code> is then locked so it cannot be nudged later.</p>
+<p>The USB-C receptacle must sit right at the edge of the board with its opening facing outward, so a cable can actually plug into it; a connector stranded in the middle of the board is useless. Place <code>J1</code> hard against the left edge, opening pointing out, lining its “PCB Edge” mark up with the board’s edge (Figure 8.20). Leave this one unlocked for now, since you may still nudge it as the rest of the board falls into place.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-6-placement_of_J1_middle_of_left_edge_not_locked_v10.png" style="width:65.0%" /></p>
+<p>Figure 8.20: The receptacle <code>J1</code> placed against the left edge with its opening facing out, its “PCB Edge” mark aligned to the board edge. <code>J2</code> is already fixed at the top-right; the rest of the parts wait in a clump, still laced by the ratsnest.</p>
+<p>Then arrange the rest as Chapter 3 taught, watching the ratsnest go short and untangled as you nudge parts, and keeping courtyards from overlapping. Put the switch where your thumb can reach it and the LED where you will see it. Add a mounting hole or two near the corners if you would like to bolt the board down, the same <code>MountingHole_3.2mm_M3</code> you used before.</p>
+<p>When every part is placed, step back and look at the board as a whole (Figure 8.21). On my first pass the parts packed into the top of the board and left a stretch of empty copper below them — the “wasted space” the figure marks. The sketch had reserved that lower end for a second header, <code>J3</code>, to feed the breadboard’s far rail directly, but the parts plainly did not need the room, and an emptier board is a bigger, costlier board for nothing. So I dragged the bottom edge up to meet the parts, ending with the shorter, tidier board in Figure 8.22. This contradicts the full-height sketch on purpose, and the trade is yours to make either way: keep the full height if you want to fit that second header later, or trim it as I did for the smallest, cheapest board. I prefer the efficient use of space, so the rest of this chapter continues with the trimmed board, and feeding the far rail stays an exercise — a second pair of jumpers from <code>J2</code> carries <code>+5V</code> and <code>GND</code> across just as well.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-7-placement_of_components_full_height_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.21: All parts placed, but at the board’s full height the lower third is empty — the “wasted space” marked here. The sketch had kept that room for a future header; the real parts did not need it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-8-adjusted_board_half_height_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.22: The same board after dragging the bottom edge up to meet the parts. A smaller, cheaper board, at the cost of the bottom-rail header — a trade you can decline by keeping the full height instead.</p>
+<p><strong>Step 4, route the tracks.</strong> Route as you did on the blinker — press “X,” set your layer and track width, and turn each ratsnest line into copper, dropping a via with “V” where two tracks need to cross on a two-layer board — but this board adds one wrinkle worth a moment’s setup. The blinker used a single 0.4 mm width for everything, and that is fine for the small currents a breadboard draws. Here, though, the path that carries all the current, from the connector through the fuse and the switch to the <code>+5V</code> rail and back along ground, is worth drawing a little wider than the signal tracks, say 0.8 mm. It costs nothing, and a fatter power track is simply sturdier. To route with two widths, define them both up front so they are waiting in the track-width dropdown. Open “File” then “Board Setup,” go to “Design Rules” then “Pre-defined Sizes,” and add 0.4 mm and 0.8 mm as track widths (Figure 8.23). They now appear in the dropdown above the canvas, ready to pick as you route.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-9-set_custom_track_widths_v10.png" style="width:65.0%" /></p>
+<p>Figure 8.23: Define the track widths you will use before you route. In “Board Setup” under “Design Rules” then “Pre-defined Sizes,” add 0.4 mm and 0.8 mm; both then appear in the track-width dropdown above the canvas.</p>
+<p>With the widths defined, route the power spine first. Pick 0.8 mm from the dropdown (❶ in Figure 8.24) and, on <code>F.Cu</code> (❷), draw the wide path from the connector through the fuse and switch to the <code>+5V</code> rail and back along ground. Then switch the dropdown back to 0.4 mm and route everything else (Figure 8.25), dropping a via with “V” wherever two tracks must cross. Keep going until the status line at the bottom-left reads “Unrouted: 0.”</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-10-route_5V_tracks_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.24: Route the power spine first, wide. With 0.8 mm picked in the dropdown (❶) and <code>F.Cu</code> active (❷), the current-carrying path is drawn as the fat copper run.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-11-route_rest_fcu_tracks_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.25: Switch back to 0.4 mm and route the remaining signal tracks. The narrower copper fills in around the wide power spine until nothing is left unrouted.</p>
+<p><strong>Step 5, add copper fills.</strong> Pour a ground plane on the back copper, just as in Chapter 3. Make <code>B.Cu</code> active and draw a filled zone around the board; when you close the shape, the Copper Zone Properties dialog opens, where you set its net to <code>GND</code> (Figure 8.26). At first the zone is just an outline (Figure 8.27); press “B” and KiCad floods it with copper, tying every <code>GND</code> pad into the plane through the small spoke-shaped “thermal reliefs” that keep those joints easy to solder (Figure 8.28). A ground pour is good practice on nearly every board, and a power supply is no exception; it gives every grounded part a short, solid path back to the connector.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-12-GND_pour_start_v10.png" style="width:85.0%" /></p>
+<p>Figure 8.26: Start the pour on the back copper. With <code>B.Cu</code> active (❶), draw the zone, then set its net to <code>GND</code> in the Copper Zone Properties dialog (❸) and click OK (❹).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-13-GND_pour_finish_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.27: Straight after you draw it, the zone is only a boundary — its filled area is still zero. Nothing is poured until you fill it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-14-GND_pour_filled_v1_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.28: Press “B” and the zone floods with copper. Each <code>GND</code> pad ties into the plane through thermal-relief spokes — the <code>J2</code> pad here joins on two spokes, another on four — and the corners are softened by the zone’s chamfer setting.</p>
+<p>A pour is not frozen once it is made. Double-click it to reopen its properties and change its geometry like any other object — here I tightened the clearance, set a wider thermal-spoke width, and changed the corner smoothing (Figure 8.29). That is enough to alter how each pad ties in: after the change, the <code>J2</code> <code>GND</code> pad joins the plane on three spokes instead of two. The one thing KiCad will not do is refill the zone for you, so keep the habit from Chapter 3: press “B” after any change to see the new fill before you check or export (Figure 8.30).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-15-GND_pour_resized_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.29: A pour can be edited after creation. Double-click it to reopen the Copper Zone Properties dialog and adjust the clearance and minimum width, the thermal-relief gap and spoke width, and the corner smoothing radius (boxed).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-16-GND_pour_filled_v2_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.30: After editing, press “B” again to refill. The new fill hugs the board more tightly, and the <code>J2</code> pad now ties in on three spokes — proof that the change took, and a reminder that a pour only updates when you ask it to.</p>
+<p><strong>Step 6, the design rules check.</strong> Run the DRC from the “Inspect” menu, leaving “Refill all zones before performing DRC” ticked so your pour is fresh when it checks. Click any violation to jump straight to it, fix it, and run again until the report is clean, exactly the loop you ran on the blinker. On my board the first run flagged two “unconnected items” — the receptacle’s metal shield, or mounting “stake,” pads were not yet tied into the <code>GND</code> net (Figure 8.31). That is a real fault, not a false alarm: those pads belong on ground, and it is an easy one to miss because the ratsnest lines hide under the pour. The fix is to route them, a short <code>GND</code> track from each shield pad into the plane (Figure 8.32). Run the check again and it comes back clean — zero violations and zero unconnected items (Figure 8.33). The DRC studies physical reality: copper too close to copper, a pad too near the edge, a courtyard overlap, a connection still missing. The surface-mount receptacle gives it a little more to look at than the all-through-hole blinker did, so read each line, fix it, and re-run until it comes back clean.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-17-DRC_1_with_errors_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.31: The first DRC run finds two unconnected items: the receptacle’s shield/stake pads (<code>SH</code>) are not yet joined to the <code>GND</code> net. The leaders point from the report to the offending pads on <code>J1</code>.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-18-DRC_fixing_errors_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.32: The fix is to route the missing connections — a short <code>GND</code> track from each shield pad into the surrounding pour, drawn here at 0.8 mm on <code>F.Cu</code>.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-19-DRC_2_no_errors_v10.png" style="width:100.0%" /></p>
+<p>Figure 8.33: Re-run the DRC and the report is clean: zero violations, zero unconnected items. The board is now physically correct.</p>
+<p><strong>Step 7, add text and silkscreen.</strong> Most of your silkscreen is already there, carried across as reference designators. Those designators often land larger than a small board wants, and you can restyle them all in one pass rather than one at a time: select the board, open “Edit” then “Edit Text and Graphic Properties,” scope the change to “Reference designators,” and set a single text width and height for the lot (Figure 8.34). Then add the board’s name and version by hand on <code>F.Silkscreen</code>, the way you signed the blinker; I am labelling mine <code>BB-PSU v1.0</code>. On this board there is one extra label worth printing, because a future you will be grateful for it: mark which output pin is <code>+5V</code> and which is <code>GND</code>, right beside the header. A power connector with no polarity printed on it is an invitation to wire your breadboard backwards, and a few letters of silkscreen prevent it. With the labels placed and sized, the silkscreen reads cleanly (Figure 8.35).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-20-Silkscreen_resize_references_v10.png" style="width:65.0%" /></p>
+<p>Figure 8.34: Restyle every reference designator at once with “Edit Text and Graphic Properties.” Scope the change to reference designators (❶), set one text width and height (❷), choose bold if you like (❸), then “Apply and Close” (❹).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-21-Silkscreen_complete_v10.png" style="width:65.0%" /></p>
+<p>Figure 8.35: The finished silkscreen: tidy reference designators, the board name and version <code>BB-PSU v1.0</code>, the <code>+5V</code> and <code>GND</code> labels beside <code>J2</code>, and <code>ON</code>/<code>OFF</code> beside the switch.</p>
+<p><strong>Step 8, generate the Gerbers.</strong> Before you export, open the “3D Viewer” from the “View” menu for the free sanity check Chapter 3 recommended. On this board it earns its keep twice over: check that the USB-C receptacle sits flush at the board edge with its opening clear (Figure 8.36), then flip the board over to confirm the <code>GND</code> pour covers the back as you expect (Figure 8.37). A part facing the wrong way is far cheaper to catch here than on real copper. One thing you will notice is missing from the render: the parts themselves. The viewer is showing the bare board and the flat footprint outlines because I did not attach 3-D models to these components. KiCad can also stand a full, realistic model of every part up on the board for a complete virtual prototype — the board <em>and</em> its components together — and you will add exactly that in the next project.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-22-3D_front_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.36: The 3D Viewer is your last sanity check. Confirm the connector sits flush at the edge before you spend a cent. The parts are drawn only as flat outlines here because no 3-D models were attached.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-23-3D_back_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.37: The back of the board in the 3D Viewer, showing the <code>GND</code> pour filling the bottom copper around the pads.</p>
+<p>The 3D view showed me two small things worth tidying before I committed the board, so I took a short detour — neither is essential, but both are cheap and easy. The first is cosmetic: square corners are sharp, so I rounded them. Select the four <code>Edge.Cuts</code> lines, right-click, and choose “Shape Modification” then “Fillet Lines” (Figure 8.38), then enter a radius — 2 mm here (Figure 8.39). The second is alignment: the board edge sat a hair wide of the USB-C receptacle, so I pulled that edge in to meet the connector, rather than move the connector itself, which would have dragged its traces along with it. The result is the rounded, trimmed outline you already saw in Figure 8.14, and re-checking it in the 3D Viewer confirms the connector now sits right at the edge (Figure 8.40).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-24-fillet_corners_outline_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.38: To round the board corners, select the <code>Edge.Cuts</code> lines, right-click, and choose “Shape Modification” then “Fillet Lines.”</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-25a-fillet_corners_radius_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.39: Enter the fillet radius — 2 mm here — and KiCad replaces each sharp corner with a smooth curve.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-26-final_outline_reduced_width_rounded_3D_v10.png" style="width:45.0%" /></p>
+<p>Figure 8.40: The finished board back in the 3D Viewer after rounding the corners and trimming the width so the edge meets the USB-C receptacle.</p>
+<p>When it looks right, plot the Gerber files from the “File” then “Plot” dialog, choosing the layers your fab needs (Edge.Cuts among them) and a folder to hold the output (Figure 8.41). Then click “Generate Drill Files” and write the drill file into the same folder (Figure 8.42), exactly as in Chapter 3. Your output folder now holds a board waiting to be made.</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-27-Generate_gerber_files_v10.png" style="width:85.0%" /></p>
+<p>Figure 8.41: Plot the Gerbers from the “File” then “Plot” dialog: tick the layers to include (❶, ❷), set the general options (❸), and the output messages confirm each file written (❺).</p>
+
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-28-Generate_drill_files_v10.png" style="width:85.0%" /></p>
+<p>Figure 8.42: From the same dialog, “Generate Drill Files” (❶) writes the drill file into the output folder (❷, ❸) alongside the Gerbers — the last file the fab needs.</p>
+<p>Take a moment with what you have just done. With no one telling you which button to press, you sourced every part for a real board, imported and verified the one the standard library did not have, drew and checked a complete schematic, met and understood the most common stumble in all of KiCad, and laid out a finished, manufacturable two-layer board. That is not a tour any more. That is you, designing.</p>
+<h2 id="sec:c8-going-deeper">Going Deeper: Reference Designs and Further Reading</h2>
+<p>This board is deliberately the simplest honest version of its idea, stripped to what a first project needs and no more. If it has whetted your appetite, here are three places I would send you to see the same idea drawn by other hands: the first if you want a fuller design to study, the next two if you want to really understand the USB-C trick at its heart. None of them is required reading. They are here for the curious.</p>
+<p><strong>The BrødBoost-C2, by Axiometa, is the closest cousin to our board, and it is open-source hardware with the full KiCad files published</strong>, so you can open the real schematic and layout and poke around inside them. It is built on exactly the foundation we used: a USB-C receptacle, the two 5.1 kΩ <code>CC</code> resistors, a resettable fuse of about an amp, an on/off switch, and a power LED. Where it goes further is the instructive part, because it adds the things we chose to leave off a first board: a small on-board regulator so it can also offer 3.3 volts, protection against static on the USB lines, and a reverse-polarity ‘ideal diode’ that shrugs off a backwards connection. Reading it is the best way to see what a more grown-up version of the board in your hands would add, and why. You will find it at <a href="https://hackaday.io/project/205468-axiometa-brdboost-c2-breadboard-power-supply" class="uri">https://hackaday.io/project/205468-axiometa-brdboost-c2-breadboard-power-supply</a>, with the design files at <a href="https://github.com/axiometa/axiometa_hardware" class="uri">https://github.com/axiometa/axiometa_hardware</a>.</p>
+<p><strong>Tyler Ward’s “Using USB Type-C on hobbyist projects” is the article I would hand anyone who wants to understand the two resistors.</strong> It is the piece much of the maker world first learned this from, and its minimal example is, near enough, our <code>J1</code>, <code>R1</code>, and <code>R2</code> and nothing else. It explains plainly why each <code>CC</code> pin needs its own 5.1 kΩ resistor to ground, and what a source will and will not offer a board that asks this way. Read it at <a href="https://www.scorpia.co.uk/2016/03/17/using-usb-type-c-on-hobyist-projects/" class="uri">https://www.scorpia.co.uk/2016/03/17/using-usb-type-c-on-hobyist-projects/</a>.</p>
+<p><strong>Hackaday’s “All About USB-C: Resistors and Emarkers” is the friendly deep dive.</strong> It walks through the same <code>CC</code>-resistor system we used and, more usefully, the ways it goes wrong, which is exactly the “stone dead board” trap I warned you about. It also explains why a board with a receptacle uses two resistors where a captive cable uses only one, and what lies beyond plain 5 volts if you ever want a board to negotiate for more. Find it at <a href="https://hackaday.com/2023/01/04/all-about-usb-c-resistors-and-emarkers/" class="uri">https://hackaday.com/2023/01/04/all-about-usb-c-resistors-and-emarkers/</a>.</p>
+<p>In the next chapter you build the second project of this volume, a tiny solar power supply. It is a gentle step up rather than a leap: you will meet 3D models and mounting holes properly, and source a part or two from outside the standard library again, with the same fifteen-step spine carrying you the whole way. For now, save your work, keep your Gerbers safe, and let’s go build the next one.</p>
+
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>
