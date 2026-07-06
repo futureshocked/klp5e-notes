@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Finding, Importing, and Managing Parts — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<title>Finding Importing and Managing Parts — KiCad Like a Pro, 5th Edition — Volume 1</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -114,11 +114,102 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
-<h1 class="note-title">Finding, Importing, and Managing Parts</h1>
+<h1 class="note-title">Finding Importing and Managing Parts</h1>
+
+<h1 id="finding-importing-and-managing-parts">Finding, Importing, and Managing Parts</h1>
 <p>In Chapter 2 you placed every symbol your blinker needed, and in Chapter 3 you gave each one a footprint, without once leaving KiCad or opening a web browser. That was not luck. I chose that circuit precisely so that every part lived in KiCad’s standard library, the large collection of symbols and footprints that ships with the program. Both tours leaned on that convenience and said almost nothing about it. This chapter is where we give it proper attention, because the day will come, probably sooner than you expect, when you reach for a part and KiCad does not have it.</p>
 <p>When that happens, you are not stuck. There is a clear path to follow, and walking it with confidence is one of the small skills that separates a smooth project from a stalled one. That path is what this chapter is about: where parts come from, how to bring a missing one into your design from a trustworthy source, and how to manage the parts you collect so a project still opens cleanly years from now. We are going to <em>use</em> libraries here, not build them; authoring a symbol or footprint from scratch is a craft of its own, and it waits for you in Volume 2.</p>
 <h2 id="the-sourcing-decision-tree">The sourcing decision tree</h2>
@@ -129,8 +220,7 @@
 
 
 <p><img src="/assets/klp5e-vol1/ch06/ch06_sourcing-tree_v10.png" /></p>
-<p>Figure 6.1: The sourcing decision tree. Ask the same three questions of every part: is it standard, is it available from a reliable source, and only then, must I make it myself?</p>
-<h2 id="sec:find-standard">Finding Parts in the Standard Library</h2>
+<p>Figure 6.1: The sourcing decision tree. Ask the same three questions of every part: is it standard, is it available from a reliable source, and only then, must I make it myself?  ## Finding Parts in the Standard Library {#sec:find-standard}</p>
 <p>Most of the time, stage one is the whole story, so let us make sure you can work it quickly. You already met the main tool in Chapter 2: the ‘symbol chooser,’ the window that opens when you press “A” or pick “Add Symbol” from the “Place” menu. It has a twin you have also used without dwelling on it, the ‘footprint chooser,’ which opens when you assign a footprint to a part. The two work the same way, and between them they cover both halves of a part (Figure 6.2). I will not repeat the full tour from Chapter 2 here; instead, let me give you the search habits that make the standard library feel small even though it is enormous.</p>
 <p>Search by what the part <em>is</em>, not by a guess at its exact name. Type a few letters and KiCad matches them against both the symbol’s name and its description, so <code>regulator</code> finds parts whose name never contains that word, and <code>usb c</code> finds the USB Type-C connectors even though their library names are more formal. When too many results come back, add a second word to narrow them; when too few come back, shorten what you typed, because you may be guessing at a name the library spells differently. The preview pane on the right is your confirmation step: never place a part you have not looked at, because two symbols with similar names can be wired very differently inside.</p>
 <p>It helps to know roughly what the standard library holds, so you can predict when stage one will succeed. The generic building blocks are all there and deep: resistors, capacitors, inductors, diodes, LEDs, transistors, and the like live in a library called <code>Device</code>, and you will return to it constantly. Connectors of every common kind, including USB, headers, and terminal blocks, fill the <code>Connector</code> libraries. Thousands of common integrated circuits have symbols, grouped into libraries by function (amplifiers, logic, microcontrollers, regulators, and so on). On the footprint side, the standard library is just as broad: the common through-hole and surface-mount packages are all present, named by their physical form (<code>SOT-23</code>, <code>DIP-8_W7.62mm</code>, <code>R_0805_2012Metric</code>, and so on) rather than by any one part that uses them. And here is a quiet convenience worth naming: most standard footprints arrive with a 3D model already attached, so when you open the 3D Viewer your board is populated for free, with no extra work on your part.</p>
@@ -205,6 +295,88 @@
 <p>Figure 6.12: Two homes for a part. Copy a part into the project (through the project-specific table) to make the design self-contained; keep the parts you reuse in a personal library (through the global table). Promote a part from the first to the second once it has earned its place.</p>
 <p>You now have the full sourcing skill: you can find a part in the standard library, import one from a reliable source when the standard library falls short, check that an imported footprint is honest, and store what you collect so a project stays whole for years. This is the missing piece both early tours quietly relied on, and from here it simply becomes part of how you work. In the next part of the book we put it to use on real boards, starting with a complete power-supply project where you will source every part with exactly these steps and copy them into the project as you go. And when, one day, you meet the part that no library has, you will already know what stage three asks of you, and Volume 2 will be waiting. Let’s go build something with the parts you can now find anywhere.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {

@@ -114,11 +114,102 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
 <h1 class="note-title">A Hands-On Tour: Schematic</h1>
+
+<h1 id="a-hands-on-tour-schematic">A Hands-On Tour: Schematic</h1>
 <p>Enough reading. In this chapter you will open the Schematic Editor and draw a real circuit, the same way you would on a paying job, only smaller. By the end you will have a finished, error-checked ‘schematic’ for a little blinking-LED board, ready to be turned into a real PCB in the next chapter. Think of this as a gentle, guided first lap. I will tell you exactly which button to click and why, and you will follow along. The deeper ideas behind what you are doing come later: Chapter 4 explains <em>why</em> it all works, and Chapter 5 turns these steps into a checklist you will reuse on every future project. For now, we act first and understand later.</p>
 <p>A quick word of reassurance before we start. The Schematic Editor is a fully featured, powerful tool, and it is where all PCB design begins. Professionals draw schematics with hundreds of parts spread across many sheets in this same editor. We are going to use a small, friendly slice of it today, and you will grow into the rest over the course of the book. So we will leave the advanced corners alone for now: multi-sheet and hierarchical designs, creating your own symbols and libraries, importing schematics from other tools, design blocks, the built-in simulator, and buses. KiCad’s official documentation covers every one of those in depth when you are ready. Today, we make something.</p>
 <p>Here is what we are building (Figure 2.1). It is a classic circuit: a 555 timer wired as an ‘astable multivibrator,’ which is a fancy way of saying it switches on and off all by itself, over and over. We use that steady on-off signal to flash an LED a couple of times a second. Press nothing, flip no switch; give it power and it blinks. It is the kind of circuit that has launched a million electronics hobbies, and it is the perfect size for a first tour: a handful of parts, a few connections, nothing exotic.</p>
@@ -133,8 +224,7 @@
 <li>an <strong>LED</strong>, the part that actually lights up;</li>
 <li>a <strong>2-pin connector</strong> where a battery plugs in (a 9 V block, or four AA cells, suits the 555 well).</li>
 </ul>
-<p>Don’t worry if you can’t yet read the circuit or work out the blink rate. That is electronics, not KiCad, and it is not what this chapter is about. Our job here is to learn the <em>editor</em>, by drawing this circuit step by step.</p>
-<h2 id="sec:c2-overview">The Schematic Workflow at a Glance</h2>
+<p>Don’t worry if you can’t yet read the circuit or work out the blink rate. That is electronics, not KiCad, and it is not what this chapter is about. Our job here is to learn the <em>editor</em>, by drawing this circuit step by step.  ## The Schematic Workflow at a Glance {#sec:c2-overview}</p>
 <p>Drawing a schematic in KiCad is not a free-for-all. There is a natural order to it, and following that order keeps you out of trouble. Throughout this book we will lean on the same eight steps, in the same sequence, for every schematic we draw. Here they are, so you have the whole map before we zoom in on any one part:</p>
 <ol type="1">
 <li><strong>Create the project and schematic.</strong> Make a home for your design and open the editor.</li>
@@ -159,8 +249,7 @@
 <p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-2-schematic-editor-empty.png" style="width:100.0%" /></p>
 <p>Figure 2.3: The Schematic Editor, ready for a new design. The numbered callouts mark the parts you will use today.</p>
 <p>Take ten seconds to get your bearings; we will explore the editor properly in Chapter 7, so a quick orientation is all you need now. Four areas are worth knowing, and they are numbered in Figure 2.3. The toolbar across the <strong>top</strong> (1) carries the everyday commands: save, undo, zoom, and the check tools you will meet later. The toolbar down the <strong>left</strong> edge (2) controls how things look: the grid, the measurement units, and the cursor. The tall toolbar down the <strong>right</strong> edge (3) holds the tools you use to build a circuit: add a symbol, draw a wire, place a label, and so on. Down in the bottom-right corner sits the title block (4), where a design records its name, date, and revision. Two movements will serve you for the whole tour. To <strong>pan</strong> around the sheet, press and hold the middle (or right) mouse button and drag. To <strong>zoom</strong>, roll the mouse wheel; the view zooms toward wherever the pointer sits. If you ever lose your drawing off the edge of the screen, press the “Home” key to fit everything back into view.</p>
-<p>One last thing worth knowing before we place a part: the canvas has a ‘grid,’ an invisible lattice that your parts and wires snap to. The standard schematic grid is 50 ‘mil’ (a mil is one-thousandth of an inch), and you should leave it alone. KiCad 10 reports the grid in millimetres down in the status bar, where you will see <code>grid 1.27 mm</code>; that is the same spacing, since 1.27 mm equals exactly 50 mil (Figure 2.3). The grid matters more than it looks: KiCad only treats two things as connected when their ends land on exactly the same point, and keeping everything on the grid is what makes that happen reliably. We will see why that is handy in Step 5.</p>
-<h3 id="step-2-place-symbols">Step 2: Place symbols</h3>
+<p>One last thing worth knowing before we place a part: the canvas has a ‘grid,’ an invisible lattice that your parts and wires snap to. The standard schematic grid is 50 ‘mil’ (a mil is one-thousandth of an inch), and you should leave it alone. KiCad 10 reports the grid in millimetres down in the status bar, where you will see <code>grid 1.27 mm</code>; that is the same spacing, since 1.27 mm equals exactly 50 mil (Figure 2.3). The grid matters more than it looks: KiCad only treats two things as connected when their ends land on exactly the same point, and keeping everything on the grid is what makes that happen reliably. We will see why that is handy in Step 5.  ### Step 2: Place symbols</p>
 <p>A schematic is built from ‘symbols.’ A symbol is a small drawing that stands for a real component: the zig-zag (or rectangle) of a resistor, the triangle-and-bar of an LED, the numbered box of a chip. Each symbol shows the part’s ‘pins,’ the points where wires attach. Our first real job is to drop a symbol onto the sheet for every part in the blinker.</p>
 <p>To add a symbol, press the “A” hotkey, or choose “Place Symbols” from the “Place” menu, or click the symbol button (the one that looks like an op-amp triangle) at the top of the right toolbar. The two arrows in Figure 2.4 point to the menu entry and the toolbar button; any of the three routes opens the ‘symbol chooser,’ the window you use to find a part and preview it before placing it (Figure 2.5).</p>
 
@@ -169,8 +258,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-4-find-ne555p-in-symbol-chooser.png" style="width:100.0%" /></p>
 <p>Figure 2.5: The symbol chooser, here searching for the 555 timer.</p>
-<p>The chooser packs a lot into one window, so let me point out the parts you will use (the numbers match the callouts in Figure 2.5). You search for a part by typing a few letters of its name in the search box (1); as you type, the list below narrows to symbols whose name or description matches. Click an item in the list, here <code>NE555P</code> (2), and it appears in the symbol preview pane (3) so you can confirm it is the part you want. The lower-right pane (4) previews a physical ‘footprint’ for the part, and the dropdown just above it (5) lets you choose which one; we will ignore footprints for now and pick them later, in Step 6, so leave that dropdown alone. When the part is the one you want, click “OK” (6). Two checkboxes sit along the bottom: leave “Place all units” ticked, and you can ignore “Place repeated copies” for now.</p>
-<p>Let’s place the 555 first, since it sits at the heart of the circuit. Type <code>NE555</code> in the search box, click the <code>NE555P</code> symbol so it shows in the preview, and click “OK” (or just double-click the part in the list). The window closes and the symbol is now glued to your mouse pointer. Move it to a roomy spot near the middle of the sheet and left-click once to drop it (Figure 2.6). Give it plenty of space; this chip has eight pins and you will be running several wires to it. Notice that the part arrives carrying the name <code>U?</code>: the letter tells you its family (a <code>U</code> is an integrated circuit), and the question mark is a placeholder for a number it does not have yet. We will deal with that in Step 3.</p>
+<p>The chooser packs a lot into one window, so let me point out the parts you will use (the numbers match the callouts in Figure 2.5). You search for a part by typing a few letters of its name in the search box (1); as you type, the list below narrows to symbols whose name or description matches. Click an item in the list, here <code>NE555P</code> (2), and it appears in the symbol preview pane (3) so you can confirm it is the part you want. The lower-right pane (4) previews a physical ‘footprint’ for the part, and the dropdown just above it (5) lets you choose which one; we will ignore footprints for now and pick them later, in Step 6, so leave that dropdown alone. When the part is the one you want, click “OK” (6). Two checkboxes sit along the bottom: leave “Place all units” ticked, and you can ignore “Place repeated copies” for now.  Let’s place the 555 first, since it sits at the heart of the circuit. Type <code>NE555</code> in the search box, click the <code>NE555P</code> symbol so it shows in the preview, and click “OK” (or just double-click the part in the list). The window closes and the symbol is now glued to your mouse pointer. Move it to a roomy spot near the middle of the sheet and left-click once to drop it (Figure 2.6). Give it plenty of space; this chip has eight pins and you will be running several wires to it. Notice that the part arrives carrying the name <code>U?</code>: the letter tells you its family (a <code>U</code> is an integrated circuit), and the question mark is a placeholder for a number it does not have yet. We will deal with that in Step 3.</p>
 
 <p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-5-ne555p-in-editor.png" style="width:65.0%" /></p>
 <p>Figure 2.6: The 555 placed near the middle of the sheet. Its name reads <code>U?</code>, and the status bar at the foot of the window echoes the part’s reference, value, and other details.</p>
@@ -316,6 +404,88 @@
 <p><strong>You can watch all of this happen.</strong> Everything described here (the capacitor climbing and draining, the output snapping between high and low) is just what a circuit simulator draws for you as a moving graph. KiCad has a built-in simulator, but it is a more advanced tool than this first tour needs, so we leave it for Volume 2. There we will come back to this very blinker, give the 555 a simulation model, and watch its waveforms on screen, a satisfying way to confirm with your own eyes that the timing capacitor really does swing between one-third and two-thirds of the supply.</p>
 <p>You have drawn a complete, checked schematic in the KiCad Schematic Editor, following the same eight steps you will use forever. Not bad for a first lap. In the next chapter we take this design into the PCB Editor and turn it into a real, manufacturable board. Let’s go make a board.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {

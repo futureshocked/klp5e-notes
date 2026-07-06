@@ -114,22 +114,114 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
 <h1 class="note-title">Getting Your Board Made</h1>
-<p>You have built two boards now, and twice you finished with the same thing: a folder of manufacturing files sitting quietly on your disk. That folder is a real board waiting to happen, but only waiting. In this chapter we stop designing and finally make something you can hold. You will produce your first ‘bill of materials,’ package and double-check the Gerbers you already know how to plot, learn the handful of things a factory needs from any board before it can build it, and then walk all the way through placing an order. By the end you will have sent a design out into the world and have boards on the way to your door.</p>
-<p>I will use the tiny solar power supply from Chapter 9 as the example throughout, because it is the freshest board in your hands and its folder of Gerbers is exactly the kind of thing we are about to send away. For the ordering walkthrough I will use NextPCB, which is the sponsor of this book and a service I have used happily for years. I want to be honest about that arrangement and equally honest about what it does not change: every step in this chapter is the same at any reputable online PCB manufacturer. You upload the same files, you choose from the same handful of options, and you read the same kind of quote back. NextPCB is the worked example, not a requirement. Learn the shape of the thing once here, and you can order a board anywhere. Let’s begin.</p>
-<h2 id="sec:c10-bom">Your First BOM</h2>
-<p>The first thing to make is a list of what the board is built from. It is called a ‘bill of materials,’ or ‘BOM’ for short, and it is exactly what the name says: every part the board needs, gathered up with its quantity. You will reach for it twice. The first time is for yourself, when you buy the components to solder onto the bare board once it arrives. The second is for the factory, in the case where you would rather not solder the small surface-mount parts by hand and ask the fab to assemble them for you, the option I mentioned back in Chapters 1, 8 and 9. When a fab assembles your board, the BOM is the shopping list it works from, so it pays to know how to produce one cleanly.</p>
-<p>KiCad builds the BOM straight from your schematic, because the schematic is where every part and its value already live. Open the Schematic Editor on the solar supply, then choose “Generate Bill of Materials…” from the “Tools” menu (Figure 10.1). This opens the “Symbol Fields Table,” a spreadsheet view of every symbol on the sheet, one part per row and one piece of information per column. The reason KiCad shows you this table rather than just dumping a file is that a BOM is rarely one fixed thing: different suppliers and different assembly services want the columns in a different order or under different names, and this is where you arrange them before you export.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
-<p>Figure 10.1: The Symbol Fields Table is where KiCad gathers every part on the schematic into a bill of materials.</p>
-<p>For this board you do not need to fuss with the columns at all. The four that matter are there by default: the reference designator, the value, the footprint, and the quantity. The one habit worth forming now is grouping. Pick the “Grouped By Value and Footprint” preset near the top, and KiCad folds identical parts onto a single line: the two <code>1 MΩ</code> resistors <code>R1</code> and <code>R4</code> collapse into one row with a quantity of two, and so on. A grouped list is what you actually buy from, because no supplier wants ten separate lines for ten identical resistors. With the table arranged, click “Export” at the bottom and KiCad writes a CSV file, a plain-text spreadsheet that opens in any tool you like, Excel, LibreOffice, Google Sheets, or even a text editor.</p>
+<h1 id="getting-your-board-made">Getting Your Board Made</h1>
+<p>You have built two boards now, and twice you finished with the same thing: a folder of manufacturing files sitting quietly on your disk. That folder is a real board waiting to happen, but only waiting. In this chapter we stop designing and finally make something you can hold. You will produce your first ‘bill of materials,’ package and double-check the Gerbers you already know how to plot, learn the handful of things a factory needs from any board before it can build it, and then walk all the way through placing an order. By the end you will have sent a design out into the world and have boards on the way to your door.</p>
+<p>One word before we start, because it shapes everything that follows. Getting a board ‘made’ can mean two different things, and it is worth being clear about which one we are doing. The first is <em>manufacturing</em> the bare board: the factory etches your copper, drills your holes, and finishes the surface, then ships you an empty PCB that you populate yourself with a soldering iron. The second is <em>assembly</em>, sometimes called turnkey: the factory also buys and solders the components on, and hands back a finished, working board. Volume 1 does the first only — every order in this chapter is for the bare PCB — and that keeps the list of what you must supply pleasantly short. A bare-board order needs just two things from you: the Gerber files and the drill file. It does <em>not</em> need a bill of materials, because the factory is not sourcing or placing any parts on your behalf. We will still make a BOM in a moment, because you need one yourself to buy the components you will solder, but keep in the back of your mind that on a Volume 1 order the manufacturer never sees it. Assembly, and the extra files it asks for, is a Volume 2 topic; I will point out where it would slot in as we pass it.</p>
+<p>I will use the breadboard power supply from Chapter 8 as the example throughout. It is the simpler of the two boards you built — nearly all through-hole, with a single surface-mount part — so it keeps our eyes on the ordering process itself rather than on the board. The solar supply from Chapter 9 orders in exactly the same way, step for step, so follow along with whichever board you would rather hold at the end; nothing in this chapter changes between them. For the ordering walkthrough I will use NextPCB, which is the sponsor of this book and a service I have used happily for years. I want to be honest about that arrangement and equally honest about what it does not change: every step in this chapter is the same at any reputable online PCB manufacturer. You upload the same files, you choose from the same handful of options, and you read the same kind of quote back. NextPCB is the worked example, not a requirement. Learn the shape of the thing once here, and you can order a board anywhere. Let’s begin.</p>
+<h2 id="sec:c10-bom">Exporting a BOM</h2>
+<p>The first thing to make is a list of what the board is built from. It is called a ‘bill of materials,’ or ‘BOM’ for short, and it is exactly what the name says: every part the board needs, gathered up with its quantity. You will reach for it twice. The first time is for yourself, when you buy the components to solder onto the bare board once it arrives. The second is for the factory, in the case where you would rather not solder the fiddliest part by hand — on this board that means the surface-mount USB-C connector — and ask the fab to place it for you, the option I mentioned back in Chapters 1, 8 and 9. When a fab assembles your board, the BOM is the shopping list it works from, so it pays to know how to produce one cleanly. For the bare-board orders in this volume it is the first use that applies: the factory you order from later in this chapter will never ask for this file. Make it anyway — it is the list you buy your own parts from, and when Volume 2 has a factory assemble a board for you, this is exactly the file it will want (you will see where it gets uploaded at the very end of the chapter, Figure 10.12).</p>
+<p>KiCad builds the BOM straight from your schematic, because the schematic is where every part and its value already live. Open the Schematic Editor on the breadboard supply, then choose “Generate Bill of Materials…” from the “Tools” menu, or click the same button on the top toolbar (Figure 10.1). This opens the “Symbol Fields Table,” a spreadsheet view of every symbol on the sheet, one part per row and one piece of information per column. The reason KiCad shows you this table rather than just dumping a file is that a BOM is rarely one fixed thing: different suppliers and different assembly services want the columns in a different order or under different names, and this is where you arrange them before you export.</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-1-bom-symbol-fields-table.png" /></p>
+<p>Figure 10.1: The Symbol Fields Table is where KiCad gathers every part on the schematic into a bill of materials. ❶ marks the toolbar button that opens it. ❷ is the grid of parts, one per row, with the resistors <code>R1, R2</code> already folded onto a single line at a quantity of two. When the columns look right, ❸ the “Export” button writes the file.  For this board you do not need to fuss with the columns at all. The four that matter are there by default: the reference designator, the value, the footprint, and the quantity. The one habit worth forming now is grouping. Tick the “Group symbols” box at the top of the dialog, and KiCad folds identical parts onto a single line: the two <code>5.1 kΩ</code> resistors <code>R1</code> and <code>R2</code>, the pair that sets the USB-C connector’s <code>CC</code> pins, collapse into one row with a quantity of two (❷), and so on. A grouped list is what you actually buy from, because no supplier wants ten separate lines for ten identical resistors. With the table arranged, click “Export” (❸) and KiCad writes a CSV file, a plain-text spreadsheet that opens in any tool you like, Excel, LibreOffice, Google Sheets, or even a text editor (Figure 10.2).</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-2-bom-csv-LibreOffice.png" /></p>
+<p>Figure 10.2: The exported CSV opened in a spreadsheet — the same parts list, written the way KiCad stores it. The footprint column carries KiCad’s full library identifiers rather than the friendly names, and a part’s value is whatever its symbol was given (the LED’s, for instance, is simply <code>D</code>). The board has not changed; this is just its parts list as a file you can hand to a supplier or edit at will.</p>
 <p>Read down the result and you have a tidy account of the whole board:</p>
 <table>
 <thead>
@@ -142,136 +234,214 @@ Figure coming soon
 </thead>
 <tbody>
 <tr>
-<td>IC1</td>
-<td>AP3015A</td>
-<td>SOT-23-5</td>
+<td>J1</td>
+<td>USB-C receptacle</td>
+<td>USB-C 6-pin, SMD</td>
 <td>1</td>
 </tr>
 <tr>
-<td>L1</td>
-<td>10 µH</td>
-<td>inductor, SMD</td>
+<td>F1</td>
+<td>500 mA resettable fuse</td>
+<td>Bourns MF-RHT050, THT</td>
 <td>1</td>
 </tr>
 <tr>
-<td>D1, D2</td>
-<td>SS14</td>
-<td>SMA diode</td>
-<td>2</td>
-</tr>
-<tr>
-<td>T1</td>
-<td>2N7002</td>
-<td>SOT-23</td>
+<td>SW1</td>
+<td>slide switch</td>
+<td>THT slide switch</td>
 <td>1</td>
 </tr>
 <tr>
-<td>R1, R4</td>
-<td>1 MΩ</td>
+<td>R1, R2</td>
+<td>5.1 kΩ</td>
 <td>axial THT</td>
 <td>2</td>
-</tr>
-<tr>
-<td>R2</td>
-<td>604 kΩ</td>
-<td>axial THT</td>
-<td>1</td>
 </tr>
 <tr>
 <td>R3</td>
-<td>10 kΩ</td>
+<td>1 kΩ</td>
 <td>axial THT</td>
 <td>1</td>
 </tr>
 <tr>
 <td>C1</td>
-<td>4.7 µF</td>
+<td>100 nF</td>
 <td>disc THT</td>
 <td>1</td>
 </tr>
 <tr>
 <td>C2</td>
-<td>22 µF</td>
+<td>10 µF</td>
 <td>radial THT</td>
 <td>1</td>
 </tr>
 <tr>
-<td>C3</td>
-<td>10 pF</td>
-<td>disc THT</td>
-<td>1</td>
-</tr>
-<tr>
-<td>J1, J2</td>
+<td>J2</td>
 <td>2-pin header</td>
 <td>PinHeader 1x02</td>
-<td>2</td>
-</tr>
-<tr>
-<td>J4</td>
-<td>2-pin header</td>
-<td>PinHeader 1x02, 2 mm</td>
 <td>1</td>
 </tr>
 <tr>
-<td>J3</td>
-<td>slide switch</td>
-<td>THT slide switch</td>
+<td>D1</td>
+<td>LED</td>
+<td>5 mm THT</td>
 <td>1</td>
 </tr>
 </tbody>
 </table>
 <p>That is your first BOM. It is a humble file, but it is the bridge between the design on your screen and the box of parts you will solder. There is a great deal more you can do with a BOM, adding supplier part numbers, custom fields, and pulling it from the PCB editor or a plugin instead, and Volume 2 gives the BOM a chapter of its own. For now, one clean grouped list is everything this board asks for. Save it beside your project and let’s turn to the files the factory itself reads.</p>
 <h2 id="sec:c10-gerbers">Generating Gerbers</h2>
-<p>You have already done the hard part of this section, three times over. The ‘Gerber’ files, the plain-text files that describe each layer of your board, and the ‘drill file’ that lists every hole and its size, are exactly what you plotted at the end of the layout tour in Chapter 3 and again on both projects. The move is unchanged: “Plot” from the “File” menu writes the Gerbers, and “Generate Drill Files” in the same dialog writes the drill file, all into one output folder. If you followed Chapter 9 to the end, that folder already exists. So rather than repeat the plotting itself, this section is about the two things you do <em>with</em> that folder before it leaves your computer: package it, and check it.</p>
-<p>Packaging is the simple part. Almost every fab wants a single file, so compress the whole output folder into one <code>.zip</code> archive. Make sure the Gerbers and the drill file are all inside it, because the factory needs both: the Gerbers tell it where the copper, soldermask and silkscreen go, and the drill file tells it where to put the holes. A board uploaded without its drill file is a board with no holes, which is a confusing thing to receive.</p>
-<p>Checking is the part worth slowing down for, and it is where a tool I promised you back in Chapter 1 finally earns its place. KiCad ships a separate little application called the ‘Gerber Viewer,’ or GerbView, whose only job is to open Gerber and drill files and show you what they actually contain. This matters because the files you just plotted are what the factory will build from, not the pretty board you were looking at in the PCB Editor. Viewing them on their own, through fresh eyes, is the cheapest insurance there is. Launch GerbView from the KiCad project manager, load your Gerber files, then load the drill file (Figure 10.2). The board redraws layer by layer, and you can turn each one on and off to inspect it alone.</p>
+<p>You have already done the hard part of this section, three times over. The ‘Gerber’ files, the plain-text files that describe each layer of your board, and the ‘drill file’ that lists every hole and its size, are exactly what you plotted at the end of the layout tour in Chapter 3 and again on both projects. The move is unchanged: “Plot” from the “File” menu writes the Gerbers, and “Generate Drill Files” in the same dialog writes the drill file, all into one output folder. One detail from Chapter 8 is worth carrying forward, because it is the reason this chapter orders that board: when you generated the drill file there, you set it to write the plated and non-plated holes in a <em>single</em> file with the coordinates in <em>decimal</em> format — the two settings NextPCB’s quote page needs to read the drill data cleanly. Export the breadboard supply’s files at the end of Chapter 8 with those settings in place and that folder already holds everything the factory needs. So rather than repeat the plotting itself, this section is about the two things you do <em>with</em> that folder before it leaves your computer: package it, and check it.</p>
+<p>Packaging is the simple part. Almost every fab wants a single file, so compress the whole output folder into one <code>.zip</code> archive (Figure 10.3). Make sure the Gerbers and the drill file are all inside it, because the factory needs both: the Gerbers tell it where the copper, soldermask and silkscreen go, and the drill file tells it where to put the holes. A board uploaded without its drill file is a board with no holes, which is a confusing thing to receive. One subtlety trips people up: put the files themselves at the <em>root</em> of the archive, not tucked inside a subfolder that is then zipped. Many fabs’ upload parsers look for the Gerbers at the top level and quietly fail to find them one directory down. The safe move is to select the Gerber and drill files and compress <em>those</em>, rather than compressing the folder that holds them.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
-<p>Figure 10.2: GerbView shows you the real files the factory receives, one layer at a time.</p>
-<p>Look for the obvious things, because the obvious things are what go wrong. Is the board outline, the <code>Edge.Cuts</code> layer, a single closed shape the right size? Are the copper layers present and sensible, with no track left floating? Does the silkscreen text sit clear of the pads? Are the drill holes where holes belong, at the headers, the via stitches, and the four mounting holes? You are not hunting for subtle faults here; you are confirming that the right files made it into the folder and that nothing is missing or empty. A blank layer or an absent drill file is glaringly obvious in GerbView and almost invisible everywhere else. Spend a minute here and you will never pay for a board that was wrong before it was even sent.</p>
+<p><img src="/assets/klp5e-vol1/ch10/ch10-3-Gerber-files-in-zip.png" style="width:65.0%" /></p>
+<p>Figure 10.3: The breadboard supply’s output, compressed into a single <code>.zip</code> and sitting ready in the project folder. This one file is all the factory needs — with the Gerbers and drill file at its root, not buried in a subfolder.</p>
+<p>Checking is the part worth slowing down for, and it is where a tool I promised you back in Chapter 1 finally earns its place. KiCad ships a separate little application called the ‘Gerber Viewer,’ or GerbView, whose only job is to open Gerber and drill files and show you what they actually contain. This matters because the files you just plotted are what the factory will build from, not the pretty board you were looking at in the PCB Editor. Viewing them on their own, through fresh eyes, is the cheapest insurance there is. Launch GerbView from the KiCad project manager (Figure 10.4), select your Gerber files and open them (Figure 10.5), then load the drill file the same way. The board redraws layer by layer (Figure 10.6), and you can turn each one on and off to inspect it alone.</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-4-gerbviewer-open-gerber-files.png" style="width:65.0%" /></p>
+<p>Figure 10.4: GerbView is its own application, launched from the project manager’s left-hand list (❶). Inside it, the Gerbers load through “File → Open Gerber Plot File(s)…” (❷); the drill file loads through “Open Excellon Drill File(s)…” just below it.</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-5-gerbviewer-select-gerber-files.png" style="width:65.0%" /></p>
+<p>Figure 10.5: Select all the <code>.gbr</code> files at once (❶) and open them. If you do not see them, check that the file-type filter is set to “Gerber files (*.g*; *.pho)”. Then repeat for the <code>.drl</code> drill file, which lives under the Excellon menu item rather than this one.</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-6-gerbviewer-view.png" /></p>
+<p>Figure 10.6: GerbView shows you the real files the factory receives, one layer at a time. The Layers Manager on the right (boxed) lists every layer that loaded; here the back copper <code>B_Cu</code> has been unchecked (arrow) so its tracks stop cluttering the view of the front. The toolbar down the left edge (boxed) holds the render and inspection tools, and the dropdown across the top (boxed) sets which layer is ‘active’ for those tools.</p>
+<p>GerbView behaves like the editors you already know, which makes it quick to get around. The mouse works exactly as it does in the Schematic and PCB editors: the scroll wheel zooms toward the cursor and dragging with the middle button pans. The real work, though, happens in the Layers Manager on the right. Every loaded layer has a checkbox, and clicking it hides or shows that layer instantly; turning layers off one at a time is the fastest way to study one in isolation — hide everything but <code>F_Cu</code>, say, and you are looking at nothing but the front copper, which is exactly the switch made to <code>B_Cu</code> in the figure to unclutter the view. The toolbar down the left edge carries controls for <em>how</em> layers are drawn (filled or outline, which one sits on top), and the dropdown along the top picks the active layer that those tools and the coordinate readouts at the bottom of the window refer to.</p>
+<p>One tool is worth calling out, because you will want it again in a minute. Under the “Tools” menu is a measuring ruler, the same one you met in the PCB Editor: click a start point, move to an end point, and GerbView reads out the distance between them (Figure 10.7). It is how you confirm a dimension straight off the manufacturing files — the width of the board, the gap between two pads — without trusting your memory of the design. We will reach for it at ordering time to cross-check the board size the factory’s own software reports.</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-7-gerbviewer-measurement.png" style="width:45.0%" /></p>
+<p>Figure 10.7: The measuring ruler in action. GerbView reads out the horizontal and vertical spans (<code>x</code>, <code>y</code>), the straight-line distance (<code>r</code>), and the angle (<code>θ</code>) as you drag — here a 2.1 mm hop measured directly off the Gerbers.</p>
+<p>Look for the obvious things, because the obvious things are what go wrong. Is the board outline, the <code>Edge.Cuts</code> layer, a single closed shape the right size? Are the copper layers present and sensible, with no track left floating? Does the silkscreen text sit clear of the pads? Are the drill holes where holes belong, at the header, the through-hole component leads, and any vias where two tracks crossed? You are not hunting for subtle faults here; you are confirming that the right files made it into the folder and that nothing is missing or empty. A blank layer or an absent drill file is glaringly obvious in GerbView and almost invisible everywhere else. Spend a minute here and you will never pay for a board that was wrong before it was even sent.</p>
+<p>One last habit before we move on. The plotting and drill settings I showed you are the ones NextPCB’s quote page reads cleanly, but they are not a universal law: every manufacturer publishes its own guidance on exactly how it wants Gerbers and drill files prepared, and the details differ from house to house. Before you order from a fab for the first time, find its file-requirements page and skim it. NextPCB’s, for instance, spells out precisely which layers and formats it expects from KiCad — you will find it at <a href="https://www.nextpcb.com/helpcenter/nextpcb-gerber-from-kicad">nextpcb.com/helpcenter/nextpcb-gerber-from-kicad</a> — and it is what tells you, among other things, to write the drill data as a single file in decimal format, the very setting you applied back in Chapter 8. Do not assume the settings in this book will pass unchanged everywhere; assume instead that a two-minute read of your own fab’s page will save you a rejected order.</p>
 <h2 id="sec:c10-dfm">DFM Basics</h2>
 <p>Before you upload anything, it helps to understand what a factory actually needs from your design in order to build it reliably. The general name for designing with the factory’s limits in mind is ‘design for manufacturing,’ or DFM. It sounds like a specialist’s concern, and at the far end it is, but the core of it for a simple board comes down to a short list of physical limits, and the good news is that the boards you have already drawn respect every one of them without your having lifted a finger.</p>
-<p>A fab is a machine shop working in copper, and like any machine shop it has a smallest feature it can make cleanly. Four limits cover almost everything a beginner meets (Figure 10.3):</p>
+<p>A fab is a machine shop working in copper, and like any machine shop it has a smallest feature it can make cleanly. Four limits cover almost everything a beginner meets (Figure 10.8):</p>
 <ul>
-<li><strong>Minimum trace width and spacing.</strong> A track can only be made so thin, and two pieces of copper can only sit so close before the factory can no longer guarantee they stay separate. Ordinary services comfortably make tracks and gaps down to around 0.15 mm; the 0.4 mm tracks you routed are far wider than that.</li>
+<li><strong>Minimum trace width and spacing.</strong> A track can only be made so thin, and two pieces of copper can only sit so close before the factory can no longer guarantee they stay separate. Ordinary services comfortably make tracks and gaps down to around 0.15 mm; the 0.4 mm signal tracks you routed — and the 0.8 mm power spine, wider still — sit far above that.</li>
 <li><strong>Minimum annular ring.</strong> The ‘annular ring’ is the collar of copper left around a drilled hole, and it has to be wide enough that a slightly off-centre drill still lands on copper rather than punching through the edge of the pad.</li>
 <li><strong>Minimum hole size.</strong> Drill bits have a smallest practical diameter. The via and through-hole pads KiCad gives you by default sit well above it.</li>
 <li><strong>Copper-to-edge clearance.</strong> Copper has to stay back a little from the board outline, because the routing tool that cuts your board out of the larger panel removes a sliver of material as it goes, and you do not want it grazing a live track.</li>
 </ul>
 
 
-<div class="figure-pending">
-Figure coming soon
-</div>
-<p>Figure 10.3: The four limits a fab cares about most on a simple board. Your default KiCad design comfortably clears all of them.</p>
-<p>Here is the reassuring part, and it is the whole reason this section is short. KiCad’s default design rules, the ones you peeked at in Chapter 9 and wisely left alone, are deliberately set well inside what any ordinary fab can build. The defaults were chosen to be safe for exactly the kind of low-current, roomy, two-layer board you have been making. So the solar supply already passes, and you did not have to become a manufacturing expert to get there. You only need to think hard about these limits the day you design a board dense enough or fast enough to push against them, and that day belongs to a later volume.</p>
-<p>There is one more lever that is less about whether a board <em>can</em> be made and more about what it <em>costs</em>: its size. As I mentioned in Chapter 1, the dominant cost in a small order is the area of the board, which is why you took the trouble in Chapter 9 to make the solar supply as small as the parts allowed. A smaller board is a cheaper board, and that habit pays you back every time you order.</p>
+<p><img src="/assets/klp5e-vol1/ch10/ch10_dfm-limits_v10.png" /></p>
+<p>Figure 10.8: The four limits a fab cares about most on a simple board. Your default KiCad design comfortably clears all of them.</p>
+<p>Here is the reassuring part, and it is the whole reason this section is short. KiCad’s default design rules, the ones you left at their defaults on both boards, are deliberately set well inside what any ordinary fab can build. The defaults were chosen to be safe for exactly the kind of low-current, roomy, two-layer board you have been making. So the breadboard supply already passes, and you did not have to become a manufacturing expert to get there. You only need to think hard about these limits the day you design a board dense enough or fast enough to push against them, and that day belongs to a later volume.</p>
+<p>There is one more lever that is less about whether a board <em>can</em> be made and more about what it <em>costs</em>: its size. As I mentioned in Chapter 1, the dominant cost in a small order is the area of the board, which is why you trimmed the breadboard supply’s outline back in Chapter 8, pulling its edges in to shed the space the parts did not use. A smaller board is a cheaper board, and that habit pays you back every time you order.</p>
 <p>For a Volume 1 board, eyeballing your design in GerbView and trusting the sensible defaults is genuinely enough. In Volume 2 you will meet a dedicated tool that checks all of this automatically, scanning your files against a factory’s real limits and flagging anything marginal before you order. It is a wonderful thing to have once your boards grow ambitious. For the boards in this book, you are ready to order as you are.</p>
 <h2 id="sec:c10-order">Ordering a PCB</h2>
 <p>This is the step that turns a folder of files into a parcel of boards, and it is far less daunting than it sounds. I will walk through it with NextPCB, but I want to say once more, plainly, that what you are about to learn is the shape every online fab shares. The screens differ, the colours differ, but the sequence is the same everywhere: make an account, upload your files, confirm the preview, choose a few options, read the quote, and place the order. Learn it here and you can order from any of these services, NextPCB included, with the same confidence. As a second real example, OSH Park in the United States is a lovely, beginner-friendly service I have recommended for years; most fab houses you will come across work in just this way.</p>
-<p>Start by creating an account at the manufacturer’s site (for NextPCB, that is <a href="https://www.nextpcb.com/">nextpcb.com</a>) and finding its online quote or ordering page. Upload the <code>.zip</code> archive you made earlier (Figure 10.4). The site reads your Gerbers and renders a preview of the board, which is the same sanity check you did in GerbView, now done by the factory’s own software: glance at it and confirm it is the board you meant to send.</p>
+<p>Start by creating an account at the manufacturer’s site (for NextPCB, that is <a href="https://www.nextpcb.com/">nextpcb.com</a>) and finding its online quote or ordering page. Choose the standard, two-layer PCB service and upload the <code>.zip</code> archive you made earlier (Figure 10.9). The site reads your Gerbers and renders a preview of the board, which is the same sanity check you did in GerbView, now done by the factory’s own software: glance at it and confirm it is the board you meant to send.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
-<p>Figure 10.4: Uploading the Gerber archive. The site renders a preview and lays out the options that set the price. Every online fab follows this same shape.</p>
-<p>Then you choose from a short list of options, and because these are the same options everywhere, it is worth knowing what each one means and why it is there:</p>
+<p><img src="/assets/klp5e-vol1/ch10/ch10-8-nextpcb-1-start-order-process.png" /></p>
+<p>Figure 10.9: Starting the order. Choose the standard PCB service (❶) and upload your Gerber <code>.zip</code> (❷). A running quote sits on the right the whole time, so the price responds live as you set the options. Every online fab follows this same shape.</p>
+<p>Then you choose from a short list of options, and because these are the same options everywhere, it is worth knowing what each one means and why it is there. NextPCB gathers them into two blocks, “Basic Information” and “PCB Parameters” (Figure 10.10); most arrive already set to sensible defaults, and for a Volume 1 board you will change almost nothing.</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-9-nextpcb-2-start-order-process.png" /></p>
+<p>Figure 10.10: The order options, most already filled in from your files. The parsed board size appears at the top (❶) and again in the size fields (❷) — worth cross-checking against the ruler in GerbView (Figure 10.7). The settings to notice are the board thickness (❸), the soldermask colour (❹), and the surface finish (❺). The rest — TG rating, copper weight, trace/space, minimum drill hole, via processing — are advanced parameters you can leave exactly as they are for these boards.</p>
+<p>Here is what the handful that matter actually mean:</p>
 <ul>
 <li><strong>Layer count.</strong> Two, for every board in this volume. This is the single biggest factor in the base price, and your simple boards sit at the cheap end of it.</li>
-<li><strong>Board dimensions.</strong> Usually filled in automatically from your <code>Edge.Cuts</code> outline. This is the size you worked to keep small, and it drives the cost, so it is satisfying to see your effort rewarded here.</li>
+<li><strong>Board dimensions.</strong> Filled in automatically from your <code>Edge.Cuts</code> outline — here 18.5 × 37.8 mm. This is the size you worked to keep small, and it drives the cost, so it is satisfying to see your effort rewarded. If the figure ever looks wrong, that is your cue to go back to GerbView and measure the outline (Figure 10.7) before you trust the quote.</li>
 <li><strong>Quantity.</strong> Most services have a small minimum, often five or ten, because boards are made together on a shared panel. Ordering a few spares costs very little more than ordering one.</li>
 <li><strong>Soldermask colour.</strong> The soldermask is that coloured layer over the copper. Green is the classic and usually the cheapest; the other colours are there if you want them and rarely cost more.</li>
-<li><strong>Surface finish.</strong> This is the coating on the exposed pads that keeps them solderable and stops the copper tarnishing. The standard, inexpensive finish is fine for everything you are making now.</li>
+<li><strong>Surface finish.</strong> This is the coating on the exposed pads that keeps them solderable and stops the copper tarnishing. The standard, inexpensive finish (HASL) is fine for everything you are making now.</li>
 <li><strong>Thickness.</strong> The standard 1.6 mm board is what you want unless you have a specific reason to differ, and for these projects you do not.</li>
 </ul>
-<p>As you set the options, the site shows a running price, the ‘instant quote.’ This is the lovely part: you can see exactly what the choices cost and adjust before you commit. For a small two-layer board like the solar supply, you will find the bare boards come to only a few dollars for several copies, with shipping usually the larger line on the bill. When the quote looks right, choose your shipping speed and place the order.</p>
-<p>One option you will see deserves a word, because it closes a loop from earlier in the chapter. Many fabs offer an ‘assembly’ service, sometimes called turnkey, where they solder the parts onto the board for you instead of shipping it bare. This is the moment your BOM comes back into play: to assemble your board, the factory needs that bill of materials so it knows which parts to buy, along with a placement file that tells its machines where each part goes. You do not need assembly for the boards in this book, and exporting the placement file is a Volume 2 topic, but now you know why you made the BOM and where it would be used.</p>
+<p>As you set the options, the site shows a running price, the ‘instant quote’ (Figure 10.11). This is the lovely part, and the reason to treat the options as a playground: because nothing is binding until you place the order, you can nudge the soldermask to red, bump the thickness, or change the quantity and watch the total move — the quickest way to build a feel for what drives a board’s price and what barely touches it. For a small two-layer board like the breadboard supply, you will find the bare boards come to only a few dollars for several copies, with shipping usually the larger line on the bill. When the quote looks right, choose your shipping speed and place the order.</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-10-nextpcb-quote.png" style="width:65.0%" /></p>
+<p>Figure 10.11: The instant quote. As you change options the total updates live — here five copies of the bare board for a few dollars, with shipping the larger line on the bill. Watch it respond as you experiment with the settings above.</p>
+<p>One option you will see deserves a word, because it closes a loop from earlier in the chapter. Many fabs offer an ‘assembly’ service, sometimes called turnkey, where they solder the parts onto the board for you instead of shipping it bare. On a board like this one, mostly through-hole and friendly to a soldering iron, the tempting candidate is the single surface-mount part — the USB-C receptacle, whose fine pitch makes it the fiddliest thing on the board to place by hand. This is the moment your BOM comes back into play: to assemble your board, the factory needs that bill of materials so it knows which parts to buy, along with a placement file that tells its machines where each part goes. You do not need assembly for the boards in this book, and exporting the placement file is a Volume 2 topic, but now you know why you made the BOM and where it would be used (Figure 10.12).</p>
+
+<p><img src="/assets/klp5e-vol1/ch10/ch10-0-nextpcb-PCB-and-assembly.png" /></p>
+<p>Figure 10.12: The assembly path, for later. Step 1 (❶) is the bare-board order you just placed — upload the Gerbers. Step 2 (❷) is what assembly adds on top: a Centroid (pick-and-place) file and the BOM, so the factory knows which parts to buy and where each one goes. The parts table shown is NextPCB’s own template example, not our board’s BOM.</p>
 <p>Since I am recommending NextPCB and they sponsor this book, let me be straight with you one last time: I suggest them because they have served my own projects well, and everything you have just learned works exactly the same at any honest competitor. The skill is yours, not theirs.</p>
+<p>Before you close the laptop, put that skill to work once more. You have taken the breadboard supply all the way to a quote; now do the same with the solar supply from Chapter 9. Plot and drill its Gerbers if you have not already — Chapter 9 covers the steps, and they are the same ones you used here — zip them with the files at the archive’s root, open them in GerbView for a last look, then upload the archive to your fab’s quote page and set the options. Take it right up to the checkout and read the price back. You do not need to place the order or pay for anything, unless you would like a second board to hold, in which case go ahead. The point is to run the whole path yourself, on a board you designed, so the process becomes yours rather than something you only watched me do.</p>
 <p>And that is the whole journey. You have taken a circuit from an idea on a blank schematic, through two complete workflows, into a folder of manufacturing files, and now out to a factory that will send it back as a board you can hold in your hand. That was the promise of this volume: to design, verify, order, and understand a simple two-layer board, and you have now done all four, twice. In the next chapter we gather a handful of ‘essential recipes,’ the short, standalone how-tos for useful tasks that did not belong to either project. For now, save your work, keep that BOM and those Gerbers safe, and enjoy the wait for the post.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {

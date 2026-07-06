@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Project 1: Breadboard Power Supply — KiCad Like a Pro, 5th Edition — Volume 1</title>
+<title>Project 1 Breadboard Power Supply — KiCad Like a Pro, 5th Edition — Volume 1</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -114,11 +114,102 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
-<h1 class="note-title">Project 1: Breadboard Power Supply</h1>
+<h1 class="note-title">Project 1 Breadboard Power Supply</h1>
+
+<h1 id="project-1-breadboard-power-supply">Project 1: Breadboard Power Supply</h1>
 <p>You have done the whole thing once, and then some. In Chapter 2 you drew a schematic, in Chapter 3 you turned it into a manufacturable board, and you did both with my hand on yours at every click. Chapter 5 pinned those two walks down as a checklist you can reuse forever, and Chapter 6 gave you the one skill both tours quietly leaned on: finding and importing any part a design needs. This chapter is where it all comes together. You are going to build a complete board of your own, from an empty project to a folder of manufacturing files, following the same fifteen steps you already know. The difference is that this time the board is yours to drive. I will still walk beside you, but where the tours told you which button to press, here I will more often point back to the chapter where you learned the move and let you make it.</p>
 <p>This is your first solo board, so let me hand you the safety net before you need it: the workflow. As long as you take the eight schematic steps and the eight layout steps in order, each one leaves the design in a state the next one expects, and you will not get lost. Keep the one-page checklist from Chapter 5 open beside you, and treat this chapter as the project that proves you can follow it without me reading it out.</p>
 <p>Here is what we are building (Figure 8.1): a small power supply for your breadboard. It takes 5 volts in over a ‘USB Type-C’ connector, the same reversible USB connector you met in Chapter 6, and delivers that 5 volts to your breadboard’s power rail through a two-pin header and a couple of jumper wires, with a switch to turn it on and off, a fuse to keep a stray strand of wire on the breadboard from harming your computer, and an LED that glows when the power is flowing.</p>
@@ -136,9 +227,8 @@ Figure coming soon
 <li>a <strong>resettable fuse</strong> (<code>F1</code>) that trips if the breadboard draws too much, then heals itself once you clear the fault;</li>
 <li>two <strong>capacitors</strong> (<code>C1</code>, <code>C2</code>) that steady the supply;</li>
 <li>an <strong>LED</strong> (<code>D1</code>) and its <strong>resistor</strong> (<code>R3</code>) as a power-on indicator;</li>
-<li>a <strong>2-pin header</strong> (<code>J2</code>) that feeds the breadboard’s power rail.</li>
+<li>a <strong>2-pin header</strong> (<code>J2</code>) that feeds the breadboard’s power rail.  ## How the Board Works {#sec:c8-how}</li>
 </ul>
-<h2 id="sec:c8-how">How the Board Works</h2>
 <p>Before you draw it, it is worth a few minutes to understand what each part is for, because a board you understand is a board you can fix. The whole design has one job, and the intro already named it: this board does not <em>make</em> 5 volts, it <em>delivers</em> them. So the clearest way to read it is to follow the power from where it enters to where it leaves, along the same spine you will wire as the schematic (Figure 8.2).</p>
 <p>The path is short. Five volts arrives on the receptacle’s <code>VBUS</code> pin once the USB-C source agrees to provide it. From there it passes through the fuse <code>F1</code>, which breaks it for you if something goes wrong, and then through the slide switch <code>SW1</code>, which simply lets you break the path by hand. Past the switch it becomes the <code>+5V</code> rail, and everything that draws power hangs off that rail: the output header <code>J2</code> that feeds your breadboard, the indicator LED through its resistor, and the two capacitors. Ground is the return road for all of it, running from every part back to the connector’s ground pins. The two resistors on the <code>CC1</code> and <code>CC2</code> pins are the one part that does not sit on this path; they are how the board asks the source to turn the 5 volts on in the first place, and because that is the single trickiest idea in the chapter, I have saved its full explanation for the moment you wire it.</p>
 <p>The fuse deserves a closer look, because it is not the glass-and-wire kind you may be picturing. <code>F1</code> is a ‘resettable fuse,’ also sold as a ‘polyfuse’ or a ‘PTC,’ where the letters stand for ‘Positive Temperature Coefficient,’ which is just a careful way of saying its resistance climbs as it heats up. In normal use it is barely warm and barely there, a few tenths of an ohm the current hardly notices. But if a stray wire on your breadboard shorts the rail to ground, the sudden rush of current heats the little polymer body fast, its resistance leaps by thousands of times, and the current collapses to a harmless trickle within a fraction of a second. Clear the short and it cools, its resistance falls, and the fuse heals itself, ready for next time. That is the gift it gives you, and the thing it is really protecting is the USB port on your laptop or charger, which would far rather see this part trip than feed a dead short.</p>
@@ -152,14 +242,12 @@ Figure coming soon
 <p>Here is a twist worth dwelling on, because it sharpens what it really means to source a part. This receptacle is common enough that KiCad actually ships a footprint for it, so you could place it straight from the standard library. We are going to fetch it from SnapMagic anyway, and the reason is the lesson. A part sitting in the library tells you only that someone drew a footprint for it; it says nothing about whether you can still buy one. The unhappy version of this story is the designer who builds a whole board around a tidy library part, sends it off, and only then learns the component was discontinued, leaving a scramble for a substitute whose footprint never quite fits. Looking the part up on SnapMagic closes that gap in a single step: the page shows it in stock and links me to distributors, so I confirm at once that the part is real, buyable today, and backed by the manufacturer’s own model. So we do exactly what Chapter 6 taught: search SnapMagic for the part number, download the KiCad package with the symbol, footprint, and 3D model together, and add it to the project. And here you get a small bonus the next part may not hand you: because KiCad carries this footprint too, you can check the one you imported against the standard one as well as against the datasheet.</p>
 <p>Do not skip the check that Chapter 6 called the most important sentence in the chapter: lay the manufacturer’s recommended land pattern beside the footprint KiCad now shows you, and confirm the pad count, the pitch, and which pad is pin 1 before you trust it. A connector that is right in every way except a mirrored pin assignment is a miserable fault to chase on a finished board, and a one-minute look now prevents it. This matters a touch more here than it did for an ordinary chip, because the receptacle’s signal pads are the only surface-mount joints on this board, and a surface-mount pad leaves you no room to fudge a misplaced pin with a bent leg.</p>
 <p>That surface-mount detail deserves a word of reassurance. Every other part on the board is through-hole, the friendly kind you met in Chapter 1, and the connector is the only one with surface-mount joints, though even it sinks those through-hole stakes into the board to hold itself steady. That changes nothing about how you <em>design</em> the board; once the footprint is in your library it behaves like any other. And if hand-soldering its small surface-mount contacts does not appeal, you can ask the fab to assemble that one part for you when you order the boards. For now, designing it is all that matters.</p>
-<p>Finally, do the housekeeping that keeps a project healthy: copy the parts you are using into a project-local library, exactly as Chapter 6’s last section described, so the design carries its own copies and still opens cleanly years from now. The imported connector especially belongs <em>inside</em> the project, reached through the project-specific library table with a path built on <code>${KIPRJMOD}</code>. The test, you will remember, is simple: when you can zip the project folder, send it to a friend with a fresh KiCad install, and have them open it whole, your parts are sourced. Now let’s draw.</p>
-<h2 id="sec:c8-schematic">Drawing the Schematic</h2>
+<p>Finally, do the housekeeping that keeps a project healthy: copy the parts you are using into a project-local library, exactly as Chapter 6’s last section described, so the design carries its own copies and still opens cleanly years from now. The imported connector especially belongs <em>inside</em> the project, reached through the project-specific library table with a path built on <code>${KIPRJMOD}</code>. The test, you will remember, is simple: when you can zip the project folder, send it to a friend with a fresh KiCad install, and have them open it whole, your parts are sourced. Now let’s draw.  ## Drawing the Schematic {#sec:c8-schematic}</p>
 <p>With the parts gathered, you are ready for the eight-step schematic workflow from Chapter 5. You know all eight moves; I will name each step, give you the few details particular to this board, and point you back to Chapter 2 for the mechanics. On this board I take two of them in a slightly different order, wiring before I set the component values: with every part annotated as it is placed, the canonical steps 4 and 5 swap freely, and wiring first lets one figure show the bare circuit and the next the same sheet once its values are filled in. Here is the schematic you are working toward (Figure 8.2); keep it beside you as your guide, the way you used the blinker’s schematic in Chapter 2.</p>
 
 <p><img src="/assets/klp5e-vol1/ch08/ch08-psu-schematic-0-fig8-2-ERC-final_v10.png" style="width:100.0%" /></p>
 <p>Figure 8.2: The finished schematic for the breadboard power supply. This is where the schematic half is headed.</p>
-<p><strong>Step 1, create the project.</strong> Make a new project the way you did for the blinker, and give it a name without spaces. I am calling mine <code>bb-psu</code>, for ‘breadboard power supply.’ Open the Schematic Editor onto its blank sheet. If you have not already, add your project-local libraries to this project’s library tables now, so the imported connector is waiting in the chooser when you reach for it.</p>
-<p><strong>Steps 2 and 3, place and annotate the symbols.</strong> Press “A” and drop a symbol for each part: the USB-C receptacle from your imported library, the two resistors for the connector, the LED and its resistor, the two capacitors, the slide switch, the fuse, and the 2-pin output header. Then press “P” and place your power symbols. Here we make one small, deliberate choice. The blinker called its positive rail <code>VCC</code>, a generic name, because its supply could be anything from 3 to 9 volts. We know exactly what ours is, so name the positive rail <code>+5V</code> instead; KiCad has a power symbol of that name. Place a <code>+5V</code> flag and a <code>GND</code> flag wherever the supply and ground belong. Naming the rail for what it actually is makes the schematic easier to read and your intent easier to check.</p>
+<p><strong>Step 1, create the project.</strong> Make a new project the way you did for the blinker, and give it a name without spaces. I am calling mine <code>bb-psu</code>, for ‘breadboard power supply.’ Open the Schematic Editor onto its blank sheet. If you have not already, add your project-local libraries to this project’s library tables now, so the imported connector is waiting in the chooser when you reach for it.  <strong>Steps 2 and 3, place and annotate the symbols.</strong> Press “A” and drop a symbol for each part: the USB-C receptacle from your imported library, the two resistors for the connector, the LED and its resistor, the two capacitors, the slide switch, the fuse, and the 2-pin output header. Then press “P” and place your power symbols. Here we make one small, deliberate choice. The blinker called its positive rail <code>VCC</code>, a generic name, because its supply could be anything from 3 to 9 volts. We know exactly what ours is, so name the positive rail <code>+5V</code> instead; KiCad has a power symbol of that name. Place a <code>+5V</code> flag and a <code>GND</code> flag wherever the supply and ground belong. Naming the rail for what it actually is makes the schematic easier to read and your intent easier to check.</p>
 <p>As each part lands it needs its reference designator, the <code>R1</code>, <code>C1</code>, or <code>J1</code> that names it for the rest of the project. Recent versions of KiCad hand these out for you: with auto-annotation switched on, every part takes the next free number the moment you drop it, the question marks never appear, and there is nothing more to do. It is a real time-saver, and it is how I work on a board like this. You can also annotate by hand, and there is one case where you will reach for it: when you are copying a reference design and want your designators to match it part for part, so that your <code>R7</code> is their <code>R7</code>. Auto-annotation numbers parts by where they happen to sit on the sheet and pays no heed to anyone else’s scheme, so for that job you switch it off and type each designator into the part’s properties yourself, or fall back on the “Annotate Schematic” tool from the “Tools” menu that you met on the blinker in Chapter 2. Whichever route you take, make sure every part shows a real designator, with no <code>R?</code> or <code>J?</code> left behind. The difference is easy to see: Figure 8.3 shows the parts just as they land, every designator still a question mark, and Figure 8.4 shows the same sheet once annotation has given each one a real number.</p>
 
 <p><img src="/assets/klp5e-vol1/ch08/ch08-psu-schematic-1-fig8-3-components-no-designators_v10.png" /></p>
@@ -262,6 +350,88 @@ Figure coming soon
 <p>This is also a good moment to sharpen the skill Chapter 2 first named: understanding every line the checker shows you, rather than chasing an empty report at any cost. The deleted-wire error you made on purpose in Chapter 2 was a real fault, a connection genuinely missing. This one was not a fault at all; it was the checker asking you to confirm your intent, and the fix was to confirm it. A good designer can tell the two apart, and telling them apart is most of what makes the ERC valuable. A clean report you do not understand is worth less than a report with one violation you have read, understood, and judged.</p>
 <p>With the schematic drawn, named, footprinted, and now genuinely clean, complete the eighth and last schematic step: save once more, then choose “Update PCB from Schematic” from the “Tools” menu to carry the whole design across the one-way bridge into the PCB Editor. Every part arrives knowing its footprint, and, as promised, no <code>PWR_FLAG</code> among them. Time to make it physical.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {

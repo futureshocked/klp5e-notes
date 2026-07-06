@@ -114,9 +114,98 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
 <h1 class="note-title">Breadboard PSU - Layout</h1>
 <h2 id="sec:c8-layout">Laying Out the Board</h2>
@@ -227,13 +316,13 @@
 
 <p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-26-final_outline_reduced_width_rounded_3D_v10.png" style="width:45.0%" /></p>
 <p>Figure 8.40: The finished board back in the 3D Viewer after rounding the corners and trimming the width so the edge meets the USB-C receptacle.</p>
-<p>When it looks right, plot the Gerber files from the “File” then “Plot” dialog, choosing the layers your fab needs (Edge.Cuts among them) and a folder to hold the output (Figure 8.41). Then click “Generate Drill Files” and write the drill file into the same folder (Figure 8.42), exactly as in Chapter 3. Your output folder now holds a board waiting to be made.</p>
+<p>When it looks right, plot the Gerber files from the “File” then “Plot” dialog, choosing the layers your fab needs (Edge.Cuts among them) and a folder to hold the output (Figure 8.41). Then click “Generate Drill Files” to write the drill file into the same folder (Figure 8.42). One detail differs from the tour in Chapter 3: rather than take every KiCad default, match the drill settings your manufacturer asks for. NextPCB, the fab we order from in Chapter 10, wants the plated and non-plated holes in a <em>single</em> file and the coordinates written in <em>decimal</em> format, so tick “PTH and NPTH in single file” and set “Zeros” to “Decimal format (recommended).” KiCad’s default suppresses the leading zeros in each coordinate, which NextPCB’s quote page then refuses to read; those two settings are the fix, and the rest of the dialog can stay as shown. Your output folder now holds a board waiting to be made.</p>
 
 <p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-27-Generate_gerber_files_v10.png" style="width:85.0%" /></p>
 <p>Figure 8.41: Plot the Gerbers from the “File” then “Plot” dialog: tick the layers to include (❶, ❷), set the general options (❸), and the output messages confirm each file written (❺).</p>
 
-<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-28-Generate_drill_files_v10.png" style="width:85.0%" /></p>
-<p>Figure 8.42: From the same dialog, “Generate Drill Files” (❶) writes the drill file into the output folder (❷, ❸) alongside the Gerbers — the last file the fab needs.</p>
+<p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-28_new-Generate_drill_files_v10.png" style="width:85.0%" /></p>
+<p>Figure 8.42: The drill export, set for NextPCB. “Generate Drill Files” (❶) opens the dialog; leave the format on Excellon and tick “PTH and NPTH in single file” (❷), set Units to Inches and Zeros to “Decimal format (recommended)” (❸), leave “Generate map” on Postscript for a readable drill diagram (❹), then click “Generate” (❺). The single file and the decimal format are what let the fab’s quote page read the drill file cleanly.</p>
 <p>Take a moment with what you have just done. With no one telling you which button to press, you sourced every part for a real board, imported and verified the one the standard library did not have, drew and checked a complete schematic, met and understood the most common stumble in all of KiCad, and laid out a finished, manufacturable two-layer board. That is not a tour any more. That is you, designing.</p>
 <h2 id="sec:c8-going-deeper">Going Deeper: Reference Designs and Further Reading</h2>
 <p>This board is deliberately the simplest honest version of its idea, stripped to what a first project needs and no more. If it has whetted your appetite, here are three places I would send you to see the same idea drawn by other hands: the first if you want a fuller design to study, the next two if you want to really understand the USB-C trick at its heart. None of them is required reading. They are here for the curious.</p>
@@ -242,6 +331,88 @@
 <p><strong>Hackaday’s “All About USB-C: Resistors and Emarkers” is the friendly deep dive.</strong> It walks through the same <code>CC</code>-resistor system we used and, more usefully, the ways it goes wrong, which is exactly the “stone dead board” trap I warned you about. It also explains why a board with a receptacle uses two resistors where a captive cable uses only one, and what lies beyond plain 5 volts if you ever want a board to negotiate for more. Find it at <a href="https://hackaday.com/2023/01/04/all-about-usb-c-resistors-and-emarkers/" class="uri">https://hackaday.com/2023/01/04/all-about-usb-c-resistors-and-emarkers/</a>.</p>
 <p>In the next chapter you build the second project of this volume, a tiny solar power supply. It is a gentle step up rather than a leap: you will meet 3D models and mounting holes properly, and source a part or two from outside the standard library again, with the same fifteen-step spine carrying you the whole way. For now, save your work, keep your Gerbers safe, and let’s go build the next one.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {

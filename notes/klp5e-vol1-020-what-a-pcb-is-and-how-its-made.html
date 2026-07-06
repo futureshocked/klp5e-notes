@@ -114,11 +114,102 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .lightbox-overlay.active { display: flex; }
+
+  .lightbox-full-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 1</p>
 <h1 class="note-title">What a PCB Is and How It&#x27;s Made</h1>
+
+<h1 id="what-a-pcb-is-and-how-its-made">What a PCB Is and How It’s Made</h1>
 <p>Before you touch a single tool, it helps to know exactly what you are setting out to build. In this chapter, I’ll show you what a printed circuit board really is: what it’s made of, what each part does, and the names we use for those parts. Then we’ll follow a design from an idea on your screen all the way to a finished board in your hand, install KiCad 10 on your computer, and take a quick look around the KiCad workspace so the rest of the book feels familiar. This is the most “reading” you’ll do for a while; from the next chapter on, you’ll be doing.</p>
 <h2 id="sec:c1-anatomy">PCB Anatomy</h2>
 <p>As a child, my interest in electronics grew from admiration of what clever engineers had come up with into plain curiosity about how those things actually worked. That curiosity led me to take an old screwdriver to anything electronic with a screw that fit. A record player, a VCR, and a radio were only a few of my “victims.” I am still surprised I never got electrocuted, though I did at least have the good sense to unplug things from the mains first. Inside those devices I found all sorts of wonders: resistors, transformers, integrated circuits, coils, and power supplies.</p>
@@ -126,6 +217,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_01_v8.png" /></p>
 <p>Figure 1.1: The top side of our example board, with the main features we’ll meet in this section labelled.</p>
+
 <h3 id="a-board-is-a-sandwich-of-layers">A board is a sandwich of layers</h3>
 <p>The easiest way to picture a PCB is as a sandwich (Figure 1.2). At its core is an insulating board that gives the PCB its strength and shape. Onto that core, the manufacturer bonds a thin sheet of copper and then carves the copper away until only the wiring you designed remains. Over the copper goes a protective coating, and on top of that, some printed lettering. Stack those up and you have a board:</p>
 <ul>
@@ -174,14 +266,12 @@ Figure coming soon
 <div class="figure-pending">
 Figure coming soon
 </div>
-<p>Figure 1.9: Vias are small plated holes that carry a track from one layer to another.</p>
-<h3 id="soldermask">Soldermask</h3>
+<p>Figure 1.9: Vias are small plated holes that carry a track from one layer to another.  ### Soldermask</p>
 <p>That coloured coating over most of the board is the ‘soldermask.’ On our example board it happens to be one colour, but soldermask comes in a whole menu of colours these days: green is the classic, but red, blue, black, white, yellow, and purple are all standard options from most manufacturers at no real extra cost. The colour is up to you; the job it does is the same regardless.</p>
 <p>The soldermask does two important things. First, it seals the copper away from the air. Bare copper slowly oxidises, and oxidised copper conducts poorly, so the mask keeps your tracks healthy over time. Second, it makes the board far easier to solder. The mask coats everything <em>except</em> the pads, and because solder won’t stick to the mask, it stays where you want it, on the pads, instead of wandering between them. That matters because pads can sit very close together, and the tip of a soldering iron is often as wide as a pad or wider. Without soldermask it’s easy to accidentally join two neighbouring pads with a blob of solder, a defect called a ‘solder bridge’ (Figure 1.10). The mask doesn’t make bridges impossible, but it makes them much less likely.</p>
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_06_v8.png" /></p>
-<p>Figure 1.10: A solder bridge, a defect that soldermask helps prevent.</p>
-<h3 id="silkscreen">Silkscreen</h3>
+<p>Figure 1.10: A solder bridge, a defect that soldermask helps prevent.  ### Silkscreen</p>
 <p>The text and line art printed on the outside of the board is the ‘silkscreen,’ usually in white ink (Figure 1.11). The silkscreen carries no electricity; it’s there purely for the humans who build and use the board. We use it to outline where each component goes, to label pins and connectors, to print the board’s name and version number, and to add logos or other markings. It’s a good habit to give every board a name and a version on the silkscreen, so that a year later you can tell at a glance which board you’re holding. Silkscreen can go on the top, the bottom, or both.</p>
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_04_v8.jpg" /></p>
@@ -241,6 +331,88 @@ Figure coming soon
 <p>KiCad’s official documentation covers every one of these in depth and stays current with the software, so I’ll link to it rather than duplicate it whenever you want to go deeper.</p>
 <p>That’s the lay of the land: you know what a PCB is made of, how a design becomes a finished board, and where the tools live. Enough reading. In the next chapter we’ll open the Schematic Editor and make something. Let’s begin.</p>
 
+<div class="lightbox-overlay" data-lightbox-overlay>
+  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
+  <img class="lightbox-full-image" data-lightbox-full alt="" />
+</div>
+</div>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
+        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
+        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size';
+          button.setAttribute('aria-label', 'View full size image');
+
+          function openLightbox() {
+            if (overlay && fullImage) {
+              fullImage.src = src;
+              fullImage.alt = img.alt || '';
+              overlay.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+          thumbnail.addEventListener('click', openLightbox);
+          button.addEventListener('click', openLightbox);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+
+        function closeLightbox() {
+          if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeLightbox();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
+            ov.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
 <!-- te-notes-autoheight v1 -->
 <script>
   function sendHeight() {
