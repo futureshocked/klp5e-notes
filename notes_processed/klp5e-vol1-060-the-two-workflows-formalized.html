@@ -163,17 +163,14 @@
   }
 
   .lightbox-overlay {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
+    position: fixed !important;
+    inset: 0 !important;
     background: rgba(0, 0, 0, 0.92) !important;
     z-index: 9999 !important;
     display: none !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     justify-content: center !important;
-    padding-top: 40px !important;
+    padding: 2rem !important;
   }
 
   .lightbox-overlay.active { display: flex !important; }
