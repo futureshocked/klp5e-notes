@@ -345,11 +345,16 @@
           var button = document.createElement('button');
           button.className = 'lightbox-view-btn';
           button.type = 'button';
-          button.textContent = 'View full size';
-          button.setAttribute('aria-label', 'View full size image');
+          button.textContent = 'View full size (opens in new tab)';
+          button.setAttribute('aria-label', 'View full size image in new tab');
 
           function openFullSize() {
-            window.open(src, '_blank');
+            fetch(src)
+              .then(function (response) { return response.blob(); })
+              .then(function (blob) {
+                var blobUrl = URL.createObjectURL(blob);
+                window.open(blobUrl, '_blank');
+              });
           }
           thumbnail.addEventListener('click', openFullSize);
           button.addEventListener('click', openFullSize);
