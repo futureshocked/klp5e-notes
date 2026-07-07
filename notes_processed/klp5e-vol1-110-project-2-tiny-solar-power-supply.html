@@ -162,48 +162,6 @@
     outline-offset: 2px;
   }
 
-  .lightbox-overlay {
-    position: fixed !important;
-    inset: 0 !important;
-    background: rgba(0, 0, 0, 0.92) !important;
-    z-index: 9999 !important;
-    display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 2rem !important;
-  }
-
-  .lightbox-overlay.active { display: flex !important; }
-
-  .lightbox-full-image {
-    max-width: 95vw !important;
-    max-height: 95vh !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-    border-radius: 4px !important;
-    margin: 0 !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
-  }
-
-  .lightbox-close {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    font-size: 1.25rem;
-    cursor: pointer;
-    z-index: 10000;
-    padding: 0.4rem 0.7rem;
-    border-radius: 4px;
-    line-height: 1;
-    transition: background 0.2s ease;
-  }
-
-  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
-  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -436,10 +394,6 @@
 <p>Notice what you never had to flag. The <code>OUT_P</code> rail carries no power-input pins clamouring to be driven, so the checker never asks you to vouch for it: the converter produces that rail, and the passive parts around it simply draw on it. A <code>PWR_FLAG</code> belongs only where power enters through something the checker sees as passive, a connector or a battery, or on a shared net like <code>GND</code> that has no driving source of its own. It never belongs on a rail an actual chip is producing. This is the same skill Chapter 8 first named: read every line the checker shows you rather than chase an empty report blindly. Knowing which complaints are real, and which would only be noise, is most of what makes the ERC worth running.</p>
 <p>With the schematic drawn, named, footprinted, and genuinely clean, complete the eighth and last schematic step: save once more, then choose “Update PCB from Schematic” from the “Tools” menu to carry the whole design across the one-way bridge into the PCB Editor. Time to make it physical.</p>
 
-<div class="lightbox-overlay" data-lightbox-overlay>
-  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
-  <img class="lightbox-full-image" data-lightbox-full alt="" />
-</div>
 </div>
 <script>
   (function () {
@@ -447,9 +401,6 @@
       var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
       wrappers.forEach(function (wrapper) {
         var images = wrapper.querySelectorAll('img');
-        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
-        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
-        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
 
         images.forEach(function (img) {
           if (img.closest('.lightbox-figure')) return;
@@ -472,44 +423,16 @@
           button.textContent = 'View full size';
           button.setAttribute('aria-label', 'View full size image');
 
-          function openLightbox() {
-            if (overlay && fullImage) {
-              fullImage.src = src;
-              fullImage.alt = img.alt || '';
-              overlay.classList.add('active');
-              document.body.style.overflow = 'hidden';
-              window.scrollTo(0, 0);
-            }
+          function openFullSize() {
+            window.open(src, '_blank');
           }
-          thumbnail.addEventListener('click', openLightbox);
-          button.addEventListener('click', openLightbox);
+          thumbnail.addEventListener('click', openFullSize);
+          button.addEventListener('click', openFullSize);
 
           figure.appendChild(thumbnail);
           figure.appendChild(button);
           img.replaceWith(figure);
         });
-
-        function closeLightbox() {
-          if (overlay) {
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-          }
-        }
-        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-        if (overlay) {
-          overlay.addEventListener('click', function (e) {
-            if (e.target === overlay) closeLightbox();
-          });
-        }
-      });
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
-            ov.classList.remove('active');
-            document.body.style.overflow = '';
-          });
-        }
       });
     }
     if (document.readyState === 'loading') {

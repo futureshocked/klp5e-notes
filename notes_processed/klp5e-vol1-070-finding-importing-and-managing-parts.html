@@ -162,48 +162,6 @@
     outline-offset: 2px;
   }
 
-  .lightbox-overlay {
-    position: fixed !important;
-    inset: 0 !important;
-    background: rgba(0, 0, 0, 0.92) !important;
-    z-index: 9999 !important;
-    display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 2rem !important;
-  }
-
-  .lightbox-overlay.active { display: flex !important; }
-
-  .lightbox-full-image {
-    max-width: 95vw !important;
-    max-height: 95vh !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-    border-radius: 4px !important;
-    margin: 0 !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
-  }
-
-  .lightbox-close {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    font-size: 1.25rem;
-    cursor: pointer;
-    z-index: 10000;
-    padding: 0.4rem 0.7rem;
-    border-radius: 4px;
-    line-height: 1;
-    transition: background 0.2s ease;
-  }
-
-  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
-  .lightbox-close:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -297,10 +255,6 @@
 <p>Figure 6.12: Two homes for a part. Copy a part into the project (through the project-specific table) to make the design self-contained; keep the parts you reuse in a personal library (through the global table). Promote a part from the first to the second once it has earned its place.</p>
 <p>You now have the full sourcing skill: you can find a part in the standard library, import one from a reliable source when the standard library falls short, check that an imported footprint is honest, and store what you collect so a project stays whole for years. This is the missing piece both early tours quietly relied on, and from here it simply becomes part of how you work. In the next part of the book we put it to use on real boards, starting with a complete power-supply project where you will source every part with exactly these steps and copy them into the project as you go. And when, one day, you meet the part that no library has, you will already know what stage three asks of you, and Volume 2 will be waiting. Let’s go build something with the parts you can now find anywhere.</p>
 
-<div class="lightbox-overlay" data-lightbox-overlay>
-  <button class="lightbox-close" data-lightbox-close type="button" aria-label="Close full-size image">✕</button>
-  <img class="lightbox-full-image" data-lightbox-full alt="" />
-</div>
 </div>
 <script>
   (function () {
@@ -308,9 +262,6 @@
       var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
       wrappers.forEach(function (wrapper) {
         var images = wrapper.querySelectorAll('img');
-        var overlay = wrapper.querySelector('[data-lightbox-overlay]');
-        var fullImage = overlay ? overlay.querySelector('[data-lightbox-full]') : null;
-        var closeBtn = overlay ? overlay.querySelector('[data-lightbox-close]') : null;
 
         images.forEach(function (img) {
           if (img.closest('.lightbox-figure')) return;
@@ -333,44 +284,16 @@
           button.textContent = 'View full size';
           button.setAttribute('aria-label', 'View full size image');
 
-          function openLightbox() {
-            if (overlay && fullImage) {
-              fullImage.src = src;
-              fullImage.alt = img.alt || '';
-              overlay.classList.add('active');
-              document.body.style.overflow = 'hidden';
-              window.scrollTo(0, 0);
-            }
+          function openFullSize() {
+            window.open(src, '_blank');
           }
-          thumbnail.addEventListener('click', openLightbox);
-          button.addEventListener('click', openLightbox);
+          thumbnail.addEventListener('click', openFullSize);
+          button.addEventListener('click', openFullSize);
 
           figure.appendChild(thumbnail);
           figure.appendChild(button);
           img.replaceWith(figure);
         });
-
-        function closeLightbox() {
-          if (overlay) {
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-          }
-        }
-        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-        if (overlay) {
-          overlay.addEventListener('click', function (e) {
-            if (e.target === overlay) closeLightbox();
-          });
-        }
-      });
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('[data-lightbox-overlay].active').forEach(function (ov) {
-            ov.classList.remove('active');
-            document.body.style.overflow = '';
-          });
-        }
       });
     }
     if (document.readyState === 'loading') {
