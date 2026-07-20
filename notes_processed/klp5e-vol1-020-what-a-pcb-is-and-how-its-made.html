@@ -196,6 +196,18 @@
   .note-toc li { margin-bottom: 0.2em; }
   .note-toc a { color: #1d4ed8; }
 
+  /* Nested H3 entries inside the TOC: indented, disc markers, muted. */
+  .note-toc .note-toc-sub {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
+  .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
+
+  /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
+  html { scroll-behavior: smooth; }
+
 </style>
 </head>
 <body>
@@ -207,10 +219,50 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c1-anatomy">PCB Anatomy</a></li>
-    <li><a href="#sec:c1-pipeline">The Design → Fabrication → Assembly Pipeline</a></li>
-    <li><a href="#sec:c1-install">Installing KiCad 10</a></li>
-    <li><a href="#sec:c1-apps">The Project Manager and the Apps</a></li>
+    <li><a href="#sec:c1-anatomy">PCB Anatomy</a>
+      <ul class="note-toc-sub">
+        <li><a href="#a-board-is-a-sandwich-of-layers">A board is a sandwich of layers</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#the-substrate">The substrate</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#copper-tracks-and-traces">Copper: tracks and traces</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#pads-holes-and-the-two-ways-to-mount-a-part">Pads, holes, and the two ways to mount a part</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#vias">Vias</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#soldermask">Soldermask</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#silkscreen">Silkscreen</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#surface-finish">Surface finish</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#mounting-holes-copper-pours-and-thermal-relief">Mounting holes, copper pours, and thermal relief</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec:c1-pipeline">The Design → Fabrication → Assembly Pipeline</a>
+      <ul class="note-toc-sub">
+        <li><a href="#design-what-you-do-in-kicad">Design: what you do in KiCad</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#fabrication-handing-off-to-the-factory">Fabrication: handing off to the factory</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#assembly-putting-the-parts-on">Assembly: putting the parts on</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec:c1-install">Installing KiCad 10</a>
+    </li>
+    <li><a href="#sec:c1-apps">The Project Manager and the Apps</a>
+    </li>
   </ul>
 </details>
 

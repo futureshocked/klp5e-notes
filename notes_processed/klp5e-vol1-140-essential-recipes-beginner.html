@@ -196,6 +196,18 @@
   .note-toc li { margin-bottom: 0.2em; }
   .note-toc a { color: #1d4ed8; }
 
+  /* Nested H3 entries inside the TOC: indented, disc markers, muted. */
+  .note-toc .note-toc-sub {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
+  .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
+
+  /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
+  html { scroll-behavior: smooth; }
+
 </style>
 </head>
 <body>
@@ -207,22 +219,38 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c11-text-graphics">Silkscreen Text</a></li>
-    <li><a href="#sec:c11-shapes-logos">Shapes, Logos, and Graphics</a></li>
-    <li><a href="#sec:c11-outline">Reshape the Board Outline</a></li>
-    <li><a href="#sec:c11-flip">Flip a Part to the Back</a></li>
-    <li><a href="#sec:c11-measure">Measure a Distance</a></li>
-    <li><a href="#sec:c11-dimension">Add a Permanent Dimension</a></li>
-    <li><a href="#sec:c11-grid">Grid Overrides</a></li>
-    <li><a href="#sec:c11-board-setup">Board-Setup Basics</a></li>
-    <li><a href="#sec:c11-highlight">Highlight a Net (Cross-Probe)</a></li>
-    <li><a href="#sec:c11-3d-snapshot">Save a 3D Snapshot</a></li>
-    <li><a href="#sec:c11-schematic-pdf">Export a Schematic PDF</a></li>
-    <li><a href="#sec:c11-recover">Recover an Earlier Version</a></li>
-    <li><a href="#sec:c11-hotkeys">Customise Your Hotkeys</a></li>
-    <li><a href="#sec:c11-pcm">Plugin and Content Manager</a></li>
-    <li><a href="#sec:c11-hop-over">Hop-over a Wire Crossing in the Schematic</a></li>
-    <li><a href="#sec:c11-recipes-conclusion">Recipes and Volume 1: a conclusion</a></li>
+    <li><a href="#sec:c11-text-graphics">Silkscreen Text</a>
+    </li>
+    <li><a href="#sec:c11-shapes-logos">Shapes, Logos, and Graphics</a>
+    </li>
+    <li><a href="#sec:c11-outline">Reshape the Board Outline</a>
+    </li>
+    <li><a href="#sec:c11-flip">Flip a Part to the Back</a>
+    </li>
+    <li><a href="#sec:c11-measure">Measure a Distance</a>
+    </li>
+    <li><a href="#sec:c11-dimension">Add a Permanent Dimension</a>
+    </li>
+    <li><a href="#sec:c11-grid">Grid Overrides</a>
+    </li>
+    <li><a href="#sec:c11-board-setup">Board-Setup Basics</a>
+    </li>
+    <li><a href="#sec:c11-highlight">Highlight a Net (Cross-Probe)</a>
+    </li>
+    <li><a href="#sec:c11-3d-snapshot">Save a 3D Snapshot</a>
+    </li>
+    <li><a href="#sec:c11-schematic-pdf">Export a Schematic PDF</a>
+    </li>
+    <li><a href="#sec:c11-recover">Recover an Earlier Version</a>
+    </li>
+    <li><a href="#sec:c11-hotkeys">Customise Your Hotkeys</a>
+    </li>
+    <li><a href="#sec:c11-pcm">Plugin and Content Manager</a>
+    </li>
+    <li><a href="#sec:c11-hop-over">Hop-over a Wire Crossing in the Schematic</a>
+    </li>
+    <li><a href="#sec:c11-recipes-conclusion">Recipes and Volume 1: a conclusion</a>
+    </li>
   </ul>
 </details>
 

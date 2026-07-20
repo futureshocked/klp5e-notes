@@ -196,6 +196,18 @@
   .note-toc li { margin-bottom: 0.2em; }
   .note-toc a { color: #1d4ed8; }
 
+  /* Nested H3 entries inside the TOC: indented, disc markers, muted. */
+  .note-toc .note-toc-sub {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
+  .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
+
+  /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
+  html { scroll-behavior: smooth; }
+
 </style>
 </head>
 <body>
@@ -207,9 +219,15 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:intro-learn">What You Will Learn</a></li>
-    <li><a href="#sec:intro-how">How This Book Is Organised</a></li>
-    <li><a href="#sec:intro-why">Why KiCad?</a></li>
+    <li><a href="#sec:intro-learn">What You Will Learn</a>
+    </li>
+    <li><a href="#sec:intro-how">How This Book Is Organised</a>
+      <ul class="note-toc-sub">
+        <li><a href="#sec:intro-need">What You Will Need</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec:intro-why">Why KiCad?</a>
+    </li>
   </ul>
 </details>
 

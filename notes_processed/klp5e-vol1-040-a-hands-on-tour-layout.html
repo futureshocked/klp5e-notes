@@ -196,6 +196,18 @@
   .note-toc li { margin-bottom: 0.2em; }
   .note-toc a { color: #1d4ed8; }
 
+  /* Nested H3 entries inside the TOC: indented, disc markers, muted. */
+  .note-toc .note-toc-sub {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
+  .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
+
+  /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
+  html { scroll-behavior: smooth; }
+
 </style>
 </head>
 <body>
@@ -207,8 +219,34 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c3-overview">The Layout Workflow at a Glance</a></li>
-    <li><a href="#sec:c3-pass">The 8-Step Pass to Gerbers</a></li>
+    <li><a href="#sec:c3-overview">The Layout Workflow at a Glance</a>
+    </li>
+    <li><a href="#sec:c3-pass">The 8-Step Pass to Gerbers</a>
+      <ul class="note-toc-sub">
+        <li><a href="#step-1-import-from-the-schematic">Step 1: Import from the schematic</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-2-set-up-the-board-outline">Step 2: Set up the board outline</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-3-place-components">Step 3: Place components</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-4-route-the-tracks">Step 4: Route the tracks</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-5-add-copper-fills">Step 5: Add copper fills</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-6-design-rules-check">Step 6: Design rules check</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-7-add-text-and-silkscreen">Step 7: Add text and silkscreen</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-8-generate-the-gerbers">Step 8: Generate the Gerbers</a></li>
+      </ul>
+    </li>
   </ul>
 </details>
 

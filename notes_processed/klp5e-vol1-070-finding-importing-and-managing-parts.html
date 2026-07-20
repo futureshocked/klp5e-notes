@@ -196,6 +196,18 @@
   .note-toc li { margin-bottom: 0.2em; }
   .note-toc a { color: #1d4ed8; }
 
+  /* Nested H3 entries inside the TOC: indented, disc markers, muted. */
+  .note-toc .note-toc-sub {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
+  .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
+
+  /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
+  html { scroll-behavior: smooth; }
+
 </style>
 </head>
 <body>
@@ -207,11 +219,16 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#the-sourcing-decision-tree">The sourcing decision tree</a></li>
-    <li><a href="#sec:find-standard">Finding Parts in the Standard Library</a></li>
-    <li><a href="#sec:import-libraries">Importing Libraries from Reliable Sources</a></li>
-    <li><a href="#sec:not-in-standard">When the Part Isn’t in the Standard Library</a></li>
-    <li><a href="#sec:self-contained">Making Your Project Self-Contained</a></li>
+    <li><a href="#the-sourcing-decision-tree">The sourcing decision tree</a>
+    </li>
+    <li><a href="#sec:find-standard">Finding Parts in the Standard Library</a>
+    </li>
+    <li><a href="#sec:import-libraries">Importing Libraries from Reliable Sources</a>
+    </li>
+    <li><a href="#sec:not-in-standard">When the Part Isn’t in the Standard Library</a>
+    </li>
+    <li><a href="#sec:self-contained">Making Your Project Self-Contained</a>
+    </li>
   </ul>
 </details>
 

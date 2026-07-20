@@ -196,6 +196,18 @@
   .note-toc li { margin-bottom: 0.2em; }
   .note-toc a { color: #1d4ed8; }
 
+  /* Nested H3 entries inside the TOC: indented, disc markers, muted. */
+  .note-toc .note-toc-sub {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
+  .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
+
+  /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
+  html { scroll-behavior: smooth; }
+
 </style>
 </head>
 <body>
@@ -207,9 +219,36 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c2-overview">The Schematic Workflow at a Glance</a></li>
-    <li><a href="#sec:c2-pass">The 8-Step Pass</a></li>
-    <li><a href="#sec:c2-going-deeper">Going Deeper: How the Blinker Works</a></li>
+    <li><a href="#sec:c2-overview">The Schematic Workflow at a Glance</a>
+    </li>
+    <li><a href="#sec:c2-pass">The 8-Step Pass</a>
+      <ul class="note-toc-sub">
+        <li><a href="#step-1-create-the-project-and-schematic">Step 1: Create the project and schematic</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-2-place-symbols">Step 2: Place symbols</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-3-annotate">Step 3: Annotate</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-4-set-component-values">Step 4: Set component values</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-5-wire-and-label">Step 5: Wire and label</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-6-assign-footprints">Step 6: Assign footprints</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-7-electrical-rules-check">Step 7: Electrical rules check</a></li>
+      </ul>
+      <ul class="note-toc-sub">
+        <li><a href="#step-8-hand-off-to-layout">Step 8: Hand off to layout</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec:c2-going-deeper">Going Deeper: How the Blinker Works</a>
+    </li>
   </ul>
 </details>
 
