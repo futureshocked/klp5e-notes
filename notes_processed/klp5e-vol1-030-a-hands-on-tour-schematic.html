@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,15 @@
 <h1 class="note-title">A Hands-On Tour: Schematic</h1>
 
 <p>Enough reading. In this chapter you will open the Schematic Editor and draw a real circuit, the same way you would on a paying job, only smaller. By the end you will have a finished, error-checked ‘schematic’ for a little blinking-LED board, ready to be turned into a real PCB in the next chapter. Think of this as a gentle, guided first lap. I will tell you exactly which button to click and why, and you will follow along. The deeper ideas behind what you are doing come later: Chapter 4 explains <em>why</em> it all works, and Chapter 5 turns these steps into a checklist you will reuse on every future project. For now, we act first and understand later.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c2-overview">The Schematic Workflow at a Glance</a></li>
+    <li><a href="#sec:c2-pass">The 8-Step Pass</a></li>
+    <li><a href="#sec:c2-going-deeper">Going Deeper: How the Blinker Works</a></li>
+  </ul>
+</details>
+
 <p>A quick word of reassurance before we start. The Schematic Editor is a fully featured, powerful tool, and it is where all PCB design begins. Professionals draw schematics with hundreds of parts spread across many sheets in this same editor. We are going to use a small, friendly slice of it today, and you will grow into the rest over the course of the book. So we will leave the advanced corners alone for now: multi-sheet and hierarchical designs, creating your own symbols and libraries, importing schematics from other tools, design blocks, the built-in simulator, and buses. KiCad’s official documentation covers every one of those in depth when you are ready. Today, we make something.</p>
 <p>Here is what we are building (Figure 2.1). It is a classic circuit: a 555 timer wired as an ‘astable multivibrator,’ which is a fancy way of saying it switches on and off all by itself, over and over. We use that steady on-off signal to flash an LED a couple of times a second. Press nothing, flip no switch; give it power and it blinks. It is the kind of circuit that has launched a million electronics hobbies, and it is the perfect size for a first tour: a handful of parts, a few connections, nothing exotic.</p>
 

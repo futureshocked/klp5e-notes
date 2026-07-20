@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,16 @@
 <h1 class="note-title">Editor Orientation (Just Enough)</h1>
 
 <p>You have already driven both of KiCad’s main editors. In Chapter 2 you drew a complete schematic, and in Chapter 3 you turned it into a finished board. Each time, I told you to take ten seconds to get your bearings and promised we would come back and explore the editors properly. This is that chapter. We are going to slow down just enough to put names to the parts of each window, so that when a later project says “open the Appearance panel” or “use the selection filter,” you know exactly where to look and what it does.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c7-shared">The Two Editors Are Siblings</a></li>
+    <li><a href="#sec:c7-schematic-editor">Schematic Editor Essentials</a></li>
+    <li><a href="#sec:c7-pcb-editor">PCB Editor Essentials</a></li>
+    <li><a href="#sec:c7-preferences">Preferences That Matter</a></li>
+  </ul>
+</details>
+
 <p>Let me be clear about what this chapter is, and what it is not. It is a map, not a catalogue. I am not going to march you through every button on every toolbar; that would be a wall of lookup material, and worse, it would go stale the moment KiCad changes an icon. Instead I will show you the regions of each editor, explain what each one is <em>for</em>, and, most importantly, teach you how to find any tool quickly when you need it. The exhaustive, button-by-button detail already exists, and it is excellent: KiCad’s official documentation is thorough, current, and free, and I will point you to it whenever you want to go deeper. Think of this chapter as the orientation that makes that reference easy to use, rather than a replacement for it.</p>
 <p>A reassuring word before we start. Both editors are large, capable programs, and you will never need all of either one on a given day. The goal here is not to memorise anything. It is to make the windows feel familiar, so that nothing on screen is a mystery and you always know roughly where to reach. You will pick up the details by using them, exactly as you did on the tour. </p>
 <h2 id="sec:c7-shared">The Two Editors Are Siblings</h2>

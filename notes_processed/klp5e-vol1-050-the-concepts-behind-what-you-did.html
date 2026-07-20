@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,17 @@
 <h1 class="note-title">The Concepts Behind What You Did</h1>
 
 <p>You’ve now done something a lot of people never get around to: you drew a complete schematic in one editor, then turned it into a real board layout in another, all the way to files a factory could build. You did it by following along, and that was the point. In these last two chapters I asked you to act first and understand later.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c4-two-editors">Why KiCad splits the work in two</a></li>
+    <li><a href="#sec:c4-symbols-footprints">Two faces of a part, and a likeness</a></li>
+    <li><a href="#sec:c4-nets">Nets: how connectivity crosses from schematic to board</a></li>
+    <li><a href="#sec:c4-checks">Why KiCad checks your work twice</a></li>
+    <li><a href="#sec:c4-board-reality">From your files to a board in your hand</a></li>
+  </ul>
+</details>
+
 <p>Now let’s close the loop. This short chapter explains the <em>why</em> behind the actions you just performed. None of it is busywork: the handful of ideas here are exactly what turn KiCad from a set of buttons you follow into a tool you understand. Once these click, everything later in the book, and every project you ever design, rests on them. I’ll keep each idea brief and point you to the Mini Encyclopedia at the back of the book whenever you want more depth.</p>
 <h2 id="sec:c4-two-editors">Why KiCad splits the work in two</h2>
 <p>The first thing to notice, looking back, is that you used two separate programs to make one board. You drew the circuit in the Schematic Editor, saved it, and then moved to the PCB Editor to lay out the physical board. Two editors, two files, two distinct jobs.</p>

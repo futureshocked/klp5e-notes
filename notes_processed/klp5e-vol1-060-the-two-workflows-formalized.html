@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,16 @@
 <h1 class="note-title">The Two Workflows, Formalized</h1>
 
 <p>You have now done the whole thing once. In Chapter 2 you drew a complete schematic, in Chapter 3 you turned it into a manufacturable board, and in Chapter 4 you saw why it all works the way it does. Along the way you walked two workflows, the eight steps of the schematic and the eight steps of the layout, but you walked them on one specific circuit, with me telling you which button to click. This chapter does a single job: it lifts those two walks off the blinker and pins them down as the durable checklist you will reuse on every project from here on.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c5-overview">The Whole Journey at a Glance</a></li>
+    <li><a href="#sec:c5-schematic">The 8-Step Schematic Workflow</a></li>
+    <li><a href="#sec:c5-layout">The 8-Step Layout Workflow</a></li>
+    <li><a href="#one-card-to-keep">One Card to Keep</a></li>
+  </ul>
+</details>
+
 <p>So there is nothing new to learn in this chapter. That is the point. This is the page to dog-ear, the one you will come back to at the start of every design when you want to remember “what comes next, and how do I know this step is finished?” Everything else in the book hangs off the spine you are about to see.</p>
 <p>What follows is the workflow model I actually use, the same order I follow whether I am building a two-part test board or a busy controller. I am laying it out as a fixed sequence because, especially while you are learning, a fixed sequence keeps you out of trouble: each step leaves the design in a known state that the next step expects. Once it is second nature you will bend the order to suit yourself, skipping ahead and doubling back as real work demands. Use it as it is to begin with, and modify it as you see fit later.</p>
 <p>Each step below is written as a small reference entry rather than a tutorial. For every step I give you three things: what the step is and why it sits where it does in the order, and then, in bold, <strong>how you know the step is finished</strong>, the concrete “tell” you can look for before you move on. Where a step has one mistake that catches almost everybody, I call it out too. The mechanics of <em>how</em> to click through each step are exactly what you practised in Chapters 2 and 3, so I will point back there rather than repeat them. </p>

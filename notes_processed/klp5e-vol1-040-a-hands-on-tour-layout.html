@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,14 @@
 <h1 class="note-title">A Hands-On Tour: Layout</h1>
 
 <p>At the end of the last chapter you gave one command, “Update PCB from Schematic,” and KiCad quietly opened a second editor and carried your whole circuit across into it. That is where we pick up now. In this chapter you will take the 555 blinker you drew as a schematic and turn it into a real, physical board: parts placed in real positions, copper of a real width connecting them, an outline that gives the board its shape, and, at the very end, the set of files a factory needs to build it. By the time you finish, you will have designed a complete, manufacturable PCB from first click to final export. This is the other half of the lap you started in Chapter 2, and the two chapters are meant to be walked back to back.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c3-overview">The Layout Workflow at a Glance</a></li>
+    <li><a href="#sec:c3-pass">The 8-Step Pass to Gerbers</a></li>
+  </ul>
+</details>
+
 <p>A word of reassurance before we begin, the same one I gave you about the Schematic Editor. The PCB Editor is a fully featured, powerful tool, and laying out boards is where a lot of the craft of this hobby lives. Professionals route dense, many-layer boards with hundreds of parts in this same editor. We are going to use a small, friendly slice of it today, enough to get a real board out the door, and you will grow into the rest over the course of the book. So we will leave the advanced corners alone for now: boards with more than two layers, the router’s push-and-shove cleverness, length tuning, differential pairs, the net inspector, net classes and custom design rules in depth, copper-zone priorities, teardrops, blind and buried vias, drawing your own footprints, and exporting 3D models for mechanical CAD. KiCad’s official documentation covers every one of those in depth when you are ready. Today, we make a board.</p>
 <p>As in the last chapter, we act first and understand later. I will tell you which button to click and give you a short reason each time, but the deeper ideas wait their turn: Chapter 4 explains <em>why</em> the layout works the way it does, and Chapter 5 turns these steps into a checklist you will reuse on every project. Here is where we are headed (Figure 3.1).</p>
 

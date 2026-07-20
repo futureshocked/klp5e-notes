@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,16 @@
 <h1 class="note-title">What a PCB Is and How It&#x27;s Made</h1>
 
 <p>Before you touch a single tool, it helps to know exactly what you are setting out to build. In this chapter, I’ll show you what a printed circuit board really is: what it’s made of, what each part does, and the names we use for those parts. Then we’ll follow a design from an idea on your screen all the way to a finished board in your hand, install KiCad 10 on your computer, and take a quick look around the KiCad workspace so the rest of the book feels familiar. This is the most “reading” you’ll do for a while; from the next chapter on, you’ll be doing.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c1-anatomy">PCB Anatomy</a></li>
+    <li><a href="#sec:c1-pipeline">The Design → Fabrication → Assembly Pipeline</a></li>
+    <li><a href="#sec:c1-install">Installing KiCad 10</a></li>
+    <li><a href="#sec:c1-apps">The Project Manager and the Apps</a></li>
+  </ul>
+</details>
+
 <h2 id="sec:c1-anatomy">PCB Anatomy</h2>
 <p>As a child, my interest in electronics grew from admiration of what clever engineers had come up with into plain curiosity about how those things actually worked. That curiosity led me to take an old screwdriver to anything electronic with a screw that fit. A record player, a VCR, and a radio were only a few of my “victims.” I am still surprised I never got electrocuted, though I did at least have the good sense to unplug things from the mains first. Inside those devices I found all sorts of wonders: resistors, transformers, integrated circuits, coils, and power supplies.</p>
 <p>The engineers had attached all those parts to small boards (Figure 1.1). A board like that is a ‘printed circuit board,’ or ‘PCB’ for short. It is the flat green (or red, or blue, or black) slab that almost every electronic device is built around. Its job is twofold: to hold the components in place, and to wire them together electrically without a single loose strand of hook-up wire. Let’s look at what a PCB is made of, what each part is called, and why it’s there. The example I’ll use throughout this section is a simple board I designed for this book (Figure 1.1).</p>

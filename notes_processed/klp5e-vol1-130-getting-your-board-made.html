@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,16 @@
 <h1 class="note-title">Getting Your Board Made</h1>
 
 <p>You have built two boards now, and twice you finished with the same thing: a folder of manufacturing files sitting quietly on your disk. That folder is a real board waiting to happen, but only waiting. In this chapter we stop designing and finally make something you can hold. You will produce your first ‘bill of materials,’ package and double-check the Gerbers you already know how to plot, learn the handful of things a factory needs from any board before it can build it, and then walk all the way through placing an order. By the end you will have sent a design out into the world and have boards on the way to your door.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c10-bom">Exporting a BOM</a></li>
+    <li><a href="#sec:c10-gerbers">Generating Gerbers</a></li>
+    <li><a href="#sec:c10-dfm">DFM Basics</a></li>
+    <li><a href="#sec:c10-order">Ordering a PCB</a></li>
+  </ul>
+</details>
+
 <p>One word before we start, because it shapes everything that follows. Getting a board ‘made’ can mean two different things, and it is worth being clear about which one we are doing. The first is <em>manufacturing</em> the bare board: the factory etches your copper, drills your holes, and finishes the surface, then ships you an empty PCB that you populate yourself with a soldering iron. The second is <em>assembly</em>, sometimes called turnkey: the factory also buys and solders the components on, and hands back a finished, working board. Volume 1 does the first only — every order in this chapter is for the bare PCB — and that keeps the list of what you must supply pleasantly short. A bare-board order needs just two things from you: the Gerber files and the drill file. It does <em>not</em> need a bill of materials, because the factory is not sourcing or placing any parts on your behalf. We will still make a BOM in a moment, because you need one yourself to buy the components you will solder, but keep in the back of your mind that on a Volume 1 order the manufacturer never sees it. Assembly, and the extra files it asks for, is a Volume 2 topic; I will point out where it would slot in as we pass it.</p>
 <p>I will use the breadboard power supply from Chapter 8 as the example throughout. It is the simpler of the two boards you built — nearly all through-hole, with a single surface-mount part — so it keeps our eyes on the ordering process itself rather than on the board. The solar supply from Chapter 9 orders in exactly the same way, step for step, so follow along with whichever board you would rather hold at the end; nothing in this chapter changes between them. For the ordering walkthrough I will use NextPCB, which is the sponsor of this book and a service I have used happily for years. I want to be honest about that arrangement and equally honest about what it does not change: every step in this chapter is the same at any reputable online PCB manufacturer. You upload the same files, you choose from the same handful of options, and you read the same kind of quote back. NextPCB is the worked example, not a requirement. Learn the shape of the thing once here, and you can order a board anywhere. Let’s begin.</p>
 <h2 id="sec:c10-bom">Exporting a BOM</h2>

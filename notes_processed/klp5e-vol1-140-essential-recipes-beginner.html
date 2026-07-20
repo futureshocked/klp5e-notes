@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,28 @@
 <h1 class="note-title">Essential Recipes (Beginner)</h1>
 
 <p>You have now taken two boards all the way from a blank sheet to a parcel in the post, and along the way you learned a complete workflow twice over. This chapter is different from the ones before it. It is not a story with a beginning and an end; it is a drawer of small, useful tools. Each section is a self-contained ‘recipe’ for one task that did not belong to either project but that you will reach for again and again: putting your name on a board, rounding off its corners, measuring a gap, recovering yesterday’s work after a wrong move. You do not need to read them in order, and you certainly do not need to read them all at once. Skim the headings, and when a job comes up, come back and follow the steps. I have kept every recipe short and aimed it at the boards you already know, so nothing here should feel unfamiliar. Let’s open the drawer. </p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c11-text-graphics">Silkscreen Text</a></li>
+    <li><a href="#sec:c11-shapes-logos">Shapes, Logos, and Graphics</a></li>
+    <li><a href="#sec:c11-outline">Reshape the Board Outline</a></li>
+    <li><a href="#sec:c11-flip">Flip a Part to the Back</a></li>
+    <li><a href="#sec:c11-measure">Measure a Distance</a></li>
+    <li><a href="#sec:c11-dimension">Add a Permanent Dimension</a></li>
+    <li><a href="#sec:c11-grid">Grid Overrides</a></li>
+    <li><a href="#sec:c11-board-setup">Board-Setup Basics</a></li>
+    <li><a href="#sec:c11-highlight">Highlight a Net (Cross-Probe)</a></li>
+    <li><a href="#sec:c11-3d-snapshot">Save a 3D Snapshot</a></li>
+    <li><a href="#sec:c11-schematic-pdf">Export a Schematic PDF</a></li>
+    <li><a href="#sec:c11-recover">Recover an Earlier Version</a></li>
+    <li><a href="#sec:c11-hotkeys">Customise Your Hotkeys</a></li>
+    <li><a href="#sec:c11-pcm">Plugin and Content Manager</a></li>
+    <li><a href="#sec:c11-hop-over">Hop-over a Wire Crossing in the Schematic</a></li>
+    <li><a href="#sec:c11-recipes-conclusion">Recipes and Volume 1: a conclusion</a></li>
+  </ul>
+</details>
+
 <h2 id="sec:c11-text-graphics">Silkscreen Text</h2>
 <p>You added a line of silkscreen text back in the layout tour, and you labelled the header pins on both projects so nobody could plug them in backwards. That same tool does a great deal more, and a few minutes spent here will make every board you build clearer to read and nicer to look at.</p>
 <p>Text usually lives on the silkscreen, the printed layer on top of the soldermask, though you can place it on other layers too. To add a line of text, pick the layer you want first in the “Appearance” panel (the front silkscreen is <code>F.Silkscreen</code>), choose the text tool from the right toolbar, click where the text should sit, and type. While the text is selected you can open its “Text Properties” to set the size, thickness, and justification (Figure 11.1). In my example I have set the width and height to 1 mm and given the board the line “BB-PSU v1.0” on <code>F.Silkscreen</code>. The reason to choose a sensible size now is legibility: silkscreen has a smallest line the factory can print cleanly, and very small text turns to mud, so keep ordinary text around 1 mm tall and you will always be able to read it on the finished board.</p>

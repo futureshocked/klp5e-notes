@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,15 @@
 <h1 class="note-title">Project 2: Tiny Solar Power Supply</h1>
 
 <p>You built a whole board of your own in Chapter 8, from an empty project to a folder of manufacturing files, and the workflow walked beside you the entire way. This chapter builds a second board the same way, and it is a gentle step up rather than a leap. The circuit is a little cleverer, most of its parts are surface-mount rather than through-hole, and along the way you will meet a few things the breadboard supply did not need: 3D models, so you can see the finished board in the round before you order it; a closer look at the design rules KiCad hands you for free; and a handful of new moves in the layout — your first via, a ground pour stitched down to it, and cross-probing between the two editors. None of this is new territory in the workflow sense. You still take the eight schematic steps and the eight layout steps in the order you already know, and each one leaves the design ready for the next. Keep the one-page checklist from Chapter 5 beside you, and let’s build a second real thing.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c9-source">Sourcing the Parts</a></li>
+    <li><a href="#sec:c9-schematic">Drawing the Schematic</a></li>
+    <li><a href="#sec:c9-defect">Finding and Fixing a Design Defect</a></li>
+  </ul>
+</details>
+
 <p>The design is not mine. It is a neat little circuit called the Tiny Solar Supply, drawn by Clemens Valens for Elektor, and I am rebuilding it in KiCad with only a few small changes of my own. Following someone else’s good schematic is exactly how a great deal of real PCB work begins, so it is a fair and useful thing to practise.</p>
 <p>Here is what we are building (Figure 9.1): a power supply that runs from a small solar panel. In daylight the panel charges a rechargeable battery; when the panel falls dark, the board draws on that stored charge instead, so the 3.3 volts it delivers never blink out. That makes it a tidy supply for a low-power project left to fend for itself on a windowsill, in a garden, or anywhere a wall socket will not reach.</p>
 

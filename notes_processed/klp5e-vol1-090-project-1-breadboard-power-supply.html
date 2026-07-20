@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,16 @@
 <h1 class="note-title">Project 1: Breadboard Power Supply</h1>
 
 <p>You have done the whole thing once, and then some. In Chapter 2 you drew a schematic, in Chapter 3 you turned it into a manufacturable board, and you did both with my hand on yours at every click. Chapter 5 pinned those two walks down as a checklist you can reuse forever, and Chapter 6 gave you the one skill both tours quietly leaned on: finding and importing any part a design needs. This chapter is where it all comes together. You are going to build a complete board of your own, from an empty project to a folder of manufacturing files, following the same fifteen steps you already know. The difference is that this time the board is yours to drive. I will still walk beside you, but where the tours told you which button to press, here I will more often point back to the chapter where you learned the move and let you make it.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c8-how">How the Board Works</a></li>
+    <li><a href="#sec:c8-source">Sourcing the Parts</a></li>
+    <li><a href="#sec:c8-schematic">Drawing the Schematic</a></li>
+    <li><a href="#sec:c8-defect">Finding and Fixing a Design Defect</a></li>
+  </ul>
+</details>
+
 <p>This is your first solo board, so let me hand you the safety net before you need it: the workflow. As long as you take the eight schematic steps and the eight layout steps in order, each one leaves the design in a state the next one expects, and you will not get lost. Keep the one-page checklist from Chapter 5 open beside you, and treat this chapter as the project that proves you can follow it without me reading it out.</p>
 <p>Here is what we are building (Figure 8.1): a small power supply for your breadboard. It takes 5 volts in over a ‘USB Type-C’ connector, the same reversible USB connector you met in Chapter 6, and delivers that 5 volts to your breadboard’s power rail through a two-pin header and a couple of jumper wires, with a switch to turn it on and off, a fuse to keep a stray strand of wire on the breadboard from harming your computer, and an LED that glows when the power is flowing.</p>
 

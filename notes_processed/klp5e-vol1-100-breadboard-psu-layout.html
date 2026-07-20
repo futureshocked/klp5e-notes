@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,14 @@
 <h1 class="note-title">Breadboard PSU - Layout</h1>
 <h2 id="sec:c8-layout">Laying Out the Board</h2>
 <p>You are on the eight-step layout workflow from Chapter 5 now, and once again you know every move from the blinker in Chapter 3. I will name each step, flag what is special about laying out a power board, and trust you with the mechanics. This board, though, has something the blinker did not: it has to fit a real piece of hardware, the breadboard it will power, and that breadboard decides its shape.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c8-layout">Laying Out the Board</a></li>
+    <li><a href="#sec:c8-going-deeper">Going Deeper: Reference Designs and Further Reading</a></li>
+  </ul>
+</details>
+
 <p>So look at the breadboard before you draw the board. Figure 8.12 shows the one this supply is made for. A power rail runs down each long side, a row of holes marked <code>+</code> beside a row marked <code>−</code>, the two rows a tidy 2.54 mm apart, and feeding those rails is your board’s whole job at this end. Rather than perch the supply on top of the breadboard, where it would bury the very holes you want to build on, you will stand it flush alongside one end and carry the power across in short jumper wires. Its output is a plain two-pin header, <code>J2</code>: two short jumpers take <code>+5V</code> and <code>GND</code> from it into the first <code>+</code> and <code>−</code> holes of the near rail, and a second pair carries them across to the rail on the far side, so the whole breadboard comes alive from one small connector while every working hole stays clear.</p>
 
 <p><img src="/assets/klp5e-vol1/ch08/ch08-psu-layout-breadboard_mini.JPEG" style="width:45.0%" /></p>

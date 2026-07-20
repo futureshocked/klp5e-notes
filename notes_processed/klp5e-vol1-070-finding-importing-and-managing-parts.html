@@ -162,6 +162,40 @@
     outline-offset: 2px;
   }
 
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
 </style>
 </head>
 <body>
@@ -170,6 +204,17 @@
 <h1 class="note-title">Finding, Importing, and Managing Parts</h1>
 
 <p>In Chapter 2 you placed every symbol your blinker needed, and in Chapter 3 you gave each one a footprint, without once leaving KiCad or opening a web browser. That was not luck. I chose that circuit precisely so that every part lived in KiCad’s standard library, the large collection of symbols and footprints that ships with the program. Both tours leaned on that convenience and said almost nothing about it. This chapter is where we give it proper attention, because the day will come, probably sooner than you expect, when you reach for a part and KiCad does not have it.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#the-sourcing-decision-tree">The sourcing decision tree</a></li>
+    <li><a href="#sec:find-standard">Finding Parts in the Standard Library</a></li>
+    <li><a href="#sec:import-libraries">Importing Libraries from Reliable Sources</a></li>
+    <li><a href="#sec:not-in-standard">When the Part Isn’t in the Standard Library</a></li>
+    <li><a href="#sec:self-contained">Making Your Project Self-Contained</a></li>
+  </ul>
+</details>
+
 <p>When that happens, you are not stuck. There is a clear path to follow, and walking it with confidence is one of the small skills that separates a smooth project from a stalled one. That path is what this chapter is about: where parts come from, how to bring a missing one into your design from a trustworthy source, and how to manage the parts you collect so a project still opens cleanly years from now. We are going to <em>use</em> libraries here, not build them; authoring a symbol or footprint from scratch is a craft of its own, and it waits for you in Volume 2.</p>
 <h2 id="the-sourcing-decision-tree">The sourcing decision tree</h2>
 <p>Every time you need a part, you are really asking the same question in three stages (Figure 6.1). First: is it in the standard library? If it is, use it, and you are done in seconds. Second: if it is not, can you get it from a reliable source, a library that someone trustworthy has already made and published? If so, import it. Third: if no reliable source has it either, you author it yourself, drawing the symbol and footprint by hand from the part’s datasheet.</p>
