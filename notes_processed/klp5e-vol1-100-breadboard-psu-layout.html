@@ -364,7 +364,8 @@
         if (!a) return;
         var href = a.getAttribute('href');
         if (!href || href.charAt(0) !== '#') return;
-        var target = document.querySelector(href);
+        var id = href.substring(1);
+        var target = document.getElementById(id);
         if (target) {
           e.preventDefault();
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
