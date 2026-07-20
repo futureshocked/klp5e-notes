@@ -208,6 +208,9 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* Offset anchored headers so they don't hide under any sticky iframe top. */
+  h2[id], h3[id] { scroll-margin-top: 1.5em; }
+
 </style>
 </head>
 <body>
@@ -453,6 +456,33 @@
 <p>With the schematic drawn, named, footprinted, and genuinely clean, complete the eighth and last schematic step: save once more, then choose “Update PCB from Schematic” from the “Tools” menu to carry the whole design across the one-way bridge into the PCB Editor. Time to make it physical.</p>
 
 </div>
+<script>
+  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
+  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
+  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  (function () {
+    function initTocScroll() {
+      var toc = document.querySelector('.note-toc');
+      if (!toc) return;
+      toc.addEventListener('click', function (e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        if (!href || href.charAt(0) !== '#') return;
+        var target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTocScroll);
+    } else {
+      initTocScroll();
+    }
+  })();
+</script>
 <script>
   (function () {
     function initLightbox() {

@@ -208,6 +208,9 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* Offset anchored headers so they don't hide under any sticky iframe top. */
+  h2[id], h3[id] { scroll-margin-top: 1.5em; }
+
 </style>
 </head>
 <body>
@@ -382,6 +385,33 @@
 <p>For now, take a moment to appreciate what you have done across these two chapters. You drew a complete schematic, then turned it into a complete, checked, manufacturable board, and you did it by acting first and understanding later. That was the plan. In the next chapter we close the loop and explain the <em>why</em> behind everything your hands just did: why KiCad splits the work into two editors, why each part wore two faces, how your connections crossed from schematic to board, and why we checked the work twice. Let’s understand why it all worked.</p>
 
 </div>
+<script>
+  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
+  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
+  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  (function () {
+    function initTocScroll() {
+      var toc = document.querySelector('.note-toc');
+      if (!toc) return;
+      toc.addEventListener('click', function (e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        if (!href || href.charAt(0) !== '#') return;
+        var target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTocScroll);
+    } else {
+      initTocScroll();
+    }
+  })();
+</script>
 <script>
   (function () {
     function initLightbox() {
