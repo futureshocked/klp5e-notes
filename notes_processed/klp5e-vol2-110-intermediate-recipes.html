@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intermediate Recipes — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #1a1a1a;
+    background: #ffffff;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  .note-eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin: 0 0 0.4em 0;
+  }
+
+  h1.note-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    margin: 0 0 0.8em 0;
+    padding-bottom: 0.3em;
+    border-bottom: 3px solid #0f766e;
+  }
+
+  h2 {
+    font-size: 1.45em;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h3 { font-size: 1.15em; font-weight: 700; color: #0f766e; margin-top: 1.6em; margin-bottom: 0.4em; }
+  h4 { font-size: 1em; font-weight: 700; color: #475569; margin-top: 1.2em; margin-bottom: 0.3em; }
+
+  p { margin-top: 0.9em; margin-bottom: 0; }
+
+  ul, ol { padding-left: 1.6em; margin-top: 0.6em; margin-bottom: 0.6em; }
+  li { margin-bottom: 0.25em; }
+
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 700; }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto 0.4em;
+  }
+
+  figure { margin: 1.4em 0; }
+  figure img { margin-bottom: 0.4em; }
+  figcaption { font-size: 0.9em; color: #64748b; text-align: center; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1.1em 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.86em; color: #0f172a; }
+
+  blockquote {
+    margin: 1.1em 0;
+    padding: 0.4em 1.1em;
+    border-left: 4px solid #cbd5e1;
+    color: #475569;
+    font-style: italic;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3em 0; font-size: 0.95em; }
+  th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .figure-pending {
+    margin: 1.4em 0;
+    padding: 22px 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: center;
+  }
+
+  .draft-pending {
+    margin: 1.6em 0;
+    padding: 28px 22px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.92em;
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
+     full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
+     thumbnail keeps this template's existing block+margin:auto centering
+     (matches the plain `img` rule above) and the button is centered via the
+     figure's text-align, since this template (unlike the source component)
+     always centers standalone images. ---- */
+  .lightbox-figure {
+    display: block;
+    text-align: center;
+    margin: 1.4em auto 0.4em;
+  }
+
+  .lightbox-thumbnail {
+    display: block;
+    margin: 0 auto;
+    max-width: var(--lightbox-max-width, 50%);
+    max-height: var(--lightbox-max-height, 350px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-thumbnail:hover { opacity: 0.85; }
+
+  .lightbox-view-btn {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--btn-bg, #0f766e);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-view-btn:hover { opacity: 0.9; }
+  .lightbox-view-btn:focus-visible {
+    outline: 2px solid var(--btn-bg, #0f766e);
+    outline-offset: 2px;
+  }
+
+  /* ---- Foldable internal TOC (inserted after the first paragraph). Uses native
+     <details>/<summary> so it works without JS and degrades gracefully. ---- */
+  .note-toc {
+    margin: 1.4em 0 2em;
+    padding: 0.9em 1.2em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  .note-toc > summary {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f766e;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .note-toc > summary::-webkit-details-marker { display: none; }
+  .note-toc > summary::before {
+    content: "▾";
+    font-size: 0.9em;
+    transition: transform 0.2s ease;
+  }
+  .note-toc:not([open]) > summary::before { transform: rotate(-90deg); }
+  .note-toc[open] > summary { margin-bottom: 0.6em; }
+  .note-toc ul { margin: 0; padding-left: 1.2em; }
+  .note-toc li { margin-bottom: 0.2em; }
+  .note-toc a { color: #1d4ed8; }
+
+  /* Nested H3 entries inside the TOC: indented, disc markers, muted. */
+  .note-toc .note-toc-sub {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
+  .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
+
+  /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
+  html { scroll-behavior: smooth; }
+
+  /* Offset anchored headers so they don't hide under any sticky iframe top. */
+  h2[id], h3[id] { scroll-margin-top: 1.5em; }
+
+</style>
+</head>
+<body>
+<div class="lightbox-wrapper" data-lightbox-wrapper>
+<p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
+<h1 class="note-title">Intermediate Recipes</h1>
+<p>Volume 1 ended with a drawer of beginner recipes, small self-contained tricks that did not belong to any one project but that you reach for again and again. This chapter is the same idea, one volume on. The techniques here are the intermediate ones, the moves that a board with a lot of parts, or a board you intend to reuse, starts to ask for, and every one of them is something Volume 1 did not need to teach. You do not have to read them in order, and you certainly do not have to read them all at once. Skim the headings, and when a job comes up on a real board, come back and follow the recipe. Several of these you have already met in passing in the two projects; here they get the standalone treatment so you can find them when you need them. Let’s open the drawer.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c10-buses">Buses</a>
+    </li>
+    <li><a href="#sec:c10-teardrops">Teardrops</a>
+    </li>
+    <li><a href="#sec:c10-net-ties">Net Ties</a>
+    </li>
+    <li><a href="#sec:c10-bulk-edits">Bulk Edits</a>
+    </li>
+    <li><a href="#sec:c10-symbol-fields-table">The Symbol Fields Table</a>
+    </li>
+    <li><a href="#sec:c10-back-annotation">Back-Annotation</a>
+    </li>
+    <li><a href="#sec:c10-geographical-reannotation">Geographical Reannotation</a>
+    </li>
+    <li><a href="#sec:c10-tables">Tables (K9)</a>
+    </li>
+    <li><a href="#sec:c10-design-blocks">Design Blocks (K9/K10)</a>
+    </li>
+    <li><a href="#sec:c10-multi-channel">Multi-Channel Design (K9)</a>
+    </li>
+    <li><a href="#sec:c10-embedded-files">Embedded Files (K9)</a>
+    </li>
+    <li><a href="#sec:c10-pin-table-csv">Symbol Pin-Table CSV (K10)</a>
+    </li>
+    <li><a href="#sec:c10-design-variants">Design Variants / DNP (K10)</a>
+    </li>
+    <li><a href="#sec:c10-project-templates">Project Templates</a>
+    </li>
+    <li><a href="#sec:c10-fab-design-rules">Importing a Fab’s Design Rules</a>
+    </li>
+  </ul>
+</details>
+
+<h2 id="sec:c10-buses">Buses</h2>
+<p>When a schematic carries a lot of related signals side by side, such as, say, four motor-control lines, eight data bits, and another eight address lines, drawing every one as its own wire makes the sheet very busy and reduces readability due to the inherent clutter. A ‘bus’ a way that KiCad offers to address this issue. A bus is a single thick line that stands for a whole group of related signals, so the sheet shows one bus where it would otherwise show multiple wires. Be careful not to confuse the term “bus” as used in KiCad, with the same word that describes the data and address buses inside a computer. The latter is what most of us first think when we see the word “bus”. In KiCad, a bus is a simply a statement about the drawing, not about the circuit. It doesn’t say that the signals share a wire, take turns, or speak a protocol, the way a memory bus or an I2C bus does. It says only that you have chosen to draw a group of nets as one line because they belong together. Each member stays its own independent net. That is why a bus suits four motor-control lines that share nothing electrically just as well as it suits eight data bits. KiCad doesn’t care whether the members ever interact, only that bundling them makes the sheet easier to read.</p>
+<p>To draw a bus, you can use pieces you already know. Remember the net labels from Volume 1, where any two wires that carry the same name are joined by name? A bus operates on the same principle, and it essentially combines multiple net labels. Select the bus tool from the right toolbar to draw the bus as one thick line. Then, attach a label that lists its members. There are two forms of label that cover the two possible cases. When the members are numbered, as in a data bus, you use a range: a label of <code>D[0..7]</code> declares eight members from <code>D0</code> to <code>D7</code>. When the members have their own unrelated names, as our control lines do, you wrap them in braces: a label of <code>CTRL{AIN1 AIN2 BIN1 BIN2}</code> declares a group of four. Once you have drawn a bus, you need to bring signals in and out. To bring a signal into or out of the bus, drop a short diagonal ‘bus entry’ from the bus to a wire, and then put an ordinary net label with the member’s name on that wire. To drop a bus entry, select the “bus entry” tool from the right toolbar. The bus entry is only a drawing; the label is what makes the connection, so a wire you tag <code>AIN1</code> where it joins the bus meets the pin you tag <code>AIN1</code> where it leaves, however far the bus wanders across the sheet. Keep in mind that when you name the group, KiCad prefixes each member’s net with that name, so the members of <code>CTRL{...}</code> become <code>CTRL.AIN1</code>, <code>CTRL.AIN2</code>, and so on; leave the group unnamed, as <code>{AIN1 AIN2 BIN1 BIN2}</code>, and the members keep their plain names. You cannot wire a pin straight onto the bus line, and KiCad ignores the attempt if you try, so every member reaches the bus through its own entry and label.</p>
+<p>Placing those entries and labels by hand, one signal at a time, is the kind of repetitive work KiCad’s ‘unfold’ tool spares you. Hover the cursor over the bus and press “C”, or right-click the bus and choose “Unfold from Bus”, and KiCad shows you a menu of the bus’s members. Pick one, and it draws the bus entry, the short wire, and the correctly-named label in a single motion, leaving you only to run the wire on to the pin. Because you choose the member from the bus’s own list instead of typing it, you can’t misspell it, so the unfold feature offers safety on top of convenience as an added benefit. Where a row of pins lines up neatly, the “Insert” key repeats the last item you placed and steps its number on as it goes, so a numbered bus like <code>D[0..7]</code> breaks out almost as fast as you can tap the key. If your keyboard has no “Insert” key, as many laptops and Mac keyboards do not, remember that “Insert” is only the default binding. To assign a different hotkey to this function, open “Preferences”, go to the “Hotkeys” page, find “Repeat Last Item,”.</p>
+<p>For a concrete case, picture a microcontroller driving a dual H-bridge, the same kind of motor driver the capstone builds. Four control lines run from the controller to the driver’s <code>AIN1</code>, <code>AIN2</code>, <code>BIN1</code>, and <code>BIN2</code> inputs. Drawn as four separate wires, they clutter the gap between the two parts; gathered into a <code>CTRL{AIN1 AIN2 BIN1 BIN2}</code> bus, they become one clean line with four tidy entries at each end (Figure 10.1). Nothing about the board changes, because the copper carries the same four nets either way. What changes is that anyone reading the sheet sees at a glance that these four signals belong together and travel together, and on a busy sheet that is worth a great deal.</p>
+<p>So when should you reach for a bus, and when is a plain net label the better tool? Since the two are identical to the board, the choice is entirely about the person reading the sheet. A bus is preferable when signals genuinely belong together and travel together, like with a data bus, an address bus, the control lines to a driver, or the signals off a ribbon connector, and when drawing them one wire at a time would clutter the sheet or make the reader work to see that they are a set. The thick line signifies that these signals go as one. Reach for plain labels instead when the signals are few, when they don’t form a natural family, or when a single net just needs to jump across the sheet. Forcing unrelated signals into a bus is worse than leaving them loose, because the bus implies a relationship that isn’t there, and you may potentially mislead the reader. A good rule of thumb is to reach for a plain label by default, and promote a group to a bus when the grouping is real and the tidiness is worth the entries. On most sheets you end up with a bus or two for the obvious bundles and plain labels for the rest.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-bus.png" /></p>
+<p>Figure 10.1: Four control lines gathered into a bus. The TB6612FNG’s AIN1, AIN2, BIN1, and BIN2 pins each leave through a bus entry onto the <code>CTRL{AIN1 AIN2 BIN1 BIN2}</code> bus and reappear at the Conn_01x04 header, connecting by name; because the group is named, the nets resolve to CTRL.AIN1 through CTRL.BIN2.</p>
+<h2 id="sec:c10-teardrops">Teardrops</h2>
+<p>The default way by which a track meets a pad or via is an abrupt join, a narrow line hitting a wide circle at a point. A ‘teardrop’ softens that join by adding a small triangular fillet of copper, so the track widens smoothly into the pad like the tail of a teardrop. There are good engineering reasons for terminating wire with a teardrop. A teardropped join is mechanically stronger and more tolerant of the small misregistration<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> that happens when the PCB manufacturer drills a hole slightly off-centre. When the track-pad joint uses a teardrop, the track is less likely to crack or neck at the very spot where it is most vulnerable.</p>
+<p>You can add teardrops from the Edit Teardrops dialogue. Open it from “Edit” and “Edit Teardrops…” (Figure 10.2). The “Scope” section provides you broad way to choose which kinds of object to treat: plated-through-hole pads, SMD pads, vias, and the track-to-track joins where two different widths meet. The “Filter Items” section narrows the job further, by net, net class, or layer, or to round pads only, or to just the items you have selected on the board. Under “Action,” choose “Add teardrops with default values for shape” to use the shapes you set once in Board Setup; the “Edit default values in Board Setup” link jumps straight there, where round pads, rectangular pads, and track-to-track joins each carry their own defaults. Click “Apply and Close,” and the joins fill in.</p>
+<p>That covers both ways of working: tick “Selected items only” to teardrop just the connections you have picked, or leave the filters off to treat the whole board in one action, which is the usual way. There is no mode that adds teardrops as you route, so treat them as a finishing step. Teardrops are essentially very small copper zones, so they refill along with the board’s other zones whenever you run the design rules check or generate fabrication files, and re-running the dialogue updates existing teardrops rather than stacking new ones on top. They will not appear on fresh routing by themselves, though, so add them once the board is routed and run the dialogue again if you rework the copper afterwards. Teardrops are particularly useful on boards that carry current or that you want rugged, which makes the motor driver a natural candidate; they cost nothing at the factory and a few seconds of your time, so on a board that matters they are an easy yes.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-teardrops.png" /></p>
+<p>Figure 10.2: Adding teardrops with the “Set Teardrops” dialogue (Edit → Edit Teardrops…). On the header at right, the lower pads (❶) still show the bare track-to-pad join, while the upper pads (❷) have teardrops that widen the track smoothly into the pad. In the dialogue, the “Filter Items” section (❸) limits which objects are treated; here it is set to a single net, but left empty it teardrops the whole board at once.</p>
+<p>Those default shapes suit most boards, and for an ordinary signal design you can teardrop everything without changing a single value. A few situations, though, justify a look at these defaults first (Figure 10.3):</p>
+<ol type="1">
+<li><strong>Power distribution and high-current nets.</strong> A power track is often nearly as wide as the pad it lands on, and the default “Track width limit” of 90% tells KiCad to skip the teardrop whenever the track is wider than that, so your fattest, most stressed joins can be the ones left bare. Raise the limit to 100% or a little beyond so those connections are teardropped too, and turn on “Curved edges” for a rounded fillet that makes a gentler transition into the pad.</li>
+<li><strong>Fine-pitch parts and small pads, tracks, and vias.</strong> On a dense board the default caps, a 1 mm “Maximum length” and a 2 mm “Maximum width”, can grow a teardrop until it crowds a neighbour or trips a clearance check. Bring the caps down to suit the geometry, something like 0.3 to 0.5 mm of length and about 0.5 mm of width, and switch on “Curved edges” so the fillet hugs the pad rather than reaching toward the next one. Leave “Prefer zone connection” ticked so a pad already sitting in a pour is not given redundant copper.</li>
+<li><strong>Tracks that change width.</strong> By default, the tool teardrops pads and vias but leaves track-to-track joins alone: the “Track to track” box in the “Scope” section of the earlier dialogue is unticked. Where a thin trace branches off a wide power track, tick that box, so KiCad also fillets the step where the two widths meet, shaped by the “Track-to-Track” defaults in this same panel.</li>
+</ol>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-teardrops-setup.png" /></p>
+<p>Figure 10.3: The teardrop defaults in Board Setup (Design Rules → Teardrops), with separate settings for round pads, rectangular pads, and track-to-track joins. Each group carries the same controls: the best and maximum length and width of the fillet, whether it may span two track segments or prefer a zone connection, the track-width limit that suppresses teardrops on wide tracks, and whether its edges are curved.</p>
+<h2 id="sec:c10-net-ties">Net Ties</h2>
+<p>Every so often you want two separate nets to touch at exactly one place, on purpose. KiCad normally treats copper from two different nets meeting as a short circuit and raises a design-rule error, which is precisely what you want almost everywhere. A ‘net tie’ is how you make one deliberate exception. It is a small footprint whose job is to join two nets with a bridge of copper at a single, controlled point, without the design rules check complaining.</p>
+<p>The classic reason to reach for one is grounds. A board that mixes a quiet section with a noisy one, or a power ground with a signal ground, is often best wired, so those grounds meet at just one ‘star’ point, so that heavy return currents cannot wash through the sensitive part of the circuit. A net tie gives you exactly that single, defined junction. The same trick makes a clean ‘Kelvin’<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> sense connection, where a measuring line must touch a power line at one precise spot and nowhere else.</p>
+<p>To see why that single join matters, it helps to have the circuit in front of you. Figure 10.4 is a small board built for this recipe, and it deliberately sets a noisy job beside a quiet one. On the left, a 555 timer runs as an oscillator and flashes an LED: it switches hard a few times a second, and every switch pulls a sharp pulse of current back through its ground. On the right, an op-amp buffers a steady reference voltage tapped off a two-resistor divider, exactly the sort of quiet analogue node whose only job is to hold still. Both are fed from the same 5 V input, and both have to return their current to ground.</p>
+<p>If they returned it through the same ground copper, they would interfere. Copper has a little resistance, so the 555’s pulsing return current develops a few millivolts of wobble along any ground it shares, and anything else tied to that copper, the op-amp’s reference included, wobbles with it. If you give each section its own ground, the problem goes away: a digital ground <code>GNDD</code> carries the 555’s messy return, an analogue ground <code>GNDA</code> carries the op-amp’s, and the two never mix. The catch is that both must still sit at the same potential, so they cannot be left as separate islands. That is the net tie’s whole reason for existence: <code>NT1</code> (the arrow in Figure 10.4) joins <code>GNDD</code> and <code>GNDA</code> at one point, giving the grounds a shared reference while keeping the noisy return current out of the quiet side.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-nettie-schematic.png" /></p>
+<p>Figure 10.4: The demonstration schematic. The 555 oscillator and its LED (left) return to the digital ground <code>GNDD</code>; the op-amp buffer and its reference divider (right) return to the analogue ground <code>GNDA</code>. The two are separate nets everywhere except at the net tie <code>NT1</code> (arrow), which joins them at a single point.</p>
+<p>On the board, the footprint for the nettie consists of two little pads joined by a short neck of copper, dropped into the gap between the two ground pours (Figure 10.5). One pad sits in the digital ground <code>GNDD</code> and the other in the analogue ground <code>GNDA</code>, so the two grounds meet at that one bridge and nowhere else, which is exactly the single star point the recipe is after. What stops the design rules check from reading that bridge as a short circuit is a small declaration the footprint carries, a ‘net tie group’: a list of the pads allowed to touch, here just <code>1,2</code>. That group is the only reason KiCad permits the short; every other net boundary on the board it still polices as strictly as ever.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-nettie-layout.png" /></p>
+<p>Figure 10.5: The net tie on the board (yellow arrow). The digital section and its <code>GNDD</code> pour fills the left of the board, the analogue section and its <code>GNDA</code> pour the right, and the two grounds are held apart everywhere except at the tie: a small two-pad footprint with pad 1 in <code>GNDD</code> and pad 2 in <code>GNDA</code>. That single copper bridge is the star point where the two grounds meet.</p>
+<p>You rarely draw that footprint yourself. KiCad ships ready-made net ties, and the simplest way to use one is from the schematic: place a <code>NetTie_2</code> symbol, wire one ground to each of its two pins, and on the board it arrives as the little two-pad bridge, ready to drop at the junction. If you ever need a shape KiCad does not provide, you can author your own the way you authored the DRV8833 footprint, then set the group yourself in the “Pad Connections” tab of the footprint’s properties by adding a <code>1,2</code> line to the “Net Ties” table. Either route ends in the same place: you have told KiCad that this one short, and only this one, is intentional.</p>
+<p>There is nothing magical about that <code>NetTie_2</code> symbol, and its properties make the point (Figure 10.6). <code>NT1</code> is an ordinary schematic symbol: it carries a reference and a value, and you can find it in KiCad’s standard <code>Device</code> library. Its footprint is a separate choice, just as it is for any part. KiCad’s <code>NetTie</code> footprint library holds several ties, two-pad and three-pad, in a range of pad sizes and spacings, so you assign whichever one suits the board; this one uses <code>NetTie-2_SMD_Pad2.0mm</code>. The symbol is only the placeholder that carries whichever tie you pick, and, as we saw, it is that footprint’s net-tie group, not the symbol, that allows the deliberate short.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-nettie-properties.png" /></p>
+<p>Figure 10.6: The “Symbol Properties” dialogue for the net tie <code>NT1</code>. Its library symbol is <code>Device:NetTie_2</code> (lower highlight), an ordinary part placed from KiCad’s standard <code>Device</code> library; its footprint (upper highlight) is <code>NetTie:NetTie-2_SMD_Pad2.0mm</code>, one of several net-tie footprints KiCad ships. Swap in a different tie footprint and the copper bridge on the board changes; the schematic does not.</p>
+<h2 id="sec:c10-bulk-edits">Bulk Edits</h2>
+<p>Sooner or later you will want to change the same thing on many objects at once: give thirty tracks the same width, move a hundred reference designators onto a different layer, or restyle every value on the sheet. Doing it one object at a time may be feasible in small projects, but doesn’t scale. KiCad has bulk-editing dialogues built for exactly this, one on the schematic and one on the board, and both are built to the same three-part shape. First a ‘Scope’ section says which kinds of object the change may touch. Then a ‘Filter Items’ section narrows the job further, by net, by layer, by a field’s value, or to just the items you have already selected on the canvas. Finally, a section of properties says what to set, and here is the part worth naming out loud: every control offers a “– leave unchanged –” choice. A bulk edit changes only the properties you actually set and leaves everything else exactly as it was, so you can reach for these dialogues without fear of trampling settings you did not mean to touch.</p>
+<p>On the schematic, the dialogue is “Edit Text and Graphic Properties”, reached from the “Edit” menu (Figure 10.7). Its “Scope” list is long, because a schematic carries a lot of different text: reference designators, values, other symbol fields, wires and their labels, buses and bus labels, global and hierarchical labels, the sheet’s own titles and fields, and any free text or graphics you have drawn. Tick the kinds you want to reach. The “Filter Items” column then narrows the set: by a field’s name, by a parent symbol’s reference designator or its type (the “Non-power symbols” option, for instance, spares your power flags), by net, or with “Selected items only” for the objects you picked before opening the dialogue. What is left, the “Set To” section, changes the font, size, colour, bold or italic weight, alignment, and visibility of every matching item in one action. In the figure the “Values” scope is ticked and a new font, a text colour, and bold are set, so every part value on the sheet, the two visible <code>10k</code> labels among them, is restyled together while their sizes and positions stay put.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-bulk-text-graphics-edit.png" /></p>
+<p>Figure 10.7: The schematic’s “Edit Text and Graphic Properties” dialogue. On the left, the “Scope” section (arrow) has “Values” ticked, so the edit reaches only part values. In the middle, “Filter Items” would narrow the set further. At the bottom, “Set To” changes the font (arrow), the text colour, and the weight to bold; everything else is left unchanged. On the right, the <code>10k</code> values on R3 and R4 (arrows) are the kind of text this one action restyles across the whole sheet.</p>
+<p>On the board, the equivalent for copper is “Set Track and Via Properties” (Figure 10.8). Its “Scope” is the routing: tracks, and the several kinds of via, through, micro, blind, and buried. “Filter Items” is where this dialogue shines, because it lets you aim the change precisely: by net, by net class, by layer, or by an existing track width or via diameter, and again “Selected items only” for a hand-picked set. The “Action” section offers two ways to apply a value. The first one is “Set to specified values” which lets you type an explicit layer, track width, via size, annular ring, or protection settings. The second one is “Set to net class / custom rule values” that snaps the selected copper back to whatever its net class already specifies. This action offer a convenient way to undo a batch of hand-tuned widths and return a net to its intended geometry. In the figure the scope is “Tracks”, the filter is the single net <code>/LEDA</code>, and the track width is being set to 0.500 mm, so every segment of that one net takes the new width at once.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-bulk-track-via-properties.png" /></p>
+<p>Figure 10.8: The board’s “Set Track and Via Properties” dialogue. “Scope” (arrow) is set to “Tracks”, “Filter Items” limits the change to the net <code>/LEDA</code> (arrow), and the “Action” section sets the track width to 0.500 mm (arrow). On the right, the highlighted <code>LEDA</code> track between R5 and D1 (arrow) is one of the segments this single action sets to the new width.</p>
+<p>The board has its own “Edit Text and Graphic Properties” dialogue too, a near-twin of the schematic one, for restyling silkscreen text, reference designators, values, and drawn graphics across the whole layout in one pass. Between the two text dialogues and the track-and-via one, almost anything you might otherwise change object by object has a bulk equivalent. The habit worth forming is to reach for the right dialogue before you start clicking through parts individually; if you find yourself making the same edit a third time by hand, stop and ask whether a bulk edit would do the whole set at once. It almost always will.</p>
+<h2 id="sec:c10-symbol-fields-table">The Symbol Fields Table</h2>
+<p>The bulk dialogues above each change one kind of property. The ‘Symbol Fields Table’ is the more versatile tool, and that’s why I’ve given it its own recipe. Open it from the schematic editor’s “Tools” menu, and it lays out every symbol in the design as a spreadsheet, one row per part and one column per field (Figure 10.9). From that one window you can edit part data in bulk, decide what your bill of materials will contain, and export that bill to a file. The Symbol Fields Table encapsulates a lot of functionality, which is why it turns up again and again once a board has more than a handful of parts.</p>
+<p>Start with the grid on the right, because that is the bulk editor. Each cell is editable, so you can correct a value, retype a footprint, or fill a value down a whole column without opening a single symbol. The “Group symbols” tick collapses identical parts onto one line. In the example in the figure, you can see the three <code>10k</code> resistors share a row that reads <code>R1, R3, R…</code>, and the two <code>100nF</code> capacitors share another, so setting a value once changes the whole group at a stroke. A “Filter” box and an “Entire Project” selector at the top narrow what you see, to one sheet or to parts whose fields match a search, when a large design would otherwise fill the grid.</p>
+<p>The left-hand panel is very useful when you are setting up your bill of materials. Each row there is a field, and its tick-boxes decide two things: whether that field appears as a column here and in the BOM, and whether parts are grouped by it. The “BOM Name” column lets you rename a field for the exported bill, so KiCad’s internal <code>${QUANTITY}</code> becomes a plain “Qty” heading and <code>${DNP}</code> becomes “DNP”. The small buttons below the list add, edit, or remove fields, which is how you introduce your own columns, a manufacturer part number, a supplier, a note, and have them travel straight into the bill. Whatever you arrange on the left is exactly what the “Export” tab at the top of the grid will write out: the Symbol Fields Table is the front end for BOM export, the same bill-of-materials machinery we set up in the Bill of Materials chapter (Chapter 5), so rather than repeat that here, treat this table as where a BOM’s columns are chosen, and its file is produced.</p>
+<p>There are two additional panels on the lower left. The first is “View presets”. A view preset is a saved layout of this table, useful because the table serves two rather different jobs. While you edit the design, a wide view showing every field lets you see what is set and what is still missing. When you order parts, a lean view grouped by value, with only a few columns such as quantity, value, footprint, and part number, is far easier to read. A preset saves that whole layout, which columns show and how the rows are grouped and sorted, under a name you pick from the dropdown, so you set each view up once (“Default Editing” is the built-in starting point) and switch between them in a click instead of rebuilding the table by hand each time.</p>
+<p>The second is “Schematic variants”, the list that reads “&lt; Default &gt;” in the figure. That is KiCad’s design-variants feature, the one that lets a single project describe more than one build of a board; we cover it in full in the Bill of Materials chapter and return to it as a recipe later in this chapter, so here it is enough to know that this is where those variants are managed.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-symbol-fields-table.png" /></p>
+<p>Figure 10.9: The Symbol Fields Table. On the left, the field list sets each field’s “BOM Name” and whether it is included and grouped, with “View presets” and “Schematic variants” panels below it. On the right, the “Edit” and “Export” tabs sit above the grid, “Group symbols” is ticked so the three <code>10k</code> resistors and the two <code>100nF</code> capacitors each collapse to a single row, and every cell is editable in place.</p>
+<h2 id="sec:c10-back-annotation">Back-Annotation</h2>
+<p>The normal direction of travel in KiCad is from the schematic to the board. You change the schematic, run “Update PCB from Schematic”, and the change crosses to the layout. This forward direction is the one that decides what the design contains: add a symbol and you add a part, delete one and you remove it, and the board follows when you import the changes from the schematic to the PCB. Occasionally, a change starts on the board instead. You may assign a footprint while working on the layout, set a part to do-not-populate<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> as you work on the physical design, or you may renumber the parts to match their positions on the finished board. ‘Back-annotation’ is the reverse update that carries those board-side changes back into the schematic, so the two views stay in sync. You run it with “Update Schematic from PCB”, on the “Tools” menu of either editor.</p>
+<p>Back-annotation often confuses new users, as it appears to suggest that placing a footprint in the layout and back-importing it to the schematic editor will also automatically add its symbol. This is not how it works. Back-annotation only updates parts that already exist in both views, and it never creates or removes them. The tool carries a property change back to a symbol that is already there, and it has no way to invent or guess a symbol for a footprint the schematic doesn’t have. The two directions are not mirror images. The forward flow is the one that adds and removes parts, because the schematic is the source of truth for what the design is made of, while back-annotation only refines the parts that the forward flow already placed. So if you drop a footprint straight onto the board, a mounting hole, say, and then run “Update Schematic from PCB”, KiCad cannot set a symbol for it. It reports the footprint as unmatched and moves on. To give that mounting hole a home in both views, work forwards instead: place a <code>MountingHole</code> symbol from KiCad’s <code>Mechanical</code> library on the schematic, assign it the mounting-hole footprint, and run “Update PCB from Schematic”. If you would rather the part live on the board alone, tick the footprint’s “Not in schematic” attribute, and the sync will stop flagging it.</p>
+<p>What back-annotation does carry across is the set of properties a board-side change can touch: reference designators, values, footprint assignments, other fields, attributes such as DNP and exclude-from-BOM, and net names. The dialogue lets you switch each kind on or off, so you bring back only what you mean to. The most common reason to reach for it is to tidy reference numbers, and a real case shows it best.</p>
+<p>Take the net-tie board from earlier in this chapter. When you drew its schematic, the LED’s <code>1k</code> series resistor was one of the last parts you added, so annotation handed it <code>R5</code>, the highest resistor number on the board. On the finished layout, though, it does not sit last. It sits over by the timer and the LED, ahead of the two <code>10k</code> resistors that form the op-amp’s reference divider. Read across the board, the resistor numbers jump about instead of climbing in order, which is a small nuisance for anyone hand-populating or inspecting it. Tidying that up is a change that starts on the board, and it is just what ‘geographical reannotation’ and back-annotation are for.</p>
+<p>Here’s how to use back-annotation, step-by-step:</p>
+<ol type="1">
+<li>In the PCB editor, run “Tools” and “Geographical Reannotation”. That tool has a recipe of its own later in this chapter that drills into it; here you only need to run it. Choose a scan order, say top-to-bottom and then left-to-right, set the starting number to 1, and apply it. KiCad renumbers each kind of part by its position on the board (Figure 10.10), so the <code>1k</code> resistor becomes <code>R3</code>, and the two <code>10k</code> divider resistors that were <code>R3</code> and <code>R4</code> move up to <code>R4</code> and <code>R5</code>. The timer’s own resistors keep <code>R1</code> and <code>R2</code>, because they already come first, and the LED stays <code>D1</code> as the only diode. Three resistors change; the rest stay put.</li>
+<li>Notice that the board and the schematic now disagree. The layout carries the tidy new numbers, the schematic still shows the old ones, and until you reconcile them the two views describe different designs.</li>
+<li>Back-annotate. From the schematic editor, open the “Tools” menu and choose “Update Schematic from PCB” (Figure 10.11). The dialogue that opens lists every board-side change it is about to make (Figure 10.12): here that is the three renumbered resistors, <code>R5</code> to <code>R3</code>, <code>R3</code> to <code>R4</code>, and <code>R4</code> to <code>R5</code>. Read the list over, then apply it, and KiCad rewrites the schematic’s designators to match the board.</li>
+</ol>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-back-annotate-layout.png" /></p>
+<p>Figure 10.10: The net-tie board after geographical reannotation. KiCad has renumbered the resistors by their position, so the LED’s <code>1k</code> series resistor is now <code>R3</code>, and the two <code>10k</code> resistors of the op-amp’s reference divider are <code>R4</code> and <code>R5</code> (arrows). The board now carries these numbers; the schematic has yet to catch up.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-back-annotate-update-from-pcb.png" /></p>
+<p>Figure 10.11: Starting the back-annotation from the schematic editor. “Update Schematic from PCB” on the “Tools” menu is the reverse update; the “Update PCB from Schematic” entry above it (F8) is the forward one you use far more often.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-back-annotate-schematic.png" /></p>
+<p>Figure 10.12: The “Update Schematic from PCB” dialogue. The “Changes to Be Applied” panel lists exactly what the board-side reannotation will alter: <code>R5</code> becomes <code>R3</code>, <code>R3</code> becomes <code>R4</code>, and <code>R4</code> becomes <code>R5</code>, each arrow tracing a change to its resistor on the sheet. Look the list over, then click “Update Schematic” to bring the schematic into step with the board.</p>
+<p>Both views now agree: the resistor feeding the LED is <code>R3</code> on the board and <code>R3</code> on the schematic. That is back-annotation doing the one job it does best, carrying a deliberate, board-side tidy-up back to the schematic so the source drawing stays honest. Remember that the schematic is normally the source of truth, so keep your everyday edits schematic-first, and reach for back-annotation only for the handful of changes, like this one, that really do originate on the board.</p>
+<h2 id="sec:c10-geographical-reannotation">Geographical Reannotation</h2>
+<p>When you first draw a schematic, annotation hands out reference designators in the order you happen to place the parts, <code>R1</code>, <code>R2</code>, <code>R3</code>, and on down the sheet. Those numbers say nothing about where the parts end up on the board, and once the layout is settled they rarely climb in any sensible order across it. ‘Geographical reannotation’ is the tool that fixes that. It walks the finished board in a reading order you choose and renumbers each kind of part by its physical position, so <code>R1</code> is the first resistor you meet, <code>R2</code> the next, and the designators run tidily across the layout instead of jumping about. It renumbers within each class independently, resistors among resistors and capacitors among capacitors, and the letter prefix never changes, only the number after it. Reach for it once the placement is settled, not before, because moving a part afterwards undoes the tidy order it just gave you.</p>
+<p>You run it from the PCB editor’s “Tools” menu, and it opens the dialogue in Figure 10.13. The row of icons at the top, “Footprint Order”, is the scan pattern, the path KiCad walks as it numbers. There are options like left-to-right then down, top-to-bottom then across, and several other combinations, so you pick the one that matches how you read the board. “Based on location of” chooses whether a part’s position is taken from the footprint itself or from where its reference-designator text sits, and “Round locations to” sets a tolerance so parts that are nearly, but not exactly, in the same row are still treated as a row rather than scrambling the order. “Reannotation Scope” limits the job to the whole board, one side of it, or just the footprints you have selected. “Reference Designators” sets the starting number, normally 1, and, for a two-sided board, lets the front and back start from different numbers and carry their own prefixes. Finally, “Exclude locked footprints” and the “Exclude references” list hold chosen parts at their existing numbers, which is how you keep a connector as <code>J1</code> while everything around it is renumbered. Click “Reannotate PCB”, and the numbers update in place.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-geographical-reannotation.png" /></p>
+<p>Figure 10.13: The “Geographical Reannotation” dialogue (PCB editor, Tools → Geographical Reannotation). “Footprint Order” at the top sets the scan pattern KiCad numbers the board in; “Reannotation Scope” limits the job to all parts, one side, or a selection; and “Reference Designators” sets the starting number and, for a two-sided board, separate front and back ranges. Click “Reannotate PCB” to renumber; the new numbers reach the schematic only when you back-annotate.</p>
+<p>Two things are worth remembering about this function. First, the tool touches only reference-designator numbers, so values, footprints, and nets are all left exactly as they were. Second, it changes only the board. The schematic keeps the old numbers until you carry the new ones across, which is the job of back-annotation.</p>
+<p>A few situations call for it:</p>
+<ol type="1">
+<li><strong>Tidying a board for assembly and inspection.</strong> When the designators climb in reading order across the layout, anyone hand-populating the board, inspecting it, or reading its pick-and-place file finds each part in sequence instead of hunting for it. This is exactly the tidy-up performed on the net-tie board in the Back-Annotation recipe above, where a late-added series resistor sat with a high number in the middle of the board.</li>
+<li><strong>Splitting a two-sided board by number range.</strong> Using the separate front and back starting numbers and prefixes, you can have top-side parts run from 1 and bottom-side parts from, say, 100, so the designator alone tells you which side a part is fitted on.</li>
+<li><strong>Restoring order after heavy rework.</strong> After a lot of manual replacement, or after stamping out copies of a sub-circuit with design blocks or multi-channel design, the original annotation is usually scrambled. One pass gives the whole board a fresh, position-based numbering.</li>
+</ol>
+<p>Because it writes its new numbers to the board alone, geographical reannotation is only half of the job. Pair it with back-annotation, “Update Schematic from PCB” on either editor’s “Tools” menu, to carry the tidied numbers back to the schematic, so the two views agree again. The Back-Annotation recipe above walks that second step in full, using this very tool as its example, so treat the two as the two halves of one board-first workflow: first, reannotate on the board, then back-annotate to the schematic, and keep it for the handful of changes that genuinely start on the layout.</p>
+<h2 id="sec:c10-tables">Tables (K9)</h2>
+<p>KiCad 9 added the ability to place a proper ‘table’, rows and columns with borders, on a schematic sheet or on the board itself. Before tables, structured information like a connector pinout, a revision history, or a list of jumper settings had to be faked with carefully aligned lines of free text that fell apart the moment you edited them. A real table holds its shape. You place it, set the number of rows and columns, type into the cells, and restyle the borders and spacing as a unit, and the layout stays intact however much you change the contents. On a schematic, a table is a tidy home for the notes that used to sprawl across the sheet; on a board, a small table in a corner of the silkscreen documents what the hardware does for anyone holding it. The running example for this recipe is a jumper table, the little map that tells a user what each jumper on the board selects.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-table-buttons.png" /></p>
+<p>Figure 10.14: The table tool in both editors. The schematic editor’s right-hand drawing toolbar (left) and the PCB editor’s (right) each carry a table button; the tool works the same way in either, letting you place a table on a schematic sheet or on the board.</p>
+<p>The table tool lives on the right-hand drawing toolbar, and it is there in both editors (Figure 10.14). Pick it up, click to set one corner, and drag out the other, and KiCad drops a table you then shape to fit. A jumper table wants three columns, one for the jumper’s reference, one for the position, and one for what that position does, and as many rows as you have settings to document.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-table-schematic-add-column.png" /></p>
+<p>Figure 10.15: The table’s right-click menu in the schematic editor. Beyond selecting a column, a row, or the whole table, it adds and deletes rows and columns (here “Add Column After”, arrow), opens “Edit Table…” (Ctrl+E) for the properties dialogue, and offers “Export Table to CSV…” to write the cells out as a spreadsheet. The jumper table being built shows behind the menu.</p>
+<p>You rarely guess the size right the first time, so most of the work of building a table is adding and removing rows and columns after the fact. Right-click anywhere in the table for the full set of operations (Figure 10.15): select a column, a row, or the whole table; add a row above or below, or a column before or after; and delete a row or column you no longer need. The same menu holds “Edit Table…” (Ctrl+E), which opens the properties dialogue covered next, and “Export Table to CSV…”, which we come back to at the end. Grow the jumper table from its header row, one row per jumper position.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-table-schematic-properties.png" /></p>
+<p>Figure 10.16: The “Table Properties” dialogue. On the left, “Cell contents” holds one field per cell, the header row <code>Jumper</code> / <code>Position</code> / <code>Function</code> above a row for each jumper setting. On the right, separate controls style the external border, the header border, the row lines, and the column lines, each with its own width, colour, and line style, so the whole table restyles as a unit.</p>
+<p>Double-click the table, or choose “Edit Table…”, to open “Table Properties” (Figure 10.16). The left of the dialogue is the cell contents, laid out as the table will read: a header row of <code>Jumper</code>, <code>Position</code>, <code>Function</code>, then a row for each setting. Type the jumper instructions straight in, <code>JP1</code> / <code>1-2</code> / <code>Enable onboard 5V regulator</code> on one row, <code>JP1</code> / <code>2-3</code> / <code>Bypass regulator, use external 5V</code> on the next, and so on through <code>JP2</code> and <code>JP3</code>. The right of the dialogue styles the table’s lines as a unit: separate controls for the external border, the header border, the row lines, and the column lines, each with its own width, colour, and style. This is what a real table buys you over aligned text, in that you can turn the header border on to set the first row apart, thin the interior lines, or drop the row lines for an open look, and every matching line changes together.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-table-schematic-filled.png" /></p>
+<p>Figure 10.17: The finished jumper table on the schematic sheet. The three columns spell out, for each jumper, its position and what that position selects: <code>JP1</code> between the onboard 5 V regulator and an external rail, <code>JP2</code> for the I2C pull-ups, and <code>JP3</code> for the boot source. Editing an entry or adding a jumper is a matter of retyping a cell or adding a row.</p>
+<p>Placed on the sheet, the finished table sits beside the circuit it documents (Figure 10.17). Anyone reading the schematic sees at a glance that <code>JP1</code> chooses between the onboard regulator and an external 5 V rail, that <code>JP2</code> switches the I2C pull-ups in or out, and that <code>JP3</code> selects the boot source, without hunting through a separate document. Because it is a real table and not a picture of one, correcting a wrong entry or inserting a jumper you forgot is a matter of retyping a cell or adding a row, and the borders and spacing hold.</p>
+<p>That same content travels out of the drawing with “Export Table to CSV…” on the same right-click menu. KiCad writes one line per row, so the jumper table becomes a small spreadsheet of jumper instructions, <code>JP1, 2-3, "Bypass regulator, use external 5V"</code> and the rest, which you can keep alongside the project, paste into an assembly document, or hand to whoever populates the board. It is a one-way export, a convenient bridge from the drawing to a spreadsheet rather than a live link, so the table on the sheet stays the source of truth.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-table-layout-3D-filled.png" /></p>
+<p>Figure 10.18: The same table on the board’s silkscreen, in the PCB editor (left) and rendered in the 3D viewer (right). Because silkscreen space is tight, the text is abbreviated, <code>JP</code> / <code>Pos</code> / <code>Func</code> and short cell entries like <code>5V int</code> and <code>Boot SD</code>, and the 3D view confirms it stays legible at the size it will be printed. Silk-screened beside the jumpers, the table is documentation that can never be separated from the board.</p>
+<p>The same table works on the board’s silkscreen, and it earns its place there because that is the copy the person holding the hardware actually reads (Figure 10.18). Space and legibility are tighter on silkscreen than on a schematic sheet, so abbreviate: <code>JP</code> / <code>Pos</code> / <code>Func</code> for the headers, and short cell text like <code>5V int</code>, <code>5V ext</code>, <code>I2C PU off</code>, <code>I2C PU on</code>, <code>Boot FLASH</code>, and <code>Boot SD</code>. Tuck it into a free corner of the board and check it in the 3D viewer, where you see it at the size and legibility it will really have. A jumper table silk-screened next to the jumpers themselves is documentation that cannot be separated from the board, which is exactly where you want it.</p>
+<p>Reach for a table whenever information is naturally a grid: a pinout, a jumper or DIP-switch map, a revision history, a short list of build options. Keep to plain text for a single note or a one-line label, where a table’s borders are only clutter. And note the division of labour between the two copies: the schematic table can be verbose because there is room, while the silkscreen table must be terse because there is not, so it is perfectly normal for the same information to appear in both, spelled out on the sheet and abbreviated on the board.</p>
+<h2 id="sec:c10-design-blocks">Design Blocks (K9/K10)</h2>
+<p>A ‘design block’ is a saved, reusable piece of a design that you drop into a project as a unit, the way you drop in a single symbol, except that a block can hold a whole sub-circuit rather than one part. KiCad treats this as two related features, one in each editor, and it helps to keep them apart in your head, because they capture two different things about the same sub-circuit.</p>
+<p>The first is the ‘schematic design block’, added in KiCad 9. It captures the <em>logical</em> sub-circuit: a group of symbols and the wiring between them, but nothing about where those parts sit on a board. You save a block once and then drop fresh copies onto the sheet whenever you need them, exactly as you would place a symbol from a library.</p>
+<p>The second is the ‘board design block’, new in KiCad 10, and this is the one that saves the tedious work. Instead of the wiring, it captures the <em>physical</em> sub-circuit: the placement of the footprints and the copper routing between them, so you can route a cell once and reuse that work instead of repeating it. The important thing to understand is that this is not a second, rival block. A single design block can hold both portions at once, the schematic capture and the board capture, and what ties them together is simply that they share one name in the same library. You save the wiring into the block first and the finished layout into that same block afterward, and from then on the one block carries both. When you place it, the reference designators are the thread that lines each laid-out cell up with its own symbols, so the layout that lands on the board matches the wiring that lands on the sheet.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10_design-blocks-workflow_v10.png" /></p>
+<p>Figure 10.19: The design-block workflow at a glance. You (1) draw the cell once and “Save Selection as Design Block” to capture its wiring; (2) route that single cell on the board and “Update Design Block from Selection” so the one block now holds both halves under a single name; and (3) stamp out the copies, and because each carries the saved layout, every cell arrives wired and routed with only one ever laid out by hand.</p>
+<p>I find the idea lands fastest on something small and obviously repetitive, so the demo board for this recipe is a strip of four identical LED driver cells. Each cell is a little sub-circuit of its own: an MMBT3904 transistor, a 1 kΩ resistor into its base, an LED, and a 330 Ω resistor to limit the LED’s current, all switched by whatever signal arrives on the cell’s input (Figure 10.20). Before I capture the cell I give that input a net label, <code>IN1</code>, because the label is what lets each copy connect to its own control line; a bare wire would leave the copies with no name to wire to.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-schematic-block.png" /></p>
+<p>Figure 10.20: The reusable cell. An LED and its 330 Ω current-limit resistor are switched by an MMBT3904 transistor, whose base is driven through a 1 kΩ resistor from the cell’s input. The input carries the net label <code>IN1</code>, which is what will let each copy of the block wire to its own control line.</p>
+<p>To work with blocks at all you first need the “Design Blocks” panel, and this is the step that trips people up. Reveal it from the “View” menu, under “Panels”, where you toggle “Design Blocks” on; it then docks on the right-hand side of the schematic editor. This is a different thing from the symbol chooser you use to place ordinary parts, so if you go hunting for blocks in the symbol libraries you will not find them. The panel lists your design-block libraries, and it is where every action in the rest of this recipe begins.</p>
+<p>With the cell drawn and the panel open, I save it as a block in two moves. First I make somewhere to keep it: I right-click in the panel and choose “New Library…” (1 in Figure 10.21), which I named <code>peters_blocks</code>. Then I select the whole cell on the sheet and, with my new library highlighted, right-click and choose “Save Selection as Design Block…” (2). KiCad opens the “Design Block Properties” dialog (Figure 10.22), where I give the block a “Name” (<code>NPN-LED</code>) and, if I want, “Keywords” and a “Description” to make it easy to find later. The dialog also has a “Default Fields” table, which is optional. It lets you attach named fields to the block itself, the way a symbol carries fields such as its value or a datasheet link, so that every copy you place arrives already carrying that information, a “Function” field reading “LED driver”, say. I have nothing to add here, so I leave it blank and click “OK”.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-new-library-save-selection.png" /></p>
+<p>Figure 10.21: Saving the cell as a schematic design block. With the “Design Blocks” panel open on the right, right-clicking offers “New Library…” to create a place to keep the block (1) and “Save Selection as Design Block…” to store the selected cell in it (2).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-schematic-design-blocks-properties.png" /></p>
+<p>Figure 10.22: The “Design Block Properties” dialog. I gave the block the name <code>NPN-LED</code> and left “Keywords”, “Description”, and the “Default Fields” table blank, since this simple block needs no extra metadata.</p>
+<p>The block now appears under <code>peters_blocks</code> in the panel, ready to use like any library part (Figure 10.23). To drop a copy, I right-click the block and choose “Place Design Block”, then click where I want it on the sheet (Figure 10.24). The panel gives you a few options worth knowing at this point. “Place repeated copies” lets you stamp several down at once rather than one click at a time; “Place as group” keeps each copy selectable as a single unit, which pairs neatly with the board block later; “Place as sheet” drops the block as a hierarchical sheet instead, the older way of reusing a repeated circuit; and “Keep annotations” decides whether the copies keep the original reference designators. Leave “Keep annotations” off, so the copies come in ready to be numbered fresh instead of arriving as four parts all called <code>Q1</code>. Before you stamp the whole row, though, notice what that copy actually is: only the schematic side of the block, since a schematic is all the block holds so far. It has no layout counterpart yet. So place a single copy and hold off on the rest until the block has a board side too, which is the next step; once it does, every later copy brings that layout along with it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-schematic-block-available.png" /></p>
+<p>Figure 10.23: The saved <code>NPN-LED</code> block now sits under the <code>peters_blocks</code> library in the panel, ready to be placed like any library part.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-schematic-block-dropped.png" /></p>
+<p>Figure 10.24: Placing a copy with “Place Design Block”. The checkboxes at the foot of the panel control how the copy comes in: “Place repeated copies”, “Place as group”, “Place as sheet”, and “Keep annotations”. At this stage the block holds only its schematic side, so I place a single copy and leave the rest until it has a board side too.</p>
+<p>So I stop at the single cell and turn to the board, which is the part people find surprising. A design block earns its keep on the board as much as on the sheet, and to capture its board side cleanly I want one tidy instance to lay out, not four copies already crowding the canvas. I take the single cell I already have over to the layout editor, route it, and save that layout back into the same <code>NPN-LED</code> block. Once the block carries both halves, finishing the design becomes a matter of stamping rather than routing, which is where the time saving comes from.</p>
+<p>One thing on the sheet deserves a word before we cross to the board. Every cell’s input has to terminate somewhere, so I have added a simple six-pin header, <code>J1</code> (a <code>Conn_01x06</code>), that gathers the four control lines <code>IN1</code> to <code>IN4</code> and the two power rails, <code>+5V</code> and <code>GND</code>, onto one connector (Figure 10.25). This demo is not meant to be a complete product, so treat <code>J1</code> as the seam where an external device, a microcontroller, say, plugs in and drives the cells through those inputs; on our board we care only about building the driver cell and reusing it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-schematic-prior-to-creating-layout-block.png" /></p>
+<p>Figure 10.25: The schematic just before I move to the board. The single, annotated <code>NPN-LED</code> cell sits inside its block outline, and the six-pin header <code>J1</code> terminates the four control lines <code>IN1</code> to <code>IN4</code> along with <code>+5V</code> and <code>GND</code>. In the panel at right, the block is still schematic-only, its board side yet to be made.</p>
+<p>On the board, then, I begin by bringing just this one cell across with “Update PCB from Schematic”. The dialog offers several options, and for design blocks two of them decide whether the reuse works at all. The one that matters on this first pass is “Group footprints based on symbol group” (2 in Figure 10.26), which I make sure is ticked so that KiCad keeps the cell’s footprints together as a single group I can later save as a block. The option just below it, “Apply design block layouts to new groups”, I leave off for now, since there is no saved board layout yet for it to apply. With that set, I click “Update PCB”.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-import-block-to-layout.png" /></p>
+<p>Figure 10.26: The first “Update PCB from Schematic”. For the block to work later, “Group footprints based on symbol group” (2) must be ticked so the cell’s footprints stay together as one group; “Apply design block layouts to new groups” stays off on this pass, because the block has no board side yet.</p>
+<p>The cell’s footprints land on the board as one bundled group, sitting next to the <code>J1</code> header, unplaced and unrouted (Figure 10.27). This little cluster is what I am about to lay out and, once it looks right, hand back to the block.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-new-block-imported.png" /></p>
+<p>Figure 10.27: The imported cell. Its footprints arrive grouped together beside the <code>J1</code> header, not yet placed or routed.</p>
+<p>Now I do the layout once, exactly as I want every copy to look: I place <code>R1</code>, <code>Q1</code>, <code>R2</code>, and <code>D1</code>, route the tracks between them, and take the transistor’s ground pad down to the back of the board through a via (Figure 10.28). One small setting makes the placement far less fiddly. In the “Selection Filter” at the lower right I tick “Footprints” only, so that a click lands on a whole footprint rather than on a pad or a track beneath the cursor, and the parts stay easy to nudge into position without my grabbing the wrong thing.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-new-block-layout-complete.png" /></p>
+<p>Figure 10.28: The single cell laid out and routed, the pattern every copy will follow. The transistor’s ground pad drops to the back of the board through a via, and “Footprints” is ticked in the “Selection Filter” so clicks select whole footprints.</p>
+<p>With the finished cell still selected, I turn to the “Design Blocks” panel, which lives in the PCB editor just as it does in the schematic editor. I right-click the <code>NPN-LED</code> block and choose “Update Design Block from Selection” (Figure 10.29). This is the step to get exactly right, because the menu offers several near neighbours. “Update Design Block from Selection” folds my routed cell into the block that already holds the wiring, so the one block now carries both halves under a single name. Reaching instead for “Save Selection as Design Block…” would start a fresh, separate block, which is not what I want here.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-layout-update-block-with-selection.png" /></p>
+<p>Figure 10.29: Saving the layout into the existing block. With the routed cell selected, right-clicking <code>NPN-LED</code> in the PCB editor’s “Design Blocks” panel offers “Update Design Block from Selection”, which adds the board side to the block that already holds the schematic.</p>
+<p>A word of reassurance is in order, because this is the part that people wrestle with. The design-block workflow is not intuitive, and KiCad’s documentation is thin on exactly these steps, so do not be surprised if the association refuses to take the first time. When that happens the quickest cure is to delete the block from the “Design Blocks” panel and build it again from a clean selection. It is well worth rehearsing the whole cycle on a throwaway schematic of two or three parts until the sequence feels familiar, rather than learning it for the first time on a board you care about.</p>
+<p>With the block now whole, the rest of the design goes quickly. Back on the schematic I stamp out the remaining three cells, so there are four in all, and I rename each new input <code>IN2</code>, <code>IN3</code>, and <code>IN4</code> to give the cells four independent control lines (Figure 10.30). The <code>+5V</code> and <code>GND</code> symbols I leave untouched, since those are global power nets shared across every cell. Then I annotate the sheet with the geographical reannotation recipe from earlier in this chapter, so every transistor, resistor, and LED gets a unique designator numbered in the order the parts sit on the board.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-schematic-add-remaining-blocks.png" /></p>
+<p>Figure 10.30: The full schematic after stamping. Four cells now hang off the <code>J1</code> header, their inputs relabelled <code>IN1</code> to <code>IN4</code> and every part annotated with its own designator.</p>
+<p>Returning to the layout editor, I run “Update PCB from Schematic” a second time, and here the earlier groundwork pays off. This time I also tick “Apply design block layouts to new groups” (Figure 10.31), the option I left off before. It tells KiCad to copy the block’s saved routing onto each of the three new cell groups automatically, so the work I did on one cell is applied to the others without my touching a track.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-layout-import-full-schematic.png" /></p>
+<p>Figure 10.31: The second “Update PCB from Schematic”. With the block now carrying a board side, ticking “Apply design block layouts to new groups” copies its saved routing onto every new cell group at once.</p>
+<p>At first the import looks untidy (Figure 10.32). The three new cells drop in already routed on the inside, each an exact copy of the one I laid out, but they land scattered across the canvas, and none is yet wired to <code>J1</code>. What matters is that not one of those internal tracks was drawn by hand; every cell brought its routing along from the block.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-layout-import-raw-result.png" /></p>
+<p>Figure 10.32: The cells straight after the import. Each new cell arrives internally routed, identical to the first, but scattered across the board and not yet connected to <code>J1</code>.</p>
+<p>From here I finish the board the ordinary way (Figure 10.33): I arrange the four cells into a tidy column, route the shared lines from <code>J1</code> out to each input along with the two power rails, draw the board outline, and run the design-rule check until it comes back clean. The result is four identical driver cells, only one of which I ever routed by hand, which is the whole point of a board design block.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-design-blocks-completed-project.png" /></p>
+<p>Figure 10.33: The finished board. The four cells sit in a column, the shared control lines and power rails run back to <code>J1</code>, and every cell carries the same routing lifted from the block.</p>
+<p>So reach for a design block whenever a design repeats a chunk of itself, and you would rather do the work once than by hand. It pairs naturally with the next recipe, ‘multi-channel design’: a design block is how you make the copies, and multi-channel design is how you keep them in step afterward, pushing a later change to one cell out to all of them. This is the reuse skill the warm-up project leans on, where you lay out one matrix cell and stamp it across the array, and the skill Chapter 9’s four-motor extension reuses, where the second driver stage is a copy of the first. Any time a design repeats a chunk of itself, a design block is how you do the work once, which is the quiet theme running through all of Volume 2.</p>
+<h2 id="sec:c10-multi-channel">Multi-Channel Design (K9)</h2>
+<p>Where a design block is a stamp you place, ‘multi-channel design’ is a way of keeping several identical copies of a circuit in step on the board. KiCad calls each repeated block a ‘channel’. The idea is simple: you place and route a single channel by hand, mark which parts belong to which channel, and let KiCad copy that placement and routing onto all the others. The channel you lay out is the ‘reference’, and the ones that copy it are the ‘targets’. A single tool, “Repeat Layout”, does the copying, and because it works from the reference as it stands rather than from anything saved, you can run it again each time you change the reference and watch the targets follow.</p>
+<p>The feature is aimed at boards that repeat a section several times over, and a few shapes come up again and again. An audio mixer is the classic case, because it contains a row of identical channels side by side, each with the same handful of parts wired the same way. A multi-output power supply is another, where one regulation stage is duplicated once per output rail. Our own demonstration board is a third: the LED driver from the previous recipe, whose four cells are copies of a single design. The more copies a board carries, the more the multi-channel approach helps, because a layout you perfect once is reused four, eight, or sixteen times over instead of redrawn. Volume 2 leans on this in its own boards too, in the matrix cells of the warm-up project and the two identical motor stages of Chapter 9’s four-motor extension.</p>
+<p>So how is this different from the board design block you just met, which also copies a laid-out cell onto its siblings? The two overlap, and KiCad itself presents multi-channel design as an alternative way to reuse a layout, but they diverge on timing. A board design block bakes the routing into a saved block and stamps that snapshot down when you import the schematic, so refining the reference cell afterwards means saving the block again and re-importing to push the change out. Multi-channel design saves no block at all. It’s a live operation you run on the board whenever you please: it reads the reference channel as it stands right now, checks that each target really is the same circuit (a ‘topology check’, which matches the parts and connections of one channel against another), and copies the current placement and routing across. Nothing is hardwired, so you can tweak the reference and run the tool again, and again, and the targets stay in step every time. Put plainly, a design block is how you make the copies, and multi-channel design is how you keep their layout in step as you refine it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10_multichannel-workflow_v10.png" /></p>
+<p>Figure 10.34: The multi-channel workflow at a glance. You (1) mark each repeated cell as a channel, here by its named group <code>NPN-LED1</code> through <code>NPN-LED4</code>; (2) route one channel as the reference and let KiCad fence every channel in its own placement rule area; and (3) run “Repeat Layout” to copy the reference’s placement and routing onto the targets. Edit the reference and run it again, and the targets follow.</p>
+<p>To see the tool at work, I will take that same four-cell driver board and build its repetition a second way, with multi-channel design in place of the board design block. The starting point is the project as the previous recipe left it on the schematic: four copies of the <code>NPN-LED</code> cell, each placed as its own group and so carrying a name of its own, <code>NPN-LED1</code> through <code>NPN-LED4</code> (Figure 10.35). Those group names are the thread the whole feature pulls on, because they are how KiCad tells one channel from another all the way to the finished board.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-schematic-start.png" /></p>
+<p>Figure 10.35: The starting schematic, carried over from the design-block recipe. The four driver cells hang off the <code>J1</code> header, and each is a named group, <code>NPN-LED1</code> through <code>NPN-LED4</code>, which is what lets KiCad treat each one as a separate channel.</p>
+<p>Rather than save that cell into a block and re-import it, I lay out one channel by hand and let “Repeat Layout” fill in the other three. The work comes down to three things: telling KiCad which parts make up each channel, giving each channel a placement area on the board, and replicating the reference channel into the rest. That first task is already behind us, because the cells arrived as named groups, and a group is all KiCad needs to recognise a channel.</p>
+<p>There are, in fact, three ways to tell KiCad which parts belong to a channel, and they are worth knowing even though we will use only one. You can use hierarchical sheets, one repeated sheet per channel, which is the method KiCad recommends because separate instances of one sheet are identical by construction. You can use component classes, named groupings a part carries on both its symbol and its footprint, giving each channel a class of its own. Or you can use named groups, the route we are taking, since the four cells already arrived as the groups <code>NPN-LED1</code> through <code>NPN-LED4</code>. Whichever you choose, the channels must be true copies of one another for the tool to work, alike in the number of parts, the reference-designator prefixes, the footprints, and the connections between them. This is exactly why stamped copies of one block suit the feature so well: they are identical from the moment they are made, so the topology check finds nothing to object to.</p>
+
+<p>With the schematic settled, I bring the design to the board with “Update PCB from Schematic”. For the multi-channel design feature to work, ensure that “Group footprints based on symbol group” is ticked so the schematic’s groups cross to the board intact and the parts land sorted cell by cell rather than in one loose pile (Figure 10.36). This is the same option the design-block recipe leaned on, doing the same job here.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-import-groups.png" /></p>
+<p>Figure 10.36: Bringing the design to the board. In “Update PCB from Schematic”, “Group footprints based on symbol group” is ticked so the four schematic groups arrive on the board as groups, one per channel.</p>
+<p>Now I lay out a single channel as I want every copy to look. Taking <code>NPN-LED1</code> as the reference, I place its <code>R1</code>, <code>Q1</code>, <code>R2</code>, and <code>D1</code>, route the tracks between them, and take the transistor’s ground pad down to the back of the board through a via (Figure 10.37). Remember to use the selection filter to make your workflow smooth, and uncheck all the element in the layout you will not be working with in this iteration. In this example, tick “Footprints” only, so a click lands on a whole part rather than on a pad or a track beneath it. This one channel is the reference, and its layout is the pattern the other three will follow.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-first-channel-routed.png" /></p>
+<p>Figure 10.37: The reference channel, laid out by hand. <code>NPN-LED1</code> has its four parts placed and routed, the transistor’s ground pad dropping to the back through a via. This is the one channel I route; the rest will copy it.</p>
+<p>With the reference routed, I get KiCad to detect and draw the placement areas. Each channel is marked on the board by a ‘placement rule area’, a fenced-off region that tells the tool where the channel sits and which items belong to it. You can draw these by hand, but there is no need, since KiCad will generate one per group. I open “Tools”, then “Multi-Channel”, then “Generate Placement Rule Areas…” (Figure 10.38).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-generate-placement-rules-areas.png" /></p>
+<p>Figure 10.38: Opening the generator from “Tools” → “Multi-Channel” → “Generate Placement Rule Areas…”. The same submenu holds “Repeat Layout…”, the tool we reach for a few steps later.</p>
+<p>The “Generate Multichannel Rule Areas” dialogue opens with a tab for each way of defining a channel: “Sheets”, “Component Classes”, and “Groups”. My channels are groups, so I move to the “Groups” tab, find the four cell groups listed there, and tick each one (Figure 10.39). Two settings are worth a glance. I turn on “Replace existing placement rule areas”; it changes nothing on this first run, since there are no areas to replace, but it matters later, when running the generator again will overwrite the existing areas rather than skip the channels that already carry one. The other setting, “Group footprints with their placement rule areas”, sits greyed out here, because for group-based channels the footprints already belong to their groups and KiCad has nothing left to bundle. I click “OK”.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-generate-multichannel-rules-areas-groups.png" /></p>
+<p>Figure 10.39: The “Generate Multichannel Rule Areas” dialog on the “Groups” tab, the four cell groups ticked and “Replace existing placement rule areas” enabled. The “Sheets” and “Component Classes” tabs offer the other two ways of defining channels.</p>
+<p>KiCad draws a placement rule area around each channel and names them for you, <code>auto-placement-area-NPN-LED1</code> through <code>auto-placement-area-NPN-LED4</code> (Figure 10.40). Each area is drawn to enclose its group, and because I routed the reference first, <code>NPN-LED1</code>’s area already wraps its tracks and via along with its parts. The four may land overlapping or scattered, so I drag each one to where its cell belongs, spacing them into a tidy column.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-channels-created-from-groups.png" /></p>
+<p>Figure 10.40: The four generated rule areas, one per channel (arrows). KiCad has drawn each to enclose its group’s parts; the reference area, <code>auto-placement-area-NPN-LED1</code>, also takes in the routing already laid down inside it.</p>
+<p>The automatic outlines are usually a good fit, tracing a tidy boundary around every part in a channel. Once in a while, though, KiCad leaves a track or some other feature outside the border, so it pays to give each area a quick look. Where an outline falls short, the fix is to make an adjustment manually. Click the area to select it, then drag the handles on its border until the whole channel sits inside. This matters most for the reference area, since anything left outside its boundary is left behind when the copy is made.</p>
+<p>This is the stage the rest was leading to. Nothing on a rule area marks it as the reference ahead of time; the reference is simply whichever area is selected when you start the tool. So I click <code>NPN-LED1</code>’s area to select it, then open “Tools”, “Multi-Channel”, “Repeat Layout…” (Figure 10.41). Selecting the whole group works just as well, since KiCad picks out the rule area inside it, and starting the tool with nothing selected makes KiCad ask you to click a reference area instead. Every other placement area on the board is then taken as a target, and KiCad runs the topology check on each to be sure it is the same circuit. The dialogue that opens reports what it found in a table, a row per target. A channel that matches shows “OK” and comes ready-ticked to receive the layout, while a channel that differs shows the reason and stays locked until you put the mismatch right. All three of my targets are honest copies of the reference, so all three report “OK”.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-repeat-layout-with-rule-area-selected.png" /></p>
+<p>Figure 10.41: Starting “Repeat Layout” with the reference selected. <code>NPN-LED1</code>’s area is picked on the board (right) before the tool is opened from “Tools” → “Multi-Channel” → “Repeat Layout…”, so KiCad takes that channel as the reference and every other area as a target.</p>
+<p>Beneath the table are the options that decide what travels across. I check that “Copy footprint placement” and “Copy routing” are both ticked, so the arrangement of the parts and the tracks between them come over together, and I leave “Copy other items” on to carry any silkscreen or text along as well. The “Anchor footprint” dropdown is worth understanding: choose a part here and each channel is positioned relative to its own copy of that part, which keeps the copies aligned when their areas are rotated or offset from one another. With the options set I click “OK”, and KiCad places and routes all three target cells in one go, each an exact copy of the reference (Figure 10.42). Not one of those tracks did I draw by hand.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-completed.png" /></p>
+<p>Figure 10.42: All four channels placed and routed after “Repeat Layout”. The three targets match the reference exactly; the arrows pick out the same copied track in each channel, the one I changed on the reference and pushed to every copy by running the tool again.</p>
+<p>From there the board finishes the ordinary way. I route the shared control lines and the power rails out to the <code>J1</code> header, draw the board outline, and run the design-rule check until it comes back clean. The outcome is the board the design block gave us earlier (Figure 10.33), four identical cells with only one routed by hand, reached by a different path.</p>
+<p>The real difference from a design block shows the moment you change your mind about the reference. Say I decide the track between <code>D1</code> and <code>R2</code> should run a different way. Because the targets are copies and not originals, I never edit them directly; I change the reference alone and let the tool carry the change out:</p>
+<ol type="1">
+<li>Change the reference channel only. Reroute the track between <code>D1</code> and <code>R2</code> on <code>NPN-LED1</code>, and leave the other three channels untouched.</li>
+<li>Check that the reference area still encloses the routing. If the new track runs past the area’s border, drag the border out to take it in; the target areas resize themselves to match on the next run.</li>
+<li>Select the reference area, or its group.</li>
+<li>Run “Repeat Layout” again. Every target is redrawn to match the reference, the old routing cleared away and the new took its place (Figure 10.42).</li>
+</ol>
+<p>You can do this as often as the design needs while it settles. The reference stays the single place you edit, and the rest of the board keeps following it.</p>
+<p>Reach for multi-channel design when a board carries several copies of a block whose shared layout you expect to keep refining, and you would rather perfect one channel and let the others track it than tend each by hand. It works well with the design block from the previous recipe. The difference is how the repeated cells come into being, and multi-channel design is how their layout stays in step as the board matures. Both are one idea in different dress, the idea behind so much of Volume 2, that when a design repeats a chunk of itself you should do the work once and let it carry.</p>
+<h2 id="sec:c10-embedded-files">Embedded Files (K9)</h2>
+<p>By default, the files a project leans on live outside it, as paths to files on your machine: a footprint’s 3D model, a custom font, a part’s datasheet, the drawing sheet behind your title block. That works until the day you hand the project to someone else, or open it on a different computer, and those paths point at files that are not there. ‘Embedded files’, added in KiCad 9, close that gap by storing a copy of such a file inside the project itself, so the project carries everything it needs and stays self-contained. You have already done this once without dwelling on it: back in the footprint chapter you ticked the embed option as you added the thermal pad’s 3D model, and that model has travelled inside the footprint ever since. This recipe steps back to show the general mechanism, using two other kinds of file you are likely to meet.</p>
+<p>Almost anything a project depends on can be embedded, and a few cases come up again and again. Embed a 3D model inside a footprint and the part still appears in the 3D viewer on a machine that never downloaded that model. A custom font stored inside a board or schematic keeps your silkscreen text and labels in their intended typeface, instead of falling back to a default when the font is absent. Put a datasheet beside its symbol and the PDF opens straight from the project, with no hunt for the file. The drawing sheet behind your title block can travel the same way, and so, really, can any other file the design refers to. The common thread is simple: if losing the external file would leave the project poorer, embedding a copy makes that loss impossible.</p>
+<p>Where do these copies live, and is there any housekeeping to do? This is something I was puzzled about when I first used Embedded Files when I couldn’t find the test file that I embedded in the project directory. It turns out that the embedded copy is stored inside the design file itself, the <code>.kicad_pcb</code> or the <code>.kicad_sch</code>, or the footprint or symbol that uses it, and it is compressed to reduce the total file size. Nothing is written out beside your project. There is no ‘embedded files’ folder to create, and you do not move the original into the project directory first. You point KiCad at the file wherever it already sits, even in some far-off corner of your drive, and it copies the contents in there and then. From that moment KiCad refers to the file by a <code>kicad-embed://</code> address of its own rather than by a filesystem path, so the reference no longer cares where the original lives, or whether it still exists at all. Delete the original, move it, or hand the project to a colleague who never had it, and the embedded copy carries on regardless.</p>
+<p>You manage all of this from one place: the “Embedded Files” page, which turns up in “Board Setup”, in “Schematic Setup”, and on a footprint’s or a symbol’s own properties (Figure 10.43). The page lists every embedded file by name beside its “Embedded Reference”, the <code>kicad-embed://</code> address that now stands in for a path, and its controls let you add another file, remove one you no longer need, or export an embedded copy back out to disk. That export matters, because embedding is not a trapdoor: whatever you put in, you can always take back out. The one “Embed fonts” switch on this page is a shortcut we come to next.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-embedded-files-schematic-setup.png" /></p>
+<p>Figure 10.43: The “Embedded Files” page of “Schematic Setup” (arrow), under “Schematic Data” in the left tree. The table (box) lists each embedded file by its “Filename” and its “Embedded Reference”, the <code>kicad-embed://</code> address KiCad uses in place of a path: here two fonts and two datasheet PDFs. The two small buttons beneath the table add and remove files, “Embed fonts” is ticked, so the document’s fonts travel with it, and “Export…” writes an embedded copy back out to disk.</p>
+<p>A short demonstration makes the two everyday cases concrete. For the font, I set a line of text on the sheet in “Comic Neue”, a typeface installed on my machine but not shipped with KiCad, then open the “Embedded Files” page and tick “Embed fonts” (Figure 10.44). KiCad scans the document for every non-standard font in use and stores a copy of each, so when the sheet opens on a machine without that font, the text holds its shape rather than snapping back to a default. Fonts are the one case KiCad gathers for you in a single tick; every other kind of file you add yourself, one at a time.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-embedded-files-schematic-font-embed.png" /></p>
+<p>Figure 10.44: An embedded font in use. The text on the sheet, “This text uses an embedded font”, is set in “Comic Neue” (left box, the “Font” field of the “Text Properties” panel), a font installed on my machine but not shipped with KiCad. Because “Embed fonts” is ticked, <code>ComicNeue-Regular.otf</code> is stored in the project (right box) and the text keeps its typeface on any machine that opens it.</p>
+<p>The datasheet takes a slightly different route, because a symbol already has a home for one: the “Datasheet” field in its properties. That field usually holds a web address, with a small globe button beside it that opens the page in your browser. Clear the address, though, and the button turns into a file browser: point it at a PDF on your disk and KiCad embeds that PDF into the symbol, rewriting the field to a <code>kicad-embed://</code> copy (Figure 10.45). From then on the datasheet opens straight from the project whether or not the reader holds the original file, and it joins the fonts in the “Embedded Files” list. I did exactly this for the INA226 current monitor on this sheet, so its datasheet travels with the design.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-embedded-files-schematic-datasheet-embed.png" /></p>
+<p>Figure 10.45: A datasheet embedded through a symbol’s “Datasheet” field. In the “Symbol Properties” of this INA226 monitor, the field reads <code>kicad-embed://ina226.pdf</code>: the globe button at its right opens a web address, but clearing the address turns the button into a file browser, and choosing a local PDF embeds it and rewrites the field to this <code>kicad-embed://</code> copy. The datasheet now opens straight from the project.</p>
+<p>The cost of all this is a slightly larger project file, kept modest by the compression, and the return is a project that simply works wherever it goes. Because embedding is opt-in and happens file by file, you stay in control of what travels and what does not. On anything you mean to share, publish, or archive, embedding is a habit worth keeping.</p>
+<h2 id="sec:c10-pin-table-csv">Symbol Pin-Table CSV (K10)</h2>
+<p>You met this recipe in passing in Chapter 1, when you drew the DRV8833 symbol and loaded its sixteen pins from a file rather than placing them one at a time. In this recipe I’ll show you the entire process. Every symbol has a ‘Pin Table’, a spreadsheet view of its pins that you open from the Symbol Editor’s top toolbar, with one row per pin and a column for each of its properties: the name, the number, the ‘electrical type’ that tells the ERC how the pin behaves, the graphic style, and several more. Editing pins here, a cell at a time, is already quicker than opening the pin dialogue for each one. KiCad 10 adds the step that changes the job entirely: you can move the whole table in and out as a file. Beneath the grid sit two pairs of buttons. “To File…” and “To Clipboard” write the pins out in comma-separated (CSV) form; “From File…” and “From Clipboard” read a CSV or tab-separated file back in. A part KiCad already carries, its stock TB6612FNG, shows all of this at once (Figure 10.46): twenty-four pins as rows, the property columns, and the export and import buttons gathered at the lower right.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-TB6612FNG-default.png" /></p>
+<p>Figure 10.46: The Pin Table of KiCad’s stock TB6612FNG, opened from the Symbol Editor. Each of its twenty-four pins is one row, with columns for the name, number, electrical type, and graphic style; the “To File…” and “From File…” buttons that move the whole table out and back as a CSV sit in the “Export” and “Import” panels at the lower right.</p>
+<p>You reach any symbol’s Pin Table the same way. On the schematic, right-click the symbol and choose “Edit with Symbol Editor” (arrows 1 and 2 in Figure 10.47); once the symbol opens in the editor, click the Pin Table button on the top toolbar (arrow 3).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-how-to-show.png" /></p>
+<p>Figure 10.47: Opening the Pin Table. From the schematic, right-click the symbol (1) and choose “Edit with Symbol Editor” (2); in the Symbol Editor that opens, click the Pin Table button on the top toolbar (3).</p>
+<p>The symbol pin-table offers a CSV import function that allows you to create the pins in a spreadsheet and then import the into the editor. Of course, you can create the pins directly in the symbol editor, which is fine if you only have a few symbols to create, but time-consuming for more than five or six. Here’s how this works.</p>
+<p>Rather than type sixteen or fifty pins into KiCad one dialogue at a time, you first export the empty table, which hands you a template carrying KiCad’s exact column headers and not a single pin to mistype. You fill the rows in any spreadsheet program, one row per pin, and read the file back in. KiCad matches your columns to the table’s by their header names, so their order doesn’t matter; any column you leave out is filled with its default, and any header it doesn’t recognise is skipped. When you are ready to import the CSV, you can choose between “Replace all existing pins”, which swaps the whole set for the one in your file, and “Append to existing pins”, which adds yours to what is already there. Because the match is by header name, exporting the empty template first is not just convenient, but the safest habit. This way, you always have a template CSV with KiCad’s latest header row. You can edit this file and add new rows beneath the header with your specific pin information.</p>
+<p>Three common tasks bring you back to this recipe, where the pin table is useful:</p>
+<ol type="1">
+<li><strong>Authoring a part no library has, when it carries more than a handful of pins.</strong> This is the main use case, and it is why the recipe exists. A datasheet’s pin table is already a table, and the CSV lets you carry it almost straight into your symbol instead of retyping it pin by pin. The DRV8833 you built in Chapter 1 is a good example; imagine the time saving for a fifty-pin microcontroller.</li>
+<li><strong>Overhauling a part’s pins in bulk.</strong> When an existing symbol needs a sweep of changes, you can export its pins, edit them in a spreadsheet, and read them back with “Replace all existing pins”. A find-and-replace down the name column, or retyping a whole column of electrical types, is far quicker than clicking through the pins one at a time.</li>
+<li><strong>Reusing a pin list you already have.</strong> A vendor’s symbol-generator output, a pin list exported from another tool, or a table you built for a previous part can each be reshaped into a CSV with the right headers and imported, so work you have already done carries into the next symbol.</li>
+</ol>
+<p>To see the whole round-trip on a part you can check your work against, I will reverse-engineer the TB6612FNG, the dual H-bridge from the Bus recipe. It carries twenty-four pins, enough to make the CSV worth the effort, and because KiCad already ships it in its <code>Driver_Motor</code> library, you have an authoritative copy to compare your result against. That cross-check is the reason to choose it: when you author a part KiCad lacks, like the DRV8833, nothing tells you whether you got it right, but here you can open KiCad’s version beside your own and confirm every row.</p>
+<p>The worked example needs somewhere to keep the new part, so start by making a library for it. In the Symbol Editor, open the library manager through “Preferences”, “Manage Symbol Libraries”, switch to the “Project Specific Libraries” tab, and add one; I named mine <code>custom-symbols</code> so it travels with this chapter’s project rather than living among my global libraries (Figure 10.48).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-new-library.png" /></p>
+<p>Figure 10.48: A new project-specific library, “custom-symbols”, added on the “Project Specific Libraries” tab of the Symbol Libraries dialogue. Keeping the part here means it travels with the project rather than living among your global libraries.</p>
+<p>Back in the Symbol Editor, select that library in the tree on the left before you do anything else (Figure 10.49). A symbol is always saved into whichever library is currently selected, so making this choice first is what puts the new part where you want it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-library-selected-in-symbol-editor.png" /></p>
+<p>Figure 10.49: With no symbol yet loaded, the new “custom-symbols” library is selected in the Symbol Editor’s library tree, the pane the arrows mark. A symbol is saved into whichever library is selected, so the selection is made before the symbol is created.</p>
+<p>Now create the symbol itself. Click the “New Symbol” button, name it <code>TB6612FNG_PD</code> (I keep the <code>_PD</code> suffix from Chapter 1 that marks a part I authored), leave the default reference designator as “U”, and click “OK” (Figure 10.50).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-create-new-symbol.png" /></p>
+<p>Figure 10.50: Creating the new symbol. With “custom-symbols” selected, click the “New Symbol” button (1), enter the name <code>TB6612FNG_PD</code> (2), leave the default reference designator as “U”, and click “OK” (3).</p>
+<p>The symbol opens empty. Open its Pin Table from the top toolbar and, while it still holds no pins, click “To File…” and save the CSV somewhere you can find it again (Figure 10.51). Opened in a spreadsheet, that file is a single header row and nothing beneath it: KiCad’s own column names, waiting to be filled. Starting from this template is what makes the headers line up when the file comes back in.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-export-empty-CSV-template.png" /></p>
+<p>Figure 10.51: Exporting the empty template. With the new symbol’s body still bare (3), open its Pin Table (1) and click “To File…” (2). Because the table holds no pins yet, the CSV it writes is just KiCad’s header row, the exact column names the import will expect back.</p>
+<p>Now fill one row per pin from the datasheet’s pin table. You need only the columns that define a pin, so I keep four: the pin’s “Name”, its “Number”, its “Electrical Type”, and its “Graphic Style”. KiCad fills every other column, the position, orientation, length, and text sizes, with sensible defaults, and you arrange the pins on the body afterward. Filled in, the file reads like this:</p>
+<pre><code>Name,Number,Electrical Type,Graphic Style
+AO1,1,Output,Line
+AO1,2,Passive,Line
+PGND1,3,Power input,Line
+PGND1,4,Passive,Line
+AO2,5,Output,Line
+AO2,6,Passive,Line
+BO2,7,Output,Line
+BO2,8,Passive,Line
+PGND2,9,Power input,Line
+PGND2,10,Passive,Line
+BO1,11,Output,Line
+BO1,12,Passive,Line
+VM2,13,Power input,Line
+VM3,14,Power input,Line
+PWMB,15,Input,Line
+BIN2,16,Input,Line
+BIN1,17,Input,Line
+GND,18,Power input,Line
+STBY,19,Input,Inverted
+VCC,20,Power input,Line
+AIN1,21,Input,Line
+AIN2,22,Input,Line
+PWMA,23,Input,Line
+VM1,24,Power input,Line</code></pre>
+<p>Two things in that file are worth understanding, because they might confuse you the first time you look at this example, and also because it matters for the ERC. First, several names appear twice. The TB6612FNG bonds each half-bridge output and each power ground out to two package pins to carry more current, so <code>AO1</code> is pins 1 and 2, <code>PGND1</code> is pins 3 and 4, and so on down the list. Each pair is one electrical node reached through two pins. I give the first of each pair its true electrical type, “Output” for a bridge output or “Power input” for a ground, and mark the second “Passive”. By doing so, the ERC is satisfied. If I had called both pins “Output” and then wired them together, as I must since they are the same node, the ERC would report that two outputs were shorted. Marking the duplicate “Passive” tells KiCad there is a single driver and the second pin merely rides along. This is how KiCad’s own library models the part, which is why the two will agree (I often look at how the people in the KiCad library team design symbols and footprints to understand what best practices are for KiCad). Second, “STBY” on pin 19 is an active-low standby input, so I set its “Graphic Style” to “Inverted”, which draws the small bubble on the pin; every other pin keeps the default “Line”.</p>
+<p>Back in the Symbol Editor, open the Pin Table again, click “From File…”, choose your filled CSV, and select “Replace all existing pins”. The table is empty, so there is nothing to replace here, but that is the right choice whenever you mean the file to define the whole part. Click “OK”, and all twenty-four pins arrive at once, filling the table exactly as you typed them (Figure 10.52).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-CSV-imported.png" /></p>
+<p>Figure 10.52: Your TB6612FNG_PD Pin Table right after importing the filled CSV: all twenty-four pins present, their names, numbers, and electrical types exactly as the file set them. The positions all read 0 mils because the CSV carried none, which is why the pins still need arranging.</p>
+<p>On the canvas, though, the pins do not arrive arranged. Because the CSV carried no positions, they land stacked on top of one another at the symbol’s origin (Figure 10.53).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-new-pins-stacked.png" /></p>
+<p>Figure 10.53: The freshly imported pins land stacked on top of one another at the symbol’s origin, because the CSV set no positions. Each still has to be dragged into place.</p>
+<p>That is expected. Drag them out into the usual functional grouping, inputs on the left, outputs on the right, the motor supply at the top and the grounds at the bottom, the same arrangement you gave the DRV8833, and stretch the body to fit. The finished symbol reads cleanly, every pin named, numbered, and typed (Figure 10.54).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-new-symbol-complete.png" /></p>
+<p>Figure 10.54: The completed TB6612FNG_PD after the pins are arranged into a clean rectangle, the doubled outputs and grounds down the sides and the logic and supply pins along the remaining edges, with the body stretched to fit.</p>
+<p>With that, the symbol is done and saved into your “custom-symbols” library, and it behaves exactly like any part KiCad ships. Open the Symbol Chooser in the schematic, type its name, and there it is, ready to place, its preview showing the pins you just imported (Figure 10.55). You have built a twenty-four-pin part without placing a single pin by hand.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-new-symbol-in-symbol-chooser.png" /></p>
+<p>Figure 10.55: The finished TB6612FNG_PD in the Symbol Chooser, listed under the “custom-symbols” library and ready to drop onto a schematic like any stock part.</p>
+<p>Before you use the new symbol, you should confirm it’s correct. Because KiCad ships its own TB6612FNG, you can check your work against an authoritative copy, which is one reason I decided to use the TB6612FNG in this recipe. The first figure in this recipe (Figure 10.46) is the stock symbol’s Pin Table; Figure 10.52 is your own, imported from the CSV. Set them side by side and confirm that they agree (they do) row for row, the names, numbers, and electrical types matching down all twenty-four pins, the doubled outputs and their “Passive” partners included. Dropped onto a schematic beside each other, the two symbols carry the same pins even though you arranged yours differently (Figure 10.56). That agreement is the confirmation you don’t get when the part is one no library carries, and it is why this exercise is worth doing once, on a part you can check, before you author the part you actually need.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-pin-table-comparison.png" /></p>
+<p>Figure 10.56: Your TB6612FNG_PD (left) beside KiCad’s stock TB6612FNG (right). The bodies are laid out differently, but the two carry the same twenty-four pins with the same numbers and electrical types, which is the cross-check that tells you the CSV was right.</p>
+<p>That from-scratch case is the real reason the recipe exists: a part KiCad lacks, exactly like the DRV8833 from Chapter 1, where the CSV turns an afternoon of clicking into a coffee break and makes the datasheet’s own pin table the direct source of your symbol. Whenever you author a part with more than a handful of pins, build it from a CSV.</p>
+
+<h2 id="sec:c10-design-variants">Design Variants / DNP (K10)</h2>
+<div class="draft-pending">
+This recipe is being revised for KiCad 10 and will appear in a later update.
+</div>
+<h2 id="sec:c10-project-templates">Project Templates</h2>
+<p>By the time you have set up a board the way you like it, with a stackup, a set of constraints from your fabricator, your net classes, your predefined track and via sizes, and your title block, you have done a fair amount of work that you would rather not repeat on every new project. A ‘project template’ saves all of it as a starting point: you create a new project from the template, and it opens with your setup already in place instead of on a blank sheet. KiCad also offers a lighter-weight version of the same idea inside Board Setup, an “Import Settings from Another Board” button that copies the rules out of an existing board and into the one you are working on, which is handy when you want the setup but not a whole project skeleton. Either way the goal is the same, to start each new board from a known-good baseline so the careful setup you did once keeps paying off.</p>
+<p>To see how much that baseline is worth, take a real board of mine. In another course I built a small USB mass-storage drive around an RP2040, with an eMMC flash chip for storage, a USB 2.0 bridge, a buck-converter supply, and a small sensor block for temperature and current monitoring. None of that circuitry is important here; what is important, however, is everything I had to set up before I could route a single track. Because it is a four-layer board, it needed a proper stackup calculated using the manufacturer’s impedance tool<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. This stackup includes a signal layer on top, an internal ground plane, an internal power plane, and a signal layer on the bottom, each with its copper weight and dielectric thickness set. Its nets are not all alike, so it grew seven net classes, where the power rails route on wide 0.5 mm copper, the eMMC data lines and the USB pair route on thin, tightly-spaced tracks with their own clearances, and the crystal and QSPI signals get classes of their own. On top of that sit a set of predefined track widths and via sizes, so that while routing I pick a ready value from a list instead of typing one each time (Figure 10.62), and a page of constraints matched to my fabricator, down to the minimum track, via, hole, and annular-ring sizes the factory guarantees, plus a few custom design rules for the fine-pitch parts. That is hours of work, and none of it is specific to a USB drive. The next four-layer board I send to the same factory would need the same stackup setup.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-import-settings-from-another-board.png" /></p>
+<p>Figure 10.62: The drive’s predefined sizes, on the “Pre-defined Sizes” page of Board Setup. The list holds the ready track widths (0.114, 0.15, 0.2, and 0.3 mm) and via sizes (0.3 mm with a 0.15 mm hole, 0.4 with 0.2) I pick from while routing rather than typing a value each time. The arrow marks the “Import Settings from Another Board…” button at the lower left, the lighter-weight way to copy a setup like this into another board without making a template of it.</p>
+<p>So rather than rebuild that scaffolding, I turn the finished project into a template once and start from it every time I need the same stackup. A KiCad template is nothing complicated: it is an ordinary project folder with one addition, a subfolder named <code>meta</code> that holds a short <code>info.html</code> file describing the template, and optionally a 64-by-64-pixel <code>icon.png</code> beside it for the list icon. The folder’s own name is what KiCad shows in the template list; the <code>info.html</code> supplies the description panel you read when you select the template, with whatever you put in its <code>&lt;title&gt;</code> tag as the heading (Figure 10.63). KiCad looks for templates in two places, a system folder that ships with the program and a personal one you control, and you point the personal one wherever you like by editing the <code>KICAD_USER_TEMPLATE_DIR</code> path under “Preferences”, “Configure Paths” (Figure 10.64). Once your template folder is there, “File”, “New Project” opens the “Project Template Selector”, which lists the available templates down the left; pick yours to read its description on the right, click “OK”, give the new project a name, and KiCad copies the folder into a fresh project already carrying your setup (Figure 10.65).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-example-template-files.png" /></p>
+<p>Figure 10.63: What a template looks like on disk, using one that ships with KiCad. The <code>Arduino_Mega</code> template folder (❶) is an ordinary project folder with a <code>meta</code> subfolder added (❷), holding <code>icon.png</code> for the list icon, a <code>brd.png</code> preview the page embeds, and the <code>info.html</code> that describes it. Open that <code>info.html</code> (❸) and its <code>&lt;title&gt;</code>, here “Arduino Mega Shield”, is the heading KiCad shows above the description.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-kicad-template-directory.png" /></p>
+<p>Figure 10.64: The two places KiCad looks for templates, set in “Preferences” → “Configure Paths”. <code>KICAD10_TEMPLATE_DIR</code> (❶) is the system folder that ships with the program; <code>KICAD_USER_TEMPLATE_DIR</code> (❷) is the personal one you control, and pointing it at a folder of your own is what makes your templates appear in the selector.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-example-template-in-gui.png" /></p>
+<p>Figure 10.65: The same <code>Arduino_Mega</code> template in the “Project Template Selector”, the dialog “File” → “New Project” opens. The installed templates are listed down the left, each labelled by its folder name; select one and its <code>info.html</code> renders on the right, showing the title, the description, and the preview image. The “default” entry at the top is KiCad’s plain empty project.</p>
+<p>Building the template from the drive project is straight-forward, because the manual’s own advice is that the easiest way to make a template is to start from a project. I use “File”, “Save As” in the Project Manager to drop a copy of the project into my user template folder, then add the <code>meta</code> folder and its <code>info.html</code> by hand (Figure 10.66). What matters next is the clean-up, because a working project accumulates a great deal that isn’t useful in a template. The rule of thumb is to keep the setup and throw away the board.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-new-template-info.png" /></p>
+<p>Figure 10.66: The drive project part-way into becoming a template, its <code>meta/info.html</code> written (❶) and open in a text editor (❷) with the “4-Layer Starter (NextPCB)” title and a summary of what the template carries. The tree still shows everything a working project collects, the Gerber folders, the bill of materials, the datasheets, the parts library, the backups, and the layout archives, none of which belongs in a template. That clutter is what the next steps strip out.</p>
+<p>Keep the scaffolding, which is the whole reason the template exists:</p>
+<ol type="1">
+<li><strong>Board Setup, entire.</strong> The stackup, the constraints, the net classes, the predefined track and via sizes, and the text, silk, and fab defaults all live here, and all of it should stay.</li>
+<li><strong>The title block.</strong> Your name, the sheet size, and the fields you always fill in are worth keeping so a new project starts already labelled.</li>
+<li><strong>An empty board and an empty schematic.</strong> Keep the <code>.kicad_pcb</code> and the root <code>.kicad_sch</code>, but clear them out: delete the footprints, tracks, zones, and the board outline from the PCB, and strip the placed symbols and the sub-sheets from the schematic. What you are keeping is the setup stored on those files, not the circuit drawn on them.</li>
+</ol>
+<p>Strip everything that belongs to the drive and not to the next board:</p>
+<ol type="1">
+<li><strong>The circuit and its parts.</strong> The seven schematic sub-sheets and every symbol on them go, and so does the project’s own <code>Library</code> of parts drawn just for this board, the RP2040, the eMMC, the USB bridge, and the OLED among them. A new project will bring its own parts.</li>
+<li><strong>The generated output and the working clutter.</strong> The Gerber folders and zips, the exported bill of materials, the datasheets folder, the reference designs, and the layout drafts are all products of this board rather than settings, so delete them. The <code>-backups</code> folder and the per-user <code>.kicad_prl</code> file go too, since KiCad rebuilds the local state a project needs; dotfiles such as an editor’s history folder are left behind for you, because a template never copies files whose names begin with a dot.</li>
+</ol>
+<p>One file deserves a closer look than a plain keep-or-delete, and that is the custom design rules in the project’s <code>.kicad_dru</code>. Some of those rules are general and worth carrying forward, such as one that sets a sensible clearance between the pads of any single footprint. Others are written against this board’s exact parts, with conditions like <code>insideCourtyard('U601')</code> that name a reference designator only the drive has. Those will never match anything in a new project, so they linger as clutter and quiet confusion. Open the file, keep the rules that speak in general terms, and delete the ones tied to a specific part.</p>
+<p>When the stripping is done, the template folder holds little more than the <code>meta</code> folder, the <code>.kicad_pro</code>, the emptied <code>.kicad_pcb</code> and <code>.kicad_sch</code>, and the trimmed <code>.kicad_dru</code> (Figure 10.67). If you list the folder with the project still open in KiCad you will also see a <code>~*.lck</code> lock file for each open editor, an autosave copy, and a fresh <code>.kicad_prl</code>; none of those are yours to curate, because KiCad writes them while a project is open and clears or rebuilds them on its own, so close the project first and leave them out.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-new-tempate-clean-files.png" /></p>
+<p>Figure 10.67: The cleaned template folder. The <code>~*.lck</code> locks, the <code>_autosave-</code> copy, and the <code>.kicad_prl</code> are present only because the project was open when the listing was taken; KiCad writes them on its own and clears or rebuilds them, so they are not part of the template you ship.</p>
+<p>With the cleanup done, the template is a blank four-layer board that already knows your stackup, your net classes, and your fabricator’s limits: open it and both editors are empty while Board Setup is fully populated (Figure 10.68). From then on it shows up in the “Project Template Selector” whenever you set the filter to “User Templates”, ready to start a new board from (Figure 10.69), and every project you begin this way inherits that head start. There is one more way to reuse your setup that does not need a whole template, though, and it is the “Import Settings from Another Board” button I mentioned at the start. It is the quickest way to pull a fabricator’s rules into a board, and it is the subject of the next recipe.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-new-tempate-clean.png" /></p>
+<p>Figure 10.68: The finished template opened once more, to show what a new project inherits. The file tree is down to the four project files and <code>meta</code> (❶), the board carries no footprints, tracks, or nets (❷), and the schematic is empty too, holding only the title block (❹). Board Setup, though, is fully populated: the “Constraints” page (❸) already holds the fabricator’s minimum track, via, hole, and annular-ring values, and the “Pre-defined Sizes”, “Net Classes”, and “Custom Rules” pages carry the drive’s settings just the same.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-new-template-ready-to-use.png" /></p>
+<p>Figure 10.69: The template ready to use. Set the selector’s filter to “User Templates” (❶) and your own templates appear; here “NextPCB_four_layer_stackup” is selected (❷) and its <code>info.html</code> renders on the right (❸), the summary of what it carries followed by a short “First steps” list. From here it behaves like any other template: pick it, name the project, and start routing on a board that already knows your setup.</p>
+<h2 id="sec:c10-fab-design-rules">Importing a Fab’s Design Rules</h2>
+<p>Remember the “Import Settings from Another Board” button from the previous recipe, the one that copies the setup out of an existing board and into the one you are working on. It has a use you will reach for on almost every new project, because it saves you from typing your fabricator’s numbers in by hand. More and more PCB manufacturers now publish a ready-made board file that already carries their capabilities: their minimum copper clearance and track width, their smallest drill and via, the annular ring and hole-to-hole spacing their process guarantees, all filled in for you. NextPCB, the sponsor of this book, is one of them, and their files are the ones we will use here; the same steps work with any manufacturer that offers one.</p>
+<p>A word on what the file actually is, because the name can mislead. Fabs often call it a ‘DRC file’ or a ‘design-rules template’, but it is not a rules file in KiCad’s own sense of a separate <code>.kicad_dru</code> document. It is an ordinary, empty <code>.kicad_pcb</code> board with the factory’s numbers already set in its Board Setup. You do not open it and work in it; you point your own board at it and copy the settings across. NextPCB publishes theirs on GitHub (github.com/Huaqiu-Electronics/NextPCB-Manufacturing-Rules) in two forms: a “Simple” template with comfortable everyday limits, and an “Advanced” one wound down to the tightest the process will run, which lets you build a denser board but can cost more. Start with the Simple one unless a design genuinely needs the tighter numbers. Download both files the repository offers for your template, the <code>.kicad_pcb</code> board and its companion <code>.kicad_pro</code>, and keep them together in one folder with their matching base names; the import needs the pair, because much of what you are about to copy, the constraints, the net classes, and the predefined sizes, lives in the project file rather than the board, and KiCad reads the <code>.kicad_pro</code> sitting beside the <code>.kicad_pcb</code> you point it at. Keep the pair somewhere you can find again.</p>
+<p>To bring its settings into your project, open your board and open Board Setup, either from the “File” menu or from the Board Setup button on the toolbar. At the bottom left of the dialogue is the “Import Settings from Another Board…” button; click it (Figure 10.70).</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-import-design-rules-fab-import-settings.png" /></p>
+<p>Figure 10.70: Opening the import from inside Board Setup. Board Setup is open here from its toolbar button (❶); the “Import Settings from Another Board…” button that starts the import sits at the bottom left of the dialogue (❷).</p>
+<p>In the “Import from:” field choose the template <code>.kicad_pcb</code> you downloaded, then tick the setting groups you want to bring across (Figure 10.71). KiCad lists them as a checklist, and you take what is useful while leaving the rest: here the ticked groups are the board layers and physical stackup, the solder-mask and paste defaults, the zone fill offsets, the text-and-graphics defaults and formatting, the design-rule constraints, the predefined track-and-via sizes, and the net classes, while teardrops, length-tuning patterns, component classes, tuning profiles, custom rules, and violation severities are left as they are.</p>
+<p>The one group worth a moment’s thought is “Board layers and physical stackup”. Ticking it brings the fab’s layer scheme across, its copper-layer count and the layer names the factory uses, which for a fab design-rules file is usually exactly what you want. The only time to leave it unticked is when your board already carries a stackup you mean to keep, such as an impedance-controlled one you calculated yourself, because importing this group replaces your layer arrangement with the template’s. Click “Import Settings”, let it finish, then “OK” to close the dialogue. Your board now carries the factory’s limits, and the moment you run the design rules check it holds the design to them.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-import-design-rules-fab-import-settings-selections.png" /></p>
+<p>Figure 10.71: Choosing what to import. Clicking “Import Settings from Another Board…” (❶) opens the “Import Settings” dialogue. Point the “Import from:” field at the template you downloaded (❷), here NextPCB’s “Simple” board from the Downloads folder. The checklist (❸) then lets you tick the groups to bring across; ticked here are the board layers and physical stackup, the solder-mask and zone defaults, the text-and-graphics defaults and formatting, the design-rule constraints, the predefined track-and-via sizes, and the net classes. Click “Import Settings” (❹) to apply them.</p>
+<p>A quick way to confirm the import took hold is to look at the layers it brought in. Open the “Physical Stackup” page of Board Setup and check two things against the fab’s own documentation: the copper-layer count and the layer names. NextPCB renames the inner copper layers to its own convention, so on this four-layer board the copper layers now read F.Cu, GL2.Cu, GL3.Cu, and B.Cu, which match the names in the repository’s notes (Figure 10.72). The template’s stackup runs to six layers, so a board with more copper would pick up GL4.Cu and GL5.Cu as well; a four-layer board like this one uses the top four. When the names line up with the documentation, the settings arrived.</p>
+
+<p><img src="/assets/klp5e-vol2/ch10/ch10-import-design-rules-check-imported-settings.png" /></p>
+<p>Figure 10.72: Confirming the import took. With “Board layers and physical stackup” ticked, the import also carries the fab’s layer scheme. The “Physical Stackup” page now shows four copper layers named F.Cu, GL2.Cu, GL3.Cu, and B.Cu (left), and each one matches the fab’s own documentation (right), which lists the renaming the factory applies (In1.Cu → GL2.Cu, In2.Cu → GL3.Cu, and so on). The documentation’s example is a six-layer board, so its two extra inner layers (In3.Cu → GL4.Cu and In4.Cu → GL5.Cu, highlighted) have no counterpart on this four-layer board. Matching the layer names against the documentation is a quick way to confirm the settings landed.</p>
+<p>This is the low-effort version of the manufacturability setup you met in the design-for-manufacturing chapter: instead of reading the factory’s capability page and copying each number into “Constraints” by hand, you let the factory hand you the numbers already entered. Treat the import as a starting point rather than the last word. These settings are not mandatory for placing an order, and a template cannot know the one custom rule your particular board needs, so once the constraints are in, add any ‘custom rule’ the design calls for and run the DRC to confirm the board is clean. Reach for a fab’s template at the very start of a board, right after you create the project, so every track you route is measured against the factory that will build it.</p>
+<p>That is the drawer of intermediate recipes, and with it the teaching of Volume 2 is complete. You can now author the parts no library has for you, set up a board that respects the current it carries, reuse your work instead of repeating it, and express several builds from a single project. What remains is to put all of it to work: to build the two boards these chapters have been pointing at, take them to a factory, and hold the results in your hand. Let’s go and build.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The small misalignment between a drilled hole and its intended position on a pad or via, arising from manufacturing tolerances during drilling. The drill may land off-centre, leaving the hole closer to one edge of the pad and reducing the copper available for a track to connect on that side. Teardrops compensate by widening the join gradually, so the connection stays sound even when the drill wanders.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A Kelvin connection, named after Lord Kelvin, is a wiring technique that separates the path carrying current from the path measuring voltage, so the measurement sees the true value at the load rather than a value reduced by the voltage drop along the current-carrying line. The sense line carries negligible current, so it develops almost no drop of its own, and it must meet the power line at exactly the point whose voltage you want to measure.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>A ‘do-not-populate’ (DNP) marking tells the assembler to leave a part off the board, even though the part remains in the design files. The footprint stays on the layout, so the copper and pads are still fabricated, but no component is fitted or soldered there. Designers use it for parts held back for testing, for options that ship in some builds and not others, or for debug components that are fitted during development and removed for production.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>In that project, I used the calculator at https://www.nextpcb.com/pcb-impedance-calculator<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</div>
+<script>
+  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
+  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
+  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  (function () {
+    function initTocScroll() {
+      var toc = document.querySelector('.note-toc');
+      if (!toc) return;
+      toc.addEventListener('click', function (e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        if (!href || href.charAt(0) !== '#') return;
+        var id = href.substring(1);
+        var target = document.getElementById(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTocScroll);
+    } else {
+      initTocScroll();
+    }
+  })();
+</script>
+<script>
+  (function () {
+    function initLightbox() {
+      var wrappers = document.querySelectorAll('[data-lightbox-wrapper]');
+      wrappers.forEach(function (wrapper) {
+        var images = wrapper.querySelectorAll('img');
+
+        images.forEach(function (img) {
+          if (img.closest('.lightbox-figure')) return;
+          var src = img.getAttribute('src');
+          if (!src) return;
+
+          var figure = document.createElement('div');
+          figure.className = 'lightbox-figure';
+
+          var thumbnail = document.createElement('img');
+          thumbnail.src = src;
+          thumbnail.alt = img.alt || '';
+          thumbnail.className = 'lightbox-thumbnail';
+          var loading = img.getAttribute('loading');
+          if (loading) thumbnail.setAttribute('loading', loading);
+
+          var button = document.createElement('button');
+          button.className = 'lightbox-view-btn';
+          button.type = 'button';
+          button.textContent = 'View full size (opens in new tab)';
+          button.setAttribute('aria-label', 'View full size image in new tab');
+
+          function openFullSize() {
+            fetch(src)
+              .then(function (response) { return response.blob(); })
+              .then(function (blob) {
+                var blobUrl = URL.createObjectURL(blob);
+                window.open(blobUrl, '_blank');
+              });
+          }
+          thumbnail.addEventListener('click', openFullSize);
+          button.addEventListener('click', openFullSize);
+
+          figure.appendChild(thumbnail);
+          figure.appendChild(button);
+          img.replaceWith(figure);
+        });
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLightbox);
+    } else {
+      initLightbox();
+    }
+  })();
+</script>
+<!-- te-notes-autoheight v1 -->
+<script>
+  function sendHeight() {
+    window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+  }
+  // Send on own load events
+  document.addEventListener('DOMContentLoaded', sendHeight);
+  window.addEventListener('load', sendHeight);
+  // Respond to ping from parent (parent pings once it is ready)
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'ping') sendHeight();
+  });
+  // Fallback: retry for 3 seconds in case both sides miss each other
+  var _a = 0;
+  var _iv = setInterval(function () {
+    sendHeight(); if (++_a >= 6) clearInterval(_iv);
+  }, 500);
+</script>
+</body>
+</html>
