@@ -115,6 +115,19 @@
     text-align: center;
   }
 
+  .draft-pending {
+    margin: 1.6em 0;
+    padding: 28px 22px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.92em;
+    font-style: italic;
+    text-align: center;
+  }
+
   /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
      full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
      thumbnail keeps this template's existing block+margin:auto centering
@@ -339,7 +352,7 @@
 <p>That is the entire spine of Volume 1, and of every project after it. Strip away the explanations and it fits on a single card you can keep beside you:</p>
 <p><strong>Schematic (what connects to what):</strong> 1) create the project, 2) place symbols, 3) annotate, 4) set component values, 5) wire and label, 6) assign footprints, 7) run the ERC until clean, 8) hand off with “Update PCB from Schematic.”</p>
 <p><strong>Layout (where everything goes):</strong> 1) import from the schematic, 2) set up the board outline, 3) place components, 4) route the tracks, 5) add copper fills, 6) run the DRC until clean, 7) add text and silkscreen, 8) generate the Gerbers.</p>
-<p>Two things are worth committing to memory more than the lists themselves. The first is the shape of the journey: you build, you check, you hand on. The second is the two gates. The ERC and the DRC are where this workflow earns its keep, because they are how you find a mistake while it is still free to fix. Run them early, run them often, and run them until they are clean.</p>
+<p>Two things are worth committing to memory more than the lists themselves. The first is the shape of the journey: you build, you check, you hand on. The second is the two gates. The ERC and the DRC are where this workflow pays off, because they are how you find a mistake while it is still free to fix. Run them early, run them often, and run them until they are clean.</p>
 <p>One more thing about that bridge, because the projects ahead will have you cross it more than once. The eight-then-eight order reads as a single pass, and your first time through it is. But real design loops: partway through a layout you will spot something to change, and the place to change it is always the schematic, never the board. Edit the schematic, save, and run “Update PCB from Schematic” again; KiCad carries the change down and reports exactly what moved. The board is where connections are <em>realised</em>, not where they are <em>decided</em>, so the schematic stays the source of truth however many times you return to it. Editing connectivity straight on the board is the one habit this workflow asks you to avoid.</p>
 <p>For your first few solo projects, keep this page open beside you and follow the order as written; it will keep the design in a sensible state at every step. As the steps become second nature, you will start to move around inside them freely, and that is exactly as it should be. The order is a scaffold for learning, not a cage.</p>
 <p>With the spine in hand, the rest of the book simply hangs new skills off these fifteen steps. The very first thing to fill in is something both tours quietly took for granted: that every part we needed was already waiting in KiCad’s standard library. That is often true, but not always, and knowing what to do when a part is missing is what separates a smooth project from a stalled one. In the next chapter we tackle exactly that: finding, importing, and managing the parts your designs are built from. Let’s go find some parts.</p>

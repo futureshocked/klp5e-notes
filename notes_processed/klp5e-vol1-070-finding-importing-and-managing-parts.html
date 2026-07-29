@@ -115,6 +115,19 @@
     text-align: center;
   }
 
+  .draft-pending {
+    margin: 1.6em 0;
+    padding: 28px 22px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.92em;
+    font-style: italic;
+    text-align: center;
+  }
+
   /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
      full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
      thumbnail keeps this template's existing block+margin:auto centering
@@ -288,7 +301,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch06/ch06-snapeda-usbc-4-download-kicad6plus.png" /></p>
 <p>Figure 6.7: Then pick the KiCad version. Choose “V6 &amp; Later” for any modern KiCad install, and you get the symbol, footprint, and 3D model in one package.</p>
-<p><strong>The check that earns its keep.</strong> Before I trust this connector, I do the one thing the previous section insisted on: I open the manufacturer’s datasheet to its recommended land pattern and lay it beside the footprint KiCad now shows me. I count the pads and confirm the number matches. I check the pitch. And I find pin 1 on the datasheet and confirm it is pin 1 on the footprint, because a connector that is correct in every way except a mirrored or rotated pin assignment is one of the most frustrating faults to chase later. Only when those three agree do I consider the part sourced. The technique is the same for any part. Figure 6.10 shows it on a small FRAM memory chip I imported from the DigiKey library: with the component selected in the chooser (1), the datasheet’s pin-assignment diagram sits alongside, so the symbol’s pin numbers and roles (2) and the footprint’s pads (3) can be checked against it at a glance.</p>
+<p><strong>The check that matters most.</strong> Before I trust this connector, I do the one thing the previous section insisted on: I open the manufacturer’s datasheet to its recommended land pattern and lay it beside the footprint KiCad now shows me. I count the pads and confirm the number matches. I check the pitch. And I find pin 1 on the datasheet and confirm it is pin 1 on the footprint, because a connector that is correct in every way except a mirrored or rotated pin assignment is one of the most frustrating faults to chase later. Only when those three agree do I consider the part sourced. The technique is the same for any part. Figure 6.10 shows it on a small FRAM memory chip I imported from the DigiKey library: with the component selected in the chooser (1), the datasheet’s pin-assignment diagram sits alongside, so the symbol’s pin numbers and roles (2) and the footprint’s pads (3) can be checked against it at a glance.</p>
 <p>This is also where the classic stage-two mistakes hide, so let me name them before they catch you. The first is grabbing the wrong <em>variant</em>: many real parts come in several footprints (different mounting styles, different pad shapes), and a download site may offer more than one, so match the variant to the exact part you will buy. The second is mismatched pin numbering between a community symbol and its footprint, which the datasheet check above is designed to catch. The third is simple over-trust: a footprint that looks plausible on screen but was modelled carelessly. None of these survive a one-minute look at the datasheet, which is the whole reason I keep insisting on it.</p>
 
 
@@ -317,7 +330,7 @@
 
 
 <p><img src="/assets/klp5e-vol1/ch06/ch06_two-homes_v10.png" /></p>
-<p>Figure 6.12: Two homes for a part. Copy a part into the project (through the project-specific table) to make the design self-contained; keep the parts you reuse in a personal library (through the global table). Promote a part from the first to the second once it has earned its place.</p>
+<p>Figure 6.12: Two homes for a part. Copy a part into the project (through the project-specific table) to make the design self-contained; keep the parts you reuse in a personal library (through the global table). Promote a part from the first to the second once it has proved worth reusing.</p>
 <p>You now have the full sourcing skill: you can find a part in the standard library, import one from a reliable source when the standard library falls short, check that an imported footprint is honest, and store what you collect so a project stays whole for years. This is the missing piece both early tours quietly relied on, and from here it simply becomes part of how you work. In the next part of the book we put it to use on real boards, starting with a complete power-supply project where you will source every part with exactly these steps and copy them into the project as you go. And when, one day, you meet the part that no library has, you will already know what stage three asks of you, and Volume 2 will be waiting. Let’s go build something with the parts you can now find anywhere.</p>
 
 </div>

@@ -115,6 +115,19 @@
     text-align: center;
   }
 
+  .draft-pending {
+    margin: 1.6em 0;
+    padding: 28px 22px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.92em;
+    font-style: italic;
+    text-align: center;
+  }
+
   /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
      full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
      thumbnail keeps this template's existing block+margin:auto centering
@@ -327,7 +340,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch11/ch11-component-cross-probing.png" style="width:100.0%" /></p>
 <p>Figure 11.12: Component cross-probing. Clicking symbol U80 in the Schematic Editor (❶) selects and pans to its matching footprint in the PCB Editor (❷).</p>
-<p>If cross-probing ever does more or less than you want, for instance if you would rather it did not pan the view, you can tune its behaviour in “Preferences → Display Options,” which both the Schematic Editor and the PCB Editor have. As an aside, the busy board in these three screenshots is not one of ours; it is one of the example projects that ship with KiCad, the NVIDIA Jetson AGX Thor baseboard, which appears to have been designed in KiCad itself. It makes a good stand-in for the kind of dense, many-net board where highlighting and cross-probing earn their keep.</p>
+<p>If cross-probing ever does more or less than you want, for instance if you would rather it did not pan the view, you can tune its behaviour in “Preferences → Display Options,” which both the Schematic Editor and the PCB Editor have. As an aside, the busy board in these three screenshots is not one of ours; it is one of the example projects that ship with KiCad, the NVIDIA Jetson AGX Thor baseboard, which appears to have been designed in KiCad itself. It makes a good stand-in for the kind of dense, many-net board where highlighting and cross-probing save the most time.</p>
 <h2 id="sec:c11-3d-snapshot">Save a 3D Snapshot</h2>
 <p>The 3D viewer has been your sanity check throughout this book, the place you spin a board around to make sure nothing fouls anything else. It is also the place to make a picture of your work worth sharing. Open it from the “View” menu or with “Alt+3”. Drag with the left mouse button to orbit the board, roll the wheel to zoom, and drag with the middle button to pan; if you lose your bearings, the little navigation widget of standard views (front, back, top, and so on) snaps you back to a clean angle. When you have framed a view you like, save it to a file with “Export Image…” in the “File” menu (❶ in Figure 11.13), where you can choose the size and resolution (❷), or send it straight to the clipboard to paste into a message.</p>
 

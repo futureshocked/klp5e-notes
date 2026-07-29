@@ -115,6 +115,19 @@
     text-align: center;
   }
 
+  .draft-pending {
+    margin: 1.6em 0;
+    padding: 28px 22px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.92em;
+    font-style: italic;
+    text-align: center;
+  }
+
   /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
      full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
      thumbnail keeps this template's existing block+margin:auto centering
@@ -257,7 +270,7 @@
 <p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-4-draw_outline_edge_cuts_v10.png" style="width:100.0%" /></p>
 <p>Figure 8.18: Draw the board outline on <code>Edge.Cuts</code>. Set the layer (❶) and pick it in the Layers panel (❷); the width and height readouts (❸, ❹) let you size the rectangle as you drag — a tall, narrow shape here, on a 1 mm grid.</p>
 <p><strong>Step 3, place the components.</strong> This is where a power board asks for a little more thought than the blinker did, because two of its parts have to meet the outside world in particular places, and you already settled both when you sketched Figure 8.13.</p>
-<p>Begin with the output header <code>J2</code>, because the breadboard fixes where it must sit. Switch to a 0.254 mm grid now for finer positioning (❷ in Figure 8.19); it lines up with the pitch of the breadboard’s power rails, so <code>J2</code> can land exactly where a pair of jumpers will reach. Put it at the top-right corner with its pins pointing up, so a pair of female jumper wires can drop onto it and run the short hop into the first <code>+</code> and <code>−</code> holes of the breadboard’s top rail. Two moves are worth meeting here, because both earn their keep on every board from now on. The first is the <strong>ruler</strong>, KiCad’s measuring tool: pick it from the right-hand toolbar and drag it across a gap to read the distance without changing anything on the board (❸), a quick way to confirm a clearance or a hop is what you think it is. The second is <strong>locking</strong>: once <code>J2</code> is exactly where you want it, right-click it and choose “Lock,” and a later stray drag can no longer nudge your one carefully placed part out of position. A small padlock then marks it as fixed.</p>
+<p>Begin with the output header <code>J2</code>, because the breadboard fixes where it must sit. Switch to a 0.254 mm grid now for finer positioning (❷ in Figure 8.19); it lines up with the pitch of the breadboard’s power rails, so <code>J2</code> can land exactly where a pair of jumpers will reach. Put it at the top-right corner with its pins pointing up, so a pair of female jumper wires can drop onto it and run the short hop into the first <code>+</code> and <code>−</code> holes of the breadboard’s top rail. Two moves are worth meeting here, because you will reach for both on every board from now on. The first is the <strong>ruler</strong>, KiCad’s measuring tool: pick it from the right-hand toolbar and drag it across a gap to read the distance without changing anything on the board (❸), a quick way to confirm a clearance or a hop is what you think it is. The second is <strong>locking</strong>: once <code>J2</code> is exactly where you want it, right-click it and choose “Lock,” and a later stray drag can no longer nudge your one carefully placed part out of position. A small padlock then marks it as fixed.</p>
 
 <p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-5-placement_of_J2_and_measurement_locked_v10.png" style="width:85.0%" /></p>
 <p>Figure 8.19: Place the output header <code>J2</code> at the top-right corner on the 0.254 mm grid (❷). The ruler tool measures a distance without altering the board (❸) — here confirming the hop to the rail — and <code>J2</code> is then locked so it cannot be nudged later.</p>
@@ -318,7 +331,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-21-Silkscreen_complete_v10.png" style="width:65.0%" /></p>
 <p>Figure 8.35: The finished silkscreen: tidy reference designators, the board name and version <code>BB-PSU v1.0</code>, the <code>+5V</code> and <code>GND</code> labels beside <code>J2</code>, and <code>ON</code>/<code>OFF</code> beside the switch.</p>
-<p><strong>Step 8, generate the Gerbers.</strong> Before you export, open the “3D Viewer” from the “View” menu for the free sanity check Chapter 3 recommended. On this board it earns its keep twice over: check that the USB-C receptacle sits flush at the board edge with its opening clear (Figure 8.36), then flip the board over to confirm the <code>GND</code> pour covers the back as you expect (Figure 8.37). A part facing the wrong way is far cheaper to catch here than on real copper. One thing you will notice is missing from the render: the parts themselves. The viewer is showing the bare board and the flat footprint outlines because I did not attach 3-D models to these components. KiCad can also stand a full, realistic model of every part up on the board for a complete virtual prototype — the board <em>and</em> its components together — and you will add exactly that in the next project.</p>
+<p><strong>Step 8, generate the Gerbers.</strong> Before you export, open the “3D Viewer” from the “View” menu for the free sanity check Chapter 3 recommended. On this board it does double duty: check that the USB-C receptacle sits flush at the board edge with its opening clear (Figure 8.36), then flip the board over to confirm the <code>GND</code> pour covers the back as you expect (Figure 8.37). A part facing the wrong way is far cheaper to catch here than on real copper. One thing you will notice is missing from the render: the parts themselves. The viewer is showing the bare board and the flat footprint outlines because I did not attach 3-D models to these components. KiCad can also stand a full, realistic model of every part up on the board for a complete virtual prototype — the board <em>and</em> its components together — and you will add exactly that in the next project.</p>
 
 <p><img src="/assets/klp5e-vol1/ch08/Ch08-psu-layout-22-3D_front_v10.png" style="width:45.0%" /></p>
 <p>Figure 8.36: The 3D Viewer is your last sanity check. Confirm the connector sits flush at the edge before you spend a cent. The parts are drawn only as flat outlines here because no 3-D models were attached.</p>

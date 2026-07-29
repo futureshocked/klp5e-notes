@@ -115,6 +115,19 @@
     text-align: center;
   }
 
+  .draft-pending {
+    margin: 1.6em 0;
+    padding: 28px 22px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.92em;
+    font-style: italic;
+    text-align: center;
+  }
+
   /* ---- Image lightbox: small thumbnail + "View full size" button, opening a
      full-screen overlay. Ported from klp5e-kicad's ImageLightbox.astro; the
      thumbnail keeps this template's existing block+margin:auto centering
@@ -318,7 +331,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch10/ch10-3-Gerber-files-in-zip.png" style="width:65.0%" /></p>
 <p>Figure 10.3: The breadboard supply’s output, compressed into a single <code>.zip</code> and sitting ready in the project folder. This one file is all the factory needs — with the Gerbers and drill file at its root, not buried in a subfolder.</p>
-<p>Checking is the part worth slowing down for, and it is where a tool I promised you back in Chapter 1 finally earns its place. KiCad ships a separate little application called the ‘Gerber Viewer,’ or GerbView, whose only job is to open Gerber and drill files and show you what they actually contain. This matters because the files you just plotted are what the factory will build from, not the pretty board you were looking at in the PCB Editor. Viewing them on their own, through fresh eyes, is the cheapest insurance there is. Launch GerbView from the KiCad project manager (Figure 10.4), select your Gerber files and open them (Figure 10.5), then load the drill file the same way. The board redraws layer by layer (Figure 10.6), and you can turn each one on and off to inspect it alone.</p>
+<p>Checking is the part worth slowing down for, and it is where a tool I promised you back in Chapter 1 finally comes into its own. KiCad ships a separate little application called the ‘Gerber Viewer,’ or GerbView, whose only job is to open Gerber and drill files and show you what they actually contain. This matters because the files you just plotted are what the factory will build from, not the pretty board you were looking at in the PCB Editor. Viewing them on their own, through fresh eyes, is the cheapest insurance there is. Launch GerbView from the KiCad project manager (Figure 10.4), select your Gerber files and open them (Figure 10.5), then load the drill file the same way. The board redraws layer by layer (Figure 10.6), and you can turn each one on and off to inspect it alone.</p>
 
 <p><img src="/assets/klp5e-vol1/ch10/ch10-4-gerbviewer-open-gerber-files.png" style="width:65.0%" /></p>
 <p>Figure 10.4: GerbView is its own application, launched from the project manager’s left-hand list (❶). Inside it, the Gerbers load through “File → Open Gerber Plot File(s)…” (❷); the drill file loads through “Open Excellon Drill File(s)…” just below it.</p>
