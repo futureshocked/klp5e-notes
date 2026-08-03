@@ -264,6 +264,10 @@
     </li>
     <li><a href="#sec:c10-fab-design-rules">Importing a Fab’s Design Rules</a>
     </li>
+    <li><a href="#sec:c10-footprint-wizard">The Footprint Wizard</a>
+    </li>
+    <li><a href="#sec:c10-calculator-tools">The Calculator Tools</a>
+    </li>
   </ul>
 </details>
 
@@ -465,8 +469,7 @@
 <p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-schematic-start.png" /></p>
 <p>Figure 10.35: The starting schematic, carried over from the design-block recipe. The four driver cells hang off the <code>J1</code> header, and each is a named group, <code>NPN-LED1</code> through <code>NPN-LED4</code>, which is what lets KiCad treat each one as a separate channel.</p>
 <p>Rather than save that cell into a block and re-import it, I lay out one channel by hand and let “Repeat Layout” fill in the other three. The work comes down to three things: telling KiCad which parts make up each channel, giving each channel a placement area on the board, and replicating the reference channel into the rest. That first task is already behind us, because the cells arrived as named groups, and a group is all KiCad needs to recognise a channel.</p>
-<p>There are, in fact, three ways to tell KiCad which parts belong to a channel, and they are worth knowing even though we will use only one. You can use hierarchical sheets, one repeated sheet per channel, which is the method KiCad recommends because separate instances of one sheet are identical by construction. You can use component classes, named groupings a part carries on both its symbol and its footprint, giving each channel a class of its own. Or you can use named groups, the route we are taking, since the four cells already arrived as the groups <code>NPN-LED1</code> through <code>NPN-LED4</code>. Whichever you choose, the channels must be true copies of one another for the tool to work, alike in the number of parts, the reference-designator prefixes, the footprints, and the connections between them. This is exactly why stamped copies of one block suit the feature so well: they are identical from the moment they are made, so the topology check finds nothing to object to.</p>
-
+<p>There are, in fact, three ways to tell KiCad which parts belong to a channel, and they are worth knowing even though we will use only one. You can use hierarchical sheets, one repeated sheet per channel, which is the method KiCad recommends because separate instances of one sheet are identical by construction. You can use component classes, the named groupings a part carries on both its symbol and its footprint that Chapter 3 introduced, giving each channel a class of its own. Or you can use named groups, the route we are taking, since the four cells already arrived as the groups <code>NPN-LED1</code> through <code>NPN-LED4</code>. Whichever you choose, the channels must be true copies of one another for the tool to work, alike in the number of parts, the reference-designator prefixes, the footprints, and the connections between them. This is exactly why stamped copies of one block suit the feature so well: they are identical from the moment they are made, so the topology check finds nothing to object to.</p>
 <p>With the schematic settled, I bring the design to the board with “Update PCB from Schematic”. For the multi-channel design feature to work, ensure that “Group footprints based on symbol group” is ticked so the schematic’s groups cross to the board intact and the parts land sorted cell by cell rather than in one loose pile (Figure 10.36). This is the same option the design-block recipe leaned on, doing the same job here.</p>
 
 <p><img src="/assets/klp5e-vol2/ch10/ch10-multichannel-layout-import-groups.png" /></p>
@@ -670,6 +673,14 @@ This recipe is being revised for KiCad 10 and will appear in a later update.
 <p><img src="/assets/klp5e-vol2/ch10/ch10-import-design-rules-check-imported-settings.png" /></p>
 <p>Figure 10.72: Confirming the import took. With “Board layers and physical stackup” ticked, the import also carries the fab’s layer scheme. The “Physical Stackup” page now shows four copper layers named F.Cu, GL2.Cu, GL3.Cu, and B.Cu (left), and each one matches the fab’s own documentation (right), which lists the renaming the factory applies (In1.Cu → GL2.Cu, In2.Cu → GL3.Cu, and so on). The documentation’s example is a six-layer board, so its two extra inner layers (In3.Cu → GL4.Cu and In4.Cu → GL5.Cu, highlighted) have no counterpart on this four-layer board. Matching the layer names against the documentation is a quick way to confirm the settings landed.</p>
 <p>This is the low-effort version of the manufacturability setup you met in the design-for-manufacturing chapter: instead of reading the factory’s capability page and copying each number into “Constraints” by hand, you let the factory hand you the numbers already entered. Treat the import as a starting point rather than the last word. These settings are not mandatory for placing an order, and a template cannot know the one custom rule your particular board needs, so once the constraints are in, add any ‘custom rule’ the design calls for and run the DRC to confirm the board is clean. Reach for a fab’s template at the very start of a board, right after you create the project, so every track you route is measured against the factory that will build it.</p>
+<h2 id="sec:c10-footprint-wizard">The Footprint Wizard</h2>
+<div class="draft-pending">
+This recipe is awaiting its screenshots and will appear in a later update.
+</div>
+<h2 id="sec:c10-calculator-tools">The Calculator Tools</h2>
+<div class="draft-pending">
+This recipe is awaiting its screenshots and will appear in a later update.
+</div>
 <p>That is the drawer of intermediate recipes, and with it the teaching of Volume 2 is complete. You can now author the parts no library has for you, set up a board that respects the current it carries, reuse your work instead of repeating it, and express several builds from a single project. What remains is to put all of it to work: to build the two boards these chapters have been pointing at, take them to a factory, and hold the results in your hand. Let’s go and build.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />

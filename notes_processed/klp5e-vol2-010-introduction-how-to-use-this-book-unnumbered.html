@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚧 Introduction: How to Use This Book — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<title>Introduction: How to Use This Book — KiCad Like a Pro, 5th Edition — Volume 2</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -229,10 +229,33 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
-<h1 class="note-title">🚧 Introduction: How to Use This Book</h1>
-<div class="draft-pending">
-This chapter is still being written and will appear in a future update.
-</div>
+<h1 class="note-title">Introduction: How to Use This Book</h1>
+<p>Welcome to the second volume of <em>KiCad Like a Pro</em>. If you’ve come here straight from Volume 1, welcome back! You already have two finished boards behind you and a workflow you have completed twice. If you’ve arrived from somewhere else, you are welcome too, though I will assume from the first page that you can already find a symbol, place it, wire a schematic, lay out a simple two-layer board, and send it to be made. That is where Volume 1 left off, and it is where this one begins. For a refresher on that workflow, read Chapter 5 of Volume 1 again, along with the project in Chapter 9.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:intro-how">How to Use This Book</a>
+    </li>
+    <li><a href="#sec:intro-contract">How This Volume Is Balanced</a>
+    </li>
+    <li><a href="#sec:intro-where">Where This Sits</a>
+    </li>
+  </ul>
+</details>
+
+<p>By the end of this second volume of KiCad Like a Pro, you’ll be able to do three things you couldn’t before. Firstly, you will author your own parts, the symbols and footprints that no library has drawn for you. Secondly, you will set up a board with rules that match the current it carries and the factory that will build it, instead of accepting the defaults a new project opens with. And, thirdly, you will take an original design, one that is yours and not a follow-along, all the way from a blank project to the files a manufacturer needs. The objective of Volume 1 was to make you a competent user of other people’s parts and rules. The objective of Volume 2 is to make you self-sufficient.</p>
+<p>This volume features two projects to demonstrate the new skills you are about to learn. The first is a warm-up. It contains a 4×8×8 LED matrix array, a board with a lot of parts, most of them identical, that teaches you to work at scale and reuse your layout instead of repeating it. The second is the capstone project. It’s a small dual H-bridge motor driver built around a chip called the DRV8833, an original board that gives you the opportunity to apply every headline skill in this volume in practice.</p>
+<p>Both projects come late in the volume, in Chapters 7 and 8. Ahead of them are six concept chapters, Chapters 1 to 6, which give you the skills the projects demand, in the order the projects will call for them. There is also an optional extension of the capstone in Chapter 9, which expands the board to a four-motor board built from a second DRV8833. This extension gives you the opportunity to reuse the part of the design that is repeated, which is a relatively new capability of KiCad. The volume closes with Chapter 10, a set of intermediate recipes: short, standalone procedures you can return to whenever a board needs one.</p>
+<h2 id="sec:intro-how">How to Use This Book</h2>
+<p>It’s best to read the chapters in order. This volume is built as a single arc, not a set of independent references, and each chapter assumes the one before it. The six concept chapters come first, Chapters 1 to 6, and they lead into the project chapters that follow: the LED matrix warm-up in Chapter 7 and the DRV8833 capstone in Chapter 8. The concept chapters make use of a simple stand-in board built around the same custom DRV8833 part, rather than the capstone project itself. That way, the custom symbol you draw in Chapter 1 and the footprint you draw in Chapter 2 are sitting in your own library, ready to be used, when the capstone needs them. You author the parts, set up the board, pour the copper, build the bill of materials, and check the design for manufacture, each in its own chapter and each on the stand-in board. The capstone then becomes a review of skills you already have rather than a list of new ones to learn.</p>
+<p>Read this volume with KiCad open. Everything in this volume is something you do, not something you memorise, and the fastest way to make a technique stick is to try it on the screen as you read about it. The version I used throughout is KiCad 10, and where a feature is new enough that you might not have met it in Volume 1, I say so. As in Volume 1, the ‘Mini Encyclopedia’ at the back holds standalone definitions and explanations for the terms the chapters introduce, so when a term needs more explanation than the main text gives it, look there.</p>
+<h2 id="sec:intro-contract">How This Volume Is Balanced</h2>
+<p>Volume 1 was roughly half concepts and half hands-on work, because its mission was to help a beginner get started with KiCad and PCB design in a gentle way. In contrast, roughly 70 percent of this volume goes to project work and 30 percent to concepts. Every concept chapter is also a build: you apply the technique to the stand-in board as you read about it, so the theory arrives at the point in a real board where it is needed. You will still get the <em>why</em> behind every step, because that is how this book teaches, but you will get it while you are building something, not before you have started.</p>
+<p>The concept chapters are comprehensive rather than brief, going deep on the one skill each teaches instead of mentioning a feature and moving to the next, and they assume you can already operate KiCad without help. The projects take up most of the volume’s pages, because producing a board, as opposed to following one, is a skill you build by doing. If a chapter feels like it is moving faster than Volume 1 did, that is this balance working as intended.</p>
+<h2 id="sec:intro-where">Where This Sits</h2>
+<p>Let’s review the difference between Volume 1 and Volume 2. In Volume 1 you learned to <em>source</em> parts. You can now find parts by searching in KiCad’s built-in libraries, pulling symbols and footprints from reputable repositories, and registering them in your library tables. KiCad is mature enough to ship with a comprehensive library, and it supports external libraries just as thoroughly, so you will find almost every part you will ever need. Volume 2 begins when sourcing fails and you need to design a custom part.</p>
+<p>Think of finding a part as a short decision tree. First you look in the libraries you already trust. If the part is not there, you look to a reliable external source, a manufacturer’s download or a reputable repository. And when neither has the part, or has it only in a form you don’t want to use, you reach the third branch: you author it yourself. Volume 1 taught the first two branches, and this volume is about the third. It assumes you have already searched for the part and found nothing, which is exactly the situation a real, original design puts you in. Producing your own parts, and the libraries and rules that hold them, is what makes you independent of whatever someone else did or did not draw.</p>
+<p>Let’s begin where self-sufficiency begins, by drawing a part from scratch. Turn to the next chapter, where you author your first custom symbol.</p>
 
 </div>
 <script>
