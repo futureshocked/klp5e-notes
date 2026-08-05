@@ -218,6 +218,35 @@
   .note-toc .note-toc-sub li { margin-bottom: 0.15em; }
   .note-toc .note-toc-sub a { font-size: 0.95em; color: #475569; }
 
+  /* ---- A-Z term index (Mini Encyclopedia note only). Same <details> chrome as
+     .note-toc, but each row is a letter followed by that letter's terms flowing
+     inline and wrapping, so 50+ entries stay compact instead of running down the
+     page one per line. ---- */
+  .note-term-index > ul { padding-left: 0; list-style: none; }
+  .note-term-index > ul > li {
+    display: flex;
+    gap: 0.7em;
+    align-items: baseline;
+    margin-bottom: 0.35em;
+  }
+  .note-term-index .note-term-letter {
+    flex: 0 0 1.1em;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.85em;
+    font-weight: 700;
+    color: #0f766e;
+  }
+  .note-term-index .note-toc-sub {
+    flex: 1 1 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15em 0.9em;
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  .note-term-index .note-toc-sub li { margin-bottom: 0; }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
