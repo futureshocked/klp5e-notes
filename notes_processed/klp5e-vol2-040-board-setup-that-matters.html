@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚧 Board Setup — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<title>Board Setup — KiCad Like a Pro, 5th Edition — Volume 2</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -258,10 +258,215 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
-<h1 class="note-title">🚧 Board Setup</h1>
-<div class="draft-pending">
-This chapter is still being written and will appear in a future update.
-</div>
+<h1 class="note-title">Board Setup</h1>
+<p>Once you have completed the schematic design of a new board, and you move to the layout phase, the first thing you do in the layout editor is to set up the board. In Volume 1 board setup was a relatively straightforward operation. You accepted sensible defaults and continued with routing, because the breadboard power supply and the little solar board had no unusual copper requirements. In the case of the Volume 2 capstone project, however, where you will design a motor driver PCB based on the DRV8833 integrated circuit, the requirements on the copper will be more demanding. Some of this board’s nets carry much higher currents, while others carry only low-current logic signals. As a result, the choices you make in the “Board Setup” dialogue before you route a single track are what let both kinds of net share one board safely. This chapter is about the setup choices that affect your design, and how to make them once so that the rest of the layout follows.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c03-stackup">Stackup</a>
+    </li>
+    <li><a href="#sec:c03-design-rules">Design Rules</a>
+    </li>
+    <li><a href="#sec:c03-net-classes">Net Classes</a>
+    </li>
+    <li><a href="#sec:c03-track-via-sizes">Predefined Track and Via Sizes</a>
+    </li>
+    <li><a href="#sec:c03-custom-rules">Custom Rules (Intro)</a>
+    </li>
+    <li><a href="#sec:c03-violation-severity">Violation Severity</a>
+    </li>
+    <li><a href="#sec:c03-component-classes">Component Classes (K9)</a>
+    </li>
+  </ul>
+</details>
+
+<p>Open “Board Setup” from the top toolbar or the “File” menu (Figure 3.1). It is a single dialogue with a list of sections down the side, and it holds far more than you need on any one board. We will visit the sections that matter for a board like this, roughly in the order you would use them, and leave the specialist ones for when a project actually calls for them.</p>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-new.png" style="width:85.0%" /></p>
+<p>Figure 3.1: Board Setup on a board where nothing has been set up yet, opened from its toolbar button (❶) and sitting on the “Net Classes” page (❷). Notice what is missing. The “Netclasses” table holds one entry, “Default”, carrying the widths and clearances KiCad ships with, and the “Netclass Assignments” pane below it is empty. The section list down the left is the order this chapter follows: “Constraints”, “Pre-defined Sizes”, “Net Classes”, “Component Classes”, “Custom Rules”, and “Violation Severity”, with the stackup pages scrolled off the top. This is the starting point for everything that follows.</p>
+<h2 id="sec:c03-stackup">Stackup</h2>
+<p>The ‘stackup’ is the sandwich of layers your board is made from: copper, the insulating substrate between the copper layers, solder mask, and silkscreen. The motor driver is a two-layer board, so the stackup is simple, one copper layer on top and one on the bottom with substrate in between, and you will mostly leave the defaults alone (Figure 3.2).</p>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-physical-stackup.png" style="width:85.0%" /></p>
+<p>Figure 3.2: The “Physical Stackup” page for the motor driver. “Copper layers” reads 2 at the top, and the two rows marked in the table, F.Cu and B.Cu, are the only layers this design will route on. The boxed thickness column is where the board’s 1.6 mm comes from: 0.01 mm of solder mask, 0.035 mm of copper, a 1.51 mm FR4 core, another 0.035 mm of copper, and 0.01 mm of solder mask again. The arrow points at the total KiCad works out for you at the foot of the page, “Board thickness from stackup: 1.6 mm”.</p>
+<p>Two values are worth a look, though, because of their effect in a couple of important KiCad operations. The first value is the board thickness, which is used when KiCad exports a 3D model and when it calculates the length of nets that pass through vias. If you care about either, set it to the thickness you will actually order. The second value, copper weight, usually given in ounces, sets how thick the copper itself is. Thicker copper carries more current in the same width of track. For most boards the default is right; I mention it because on a board that drives motors, copper weight is one of the few things you can change if a power track would otherwise need to be uncomfortably wide.</p>
+<p>When you look for the copper weight setting, beware that nothing on this page is labelled in ounces or in any other unit of weight. KiCad states copper as a thickness in millimetres, which is not a unit of weight, and leaves the conversion to you. A “weight” of 0.035 mm is the 1 oz copper that almost every low-cost fabricator treats as standard, and 0.070 mm is 2 oz. The board thickness is not a field you type into either. It is the sum of everything in the thickness column, added up and reported back to you at the bottom of the page. A board that has to finish at some other thickness is one where you change the dielectric core rather than the total.</p>
+<p>In the motor driver we’ll keep both defaults. We are designing a 1.6 mm board with 1 oz copper on each of its two layers, which is the 0.035 mm the figure shows. Note those two numbers down, because everything that follows in this chapter depends on them. Copper weight in particular is what decides how wide a track has to be to carry a given current, so the moment you change it, every width in your net classes needs looking at again.</p>
+<h2 id="sec:c03-design-rules">Design Rules</h2>
+<p>Design rules are the limits the whole layout must respect, and KiCad enforces them while you route and again when you run the design rules check. The board-wide floor for these limits can be set in the “Constraints” section of Board Setup. That is where you can set values for things like the minimum copper clearance, the minimum track width, the smallest via and drill you will allow, and a handful of related minimums (Figure 3.3). Set these to the values your board manufacturer publishes as their capability, because a minimum you set here is an absolute floor that no more specific rule can go below.</p>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-constraints.png" style="width:85.0%" /></p>
+<p>Figure 3.3: The “Constraints” page after NextPCB’s “Simple” capability file has been imported into it. Every number here is something the factory guarantees its process can hold: a 0.127 mm track, a 0.09 mm annular ring, a 0.48 mm via on a 0.15 mm drill, 0.25 mm from copper to any hole, and 0.5 mm from copper to the board edge. Not one of them is a number you will actually design to. They are the limits the design must not go below.</p>
+<p>That last point is the key to how KiCad layers its rules. If part of your board needs 0.2 mm clearance and the rest needs 0.3 mm, then you should set the smaller 0.2 mm as the floor and use a net class or a custom rule to ask for the larger clearance where you want it. Establish these constraints at the start, from your fabricator’s specification, and the rest of your setup builds on top of them. Remember that you do not have to copy those numbers in by hand, as some fabricators publish a ready-made file with their capability numbers already set. Chapter 10 shows how to import one directly into Board Setup with the “Import Settings from Another Board…” button.</p>
+<p>Two things on that page require a closer look. The first is the minimum track width of 0.127 mm, which is half of what the logic on this board will route at and roughly a twelfth of the power width. That gap is the whole idea rather than a mistake, because the floor describes what the factory can make and not what you intend to draw. The second is that several fields read zero, among them the minimum copper clearance and the minimum connection width. A zero is not an omission either. It says the fabricator has set no board-wide floor for that particular check and is content to let your net classes and your custom rules govern it, which is precisely what the sections that follow do.</p>
+<h2 id="sec:c03-net-classes">Net Classes</h2>
+<p>A ‘net class’ is a named set of routing rules, such as a track width, a clearance, and via sizes, that you attach to a group of nets so that they are all treated the same way<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Every board starts with one class, called “Default”, and on the simple boards of Volume 1, that single class was all you ever needed. The motor driver needs at least two, because it has two kinds of net with very different needs. The choices you make here affect the quality of the whole board.</p>
+<p>The logic nets are the four inputs from the control header, plus the sleep and fault lines. They only require thin default tracks. These tracks carry almost no current and there are a lot of them, so narrow is good. The power and motor nets are the opposite. The motor supply “VM”, the ground return, and the four bridge outputs that feed the motors all carry real current, and current in too thin a track means heat and voltage drop. This is a case where you should make a second net class, call it something like “Power”, give it a generously wide track and a larger clearance, and assign the VM, ground, and motor-output nets to it. The logic stays on “Default”. From that point on, KiCad automatically routes each net at the width its class specifies, and the design rules check will hold you to the wider clearance on the power nets. Without setting up different net rules for each track, you would have to remember to manually change track width depending on what kind of track you are drawing. This is why net classes stop being optional on the capstone board. On a board that carries current, the net class is what sets each track to a width that matches the current it has to carry.</p>
+<p>Here is what the motor driver ends up with, so that you have real numbers to use (Figure 3.4):</p>
+<ul>
+<li><strong>Default</strong>, for the logic and everything else: 0.20 mm clearance, 0.25 mm track width, and a 0.60 mm via with a 0.30 mm hole.</li>
+<li><strong>Power</strong>, for the current-carrying nets: 0.30 mm clearance, 1.50 mm track width, and a 0.80 mm via with a 0.40 mm hole. Its members are <code>VM</code>, <code>GND</code>, and the four bridge outputs <code>AOUT1</code>, <code>AOUT2</code>, <code>BOUT1</code>, and <code>BOUT2</code>.</li>
+</ul>
+<p>Each of these numbers comes out of KiCad’s own Calculator Tools, worked from the current the DRV8833 datasheet says a net has to carry and the copper weight you just set in the stackup. The calculation belongs with the board rather than with this dialogue, so I have kept it there. Chapter 8 shows how each value was arrived at, and Chapter 10 has the recipe for using the calculators yourself. Take the numbers as given for now; the sections that follow show how each one is applied.</p>
+<p>Building the Power class takes six steps:</p>
+<ol type="1">
+<li><strong>Open the page.</strong> Open Board Setup and select “Net Classes” from the section list on the left. The “Netclasses” table at the top is the one you are about to add a row to.</li>
+<li><strong>Create the class.</strong> Click the “+” button beneath the table. A new row appears with its “Name” cell ready for editing. Type <code>Power</code>.</li>
+<li><strong>Fill in the row.</strong> Set “Clearance” to 0.30 mm, “Track Width” to 1.50 mm, “Via Size” to 0.80 mm, and “Via Hole” to 0.40 mm. Leave every other column empty. Each column of a class you create yourself is optional, and anything you leave blank falls back to the value in Default. You can see this in Figure 3.4, where the Power row’s “µVia Size” cell is empty while Default’s reads 0.48 mm.</li>
+<li><strong>Find the columns you need.</strong> The table carries more columns than the dialogue can show, so some of them are scrolled off to the right. Drag the horizontal scrollbar under the table to reach them, or right-click the header row to choose which columns are shown and which are hidden.</li>
+<li><strong>Set the priority.</strong> Select the Power row and click the up arrow beside the “+” button until Power sits above Default. Row order is priority order, and it decides which class wins when a net belongs to more than one. Default always sits at the bottom and cannot be moved.</li>
+<li><strong>Adjust Default while you are here.</strong> This board routes its logic at 0.25 mm rather than the 0.2 mm KiCad ships with, so change Default’s “Track Width” to 0.25 mm.</li>
+</ol>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-netclasses.png" style="width:85.0%" /></p>
+<p>Figure 3.4: The “Net Classes” page with both classes built and the power nets assigned to them. The upper box is the “Netclasses” table, Power sitting above Default, and that order is not cosmetic: it sets which class takes precedence when a net belongs to both. The lower box holds the three assignment patterns, and the panel beside it resolves the selected one, <code>*OUT*</code>, into the four nets it currently matches, /AOUT1, /AOUT2, /BOUT1, and /BOUT2. Compare the Default row here with the one in Figure 3.1 and you can see its track width has moved from the 0.2 mm KiCad ships with to the 0.25 mm this board routes its logic at.</p>
+<p>Assigning nets into a class is what the lower half of that page is for. You do not select and assign nets one at a time. Instead, you write a pattern, and every net whose name matches it joins the class. This board needs three patterns, <code>*VM</code>, <code>*GND</code>, and <code>*OUT*</code>, and they are worth reading closely, because their elements are the ones you will use in patterns of your own.</p>
+<p>Adding them is a short procedure:</p>
+<ol type="1">
+<li><strong>Create a row.</strong> Click the “+” button beneath the “Netclass Assignments” pane at the bottom of the page. A new row appears with two columns, “Pattern” and “Net Class”.</li>
+<li><strong>Type the pattern.</strong> Enter <code>*VM</code> in the “Pattern” column.</li>
+<li><strong>Choose the class.</strong> Set the “Net Class” column to “Power”.</li>
+<li><strong>Repeat for the rest.</strong> Add a row for <code>*GND</code> and another for <code>*OUT*</code>, both assigned to Power, which gives this board three rows in total. To remove a row you no longer want, select it and click the delete button beside the “+”.</li>
+<li><strong>Check what each pattern caught.</strong> Select a row, and the panel to the right of the list, headed “Nets matching” and the pattern you selected, lists every net that pattern currently matches (Figure 3.4). Because you are describing a shape rather than naming nets, this list is the most reliable proof that a pattern works the way you intended.</li>
+</ol>
+<p>There is a quicker route to the same result when you already have the net in front of you. Right-click a net in the schematic, or a copper track or zone in the PCB editor, and choose “Assign Netclass…”. The dialogue that opens arrives with the pattern already filled in from that net’s name, and you can edit it before you accept it.</p>
+<p>The patterns themselves are worth taking apart, and the place to start is what a pattern is compared against, because it is not always the name you drew on the schematic. KiCad matches against the full net name, and a net that got its name from a label carries the path of the sheet it lives on, so the net you labelled <code>VM</code> reaches the matcher as <code>/VM</code>. You can see this in the figure, where the four outputs are listed as <code>/AOUT1</code>, <code>/AOUT2</code>, <code>/BOUT1</code>, and <code>/BOUT2</code>. Nets that come from a power symbol arrive without that prefix, which is why the ground net on this board is plain <code>GND</code>, and it means a pattern typed as the bare name will match some of your nets and silently miss others. Opening every pattern with an asterisk avoids the problem entirely, and a pattern that assigns nothing is very often a pattern that was written without one.</p>
+<p>Those two wildcards, the asterisk and the question mark, are very nearly the whole syntax. Read <code>*VM</code> as “anything, then VM, then the end”, and <code>*OUT*</code> as “anything, then OUT, then anything”, which is how a single line catches <code>AOUT1</code>, <code>AOUT2</code>, <code>BOUT1</code>, and <code>BOUT2</code> together. KiCad will accept a full regular expression in this field as well, if you ever meet a naming scheme the wildcards cannot describe, but in practice the wildcards do nearly all the work, and a pattern you can read easily is more useful than a clever one. Table 3.1 puts the pieces side by side: the wildcards a pattern is built from, the parts of a net name they are matched against, and an example of each from this board.</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Element</th>
+<th>What it does</th>
+<th>On this board</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*</code></td>
+<td>Stands for any run of characters, including none.</td>
+<td><code>*VM</code> matches <code>/VM</code>, prefix and all. <code>*OUT*</code> matches all four bridge outputs.</td>
+</tr>
+<tr>
+<td><code>?</code></td>
+<td>Stands for exactly one character.</td>
+<td><code>*OUT?</code> matches the same four outputs, but would miss <code>AOUT10</code>.</td>
+</tr>
+<tr>
+<td>A regular expression</td>
+<td>Accepted in the same field, for a naming scheme the wildcards cannot describe. Note that <code>*</code> changes meaning: in a regular expression it reads as “zero or more of the character before it”.</td>
+<td><code>*VM</code> is safe read either way. <code>VM*</code> is not, because as a regular expression it matches a bare <code>V</code> as well.</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Not a wildcard. It is the separator KiCad puts in front of every net that a label names, and between sheet names inside a hierarchy.</td>
+<td>The label you drew as <code>VM</code> arrives as <code>/VM</code>, so a pattern typed as <code>VM</code> matches nothing at all.</td>
+</tr>
+<tr>
+<td>No leading <code>/</code></td>
+<td>A net named by a power symbol is global rather than local to one sheet, so its name carries no sheet path and no leading slash.</td>
+<td>The ground net arrives as <code>GND</code>. <code>*GND</code> catches it; <code>/GND</code> would not.</td>
+</tr>
+<tr>
+<td><code>/sheet/name</code></td>
+<td>A net inside a hierarchical sheet carries that sheet’s name too.</td>
+<td>A <code>VM</code> label in a sheet named <code>motor</code> arrives as <code>/motor/VM</code>.</td>
+</tr>
+<tr>
+<td><code>Net-(...)</code></td>
+<td>The name KiCad invents for a net you never labelled, built from a pin it connects to.</td>
+<td>The fault line is <code>Net-(U1-nFAULT)</code> until you give it a label of your own.</td>
+</tr>
+</tbody>
+</table>
+<p>Table 3.1: What a net class assignment pattern is built from, and what it is matched against.</p>
+<p>Beware of these two consequences of matching by pattern:</p>
+<ol type="1">
+<li><strong>Patterns are live, not a one-off assignment.</strong> If you add a net later whose name matches, it will join the class the moment it exists, with no further action needed from you. In the example of this chapter, this is exactly what you want, because it means a net you add during layout arrives already wide. But it also means that <code>*GND</code> is a standing instruction that will match new nets like <code>AGND</code> or <code>DGND</code> you might add months from now, without any warning. Therefore, write the pattern you actually mean rather than the shortest one that happens to work today. Think about what else it could catch later.</li>
+<li><strong>A net can match more than one pattern</strong>, and in such case it belongs to every class it matched. KiCad then assembles an effective class for that net, property by property. Each value comes from the highest-priority class that sets one. Priority is simply the row order in the table above, which is what the up and down arrows beside it are for, and it is why Power sits above Default. Default still applies as well, because it remains the fallback for any property the explicit classes leave unset.</li>
+</ol>
+<p>All of this works from either end of the project. Net classes can be created and edited in Board Setup or in the schematic’s own setup dialogue. If you would rather not use patterns at all, you can use a ‘net class directive’ instead. A directive is a small label you attach to a wire in the schematic, placed with the directive label button in the schematic editor’s right toolbar. Unlike an ordinary label it cannot name a net; its only job is to carry a “Net Class” field, and whatever class you choose in that field is applied to the wire it touches.</p>
+<p>One caution is worth remembering. A net class track width is the default, optimal width for that class, not a hard limit. Hand-routing a power net thinner than its class specifies will not raise a violation. If you need a width or a clearance to be specifically enforced, then you should create a custom rule, which we come to shortly.</p>
+<h2 id="sec:c03-track-via-sizes">Predefined Track and Via Sizes</h2>
+<p>Net classes set the default width for each net, but while you route you will often want to step a track up or down on purpose. For example, you may need to draw a wider track through a tight corner of the power section, or a thinner one where space is short. The “Pre-defined Sizes” section lets you set up a small menu of track widths and via sizes ahead of time so that, while routing, you can cycle through them with a keystroke instead of typing a number each time (Figure 3.5).</p>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-pre-defined-sizes.png" style="width:85.0%" /></p>
+<p>Figure 3.5: The “Pre-defined Sizes” page. The menu is deliberately short: three track widths (❶) and two via sizes (❷), and nothing else. Two of the widths are the ones the net classes already route at, and the third, 0.80 mm, is the neck-down size a power track uses for its last approach to a fine-pitch pad. The “Differential Pairs” column to the right stays empty, because this board has no differential pairs.</p>
+<p>For the motor driver the menu holds three track widths, 0.25 mm, 0.80 mm, and 1.50 mm, and two via sizes, 0.60 mm with a 0.30 mm hole and 0.80 mm with a 0.40 mm hole. Two of the widths you have already seen: 0.25 mm is what the logic routes at and 1.50 mm is what the power nets route at, so the menu simply puts the two class widths within reach. The exception is 0.80 mm, and it is there because a 1.50 mm track cannot physically arrive at a 0.4 mm pad on a fine-pitch chip. The last millimetre of a power run has to narrow, and 0.80 mm is the size you step down to when it does. That deliberate narrowing is called a ‘neck-down’<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, and it is why 0.80 mm belongs on the menu rather than in a number you type by hand and get slightly different every time.</p>
+<h2 id="sec:c03-custom-rules">Custom Rules (Intro)</h2>
+<p>Net classes cover most of what a board needs, but sometimes you want a rule they cannot express. That is what ‘custom rules’ are for. They are written in KiCad’s design-rule language in the “Custom Rules” section of Board Setup, and they let you state conditions and constraints precisely, which the design rules check then enforces.</p>
+<p>The motor driver needs only one of them, and I mentioned it earlier in this chapter. A net class track width is the width KiCad routes at rather than a limit it enforces, so a power net left at 0.25 mm raises no violation at all. That is the one gap this board’s setup still has. A custom rule closes this gap. This rule sets a minimum width for anything in the Power class, and a track that is too thin for its job becomes a design rules check error instead of a problem that nothing reports.</p>
+<p>The floor that rule should enforce is 0.80 mm. You might be wondering why it’s not 1.50 mm. A 1.50 mm track cannot physically reach a 0.4 mm pad on the driver chip, so every power run has to narrow for its final approach, which is what the 0.80 mm pre-defined size is for. If you set the floor at 1.50 mm, then the checker would flag that deliberate narrowing on every power pin, and you would soon start dismissing its reports. If you set it at the neck-down width instead, then the rule permits what you meant while still catching what you did not.</p>
+<p>You don’t have to learn the rule syntax before you can write a rule, as you can now use the graphical design rules editor, which was introduced in KiCad 10. The graphical design rule editor builds a rule from menus and fields, and it sits in the PCB editor’s “Tools” menu rather than in Board Setup. Open it with “Tools”, “Design Rule Editor”, and follow these steps (Figure 3.6):</p>
+<ol type="1">
+<li><p>Find “Routing width” in the rule tree and create a new rule under it. Typing <code>routing</code> into the search box above the tree (❶) narrows it to the “Highspeed design” group, which is where this constraint lives and is not where anyone looks first for a power-track rule. Select “Routing width”, click the “+” button at the foot of the tree, and your new rule appears beneath it, named “Routing width 1” and carrying an asterisk to mark it as unsaved (❷).</p></li>
+<li><p>Replace that default name with one you will recognise in a violation report, such as “Power minimum width” (❸).</p></li>
+<li><p>Under “Conditions”, the row reading “Where object matches” is where you aim the rule. Set its dropdown to “Netclass” and choose “Power” from the list beside it (❹). Leave “Layer” set to “Any”, because both copper layers of a two-layer board carry power.</p></li>
+<li><p>In the “Routing width Constraint” section, set the width to 1.50 mm and the tolerance beside it to 0.70 mm (❺). Those two fields are tiny, which is why the figure repeats their values in a bubble. KiCad turns that pair into the three values the rule actually enforces:</p>
+<pre><code>min = width - tolerance = 1.50 mm - 0.70 mm = 0.80 mm
+opt = width                                 = 1.50 mm
+max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
+<p>They are not the numbers you were expecting, and the paragraphs after this procedure explain why.</p></li>
+<li><p>Click “Show Matches”. The button carries a running count of the objects on the board that satisfy your condition, six of them here, and clicking it highlights them on the canvas. What you are checking is not the exact figure, which depends on how much copper exists at the time, but that it is neither zero nor the entire board. That is what reveals a condition which is perfectly valid but matches the wrong objects.</p></li>
+<li><p>Click “Save” (❻).</p></li>
+</ol>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-rule-editor.png" style="width:85.0%" /></p>
+<p>Figure 3.6: The “Design Rule Editor” with the “Power minimum width” rule built. Searching for <code>routing</code> (❶) has filtered the tree down to the “Highspeed design” group, and the new rule sits under “Routing width” (❷) with the “+” button that created it ringed at the foot of the tree. To the right are the rule’s name (❸), the condition aiming it at the Power net class (❹), and the constraint itself (❺), whose two fields are too small to read at this size and so are repeated in the bubble: a width of 1.5 mm with a tolerance of 0.7 mm either side. The “Show Matches” button is ringed on the right, reading six matches, and “Save” (❻) writes the rule out.</p>
+<p>The reason for those two values is the shape of the form. The section does not offer you a minimum, an optimum and a maximum as three separate fields. It offers a width and a single tolerance that applies either side of it. This means you cannot ask for a floor and leave the ceiling open, so you have to work backwards from the floor you want. Put the class width of 1.50 mm in the width field, and the tolerance becomes the distance a track is allowed to fall below it, which is how 0.70 mm gives you the 0.80 mm floor.</p>
+<p>Save the rule, and it goes into the project as text, which you can read for yourself on the “Custom Rules” page of Board Setup (Figure 3.7). Here is what those two fields produced:</p>
+<pre><code>(rule &quot;Power minimum width&quot;
+    (constraint track_width (min 0.8mm) (opt 1.5mm) (max 2.2mm))
+    (condition &quot;A.hasNetclass(&#39;Power&#39;)&quot;)
+)</code></pre>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-drc-rule.png" style="width:85.0%" /></p>
+<p>Figure 3.7: The same rule as Figure 3.6, seen from the other editor. The “Custom Rules” page of Board Setup holds the text the graphical editor wrote, and this is the only place the rule states what it means: a minimum of 0.8 mm, an optimum of 1.5 mm, and a maximum of 2.2 mm, from the two fields you filled in. Below the editor, “No errors found” is the result of the “Check Rule Syntax” button, which is the message you want before you close the dialogue.</p>
+<p>In this rule, you can see the three numbers (out of two fields in the graphical editor), and each one has a different job. The <code>min</code> of 0.80 mm is the floor the whole rule exists for. The <code>opt</code> of 1.50 mm is the width the interactive router will actually lay down, and because you entered the class width it agrees with the Power class, so nothing about routing changes. The <code>max</code> of 2.20 mm is a ceiling that simply fell out of the arithmetic, and since nothing on this board comes near it, it has no practical consequence. Type 0.80 mm into the width field instead, with a tolerance of zero, and all three values come out at 0.80 mm. That rule flags every 1.50 mm power track as a violation, and it sets the router to lay thin copper on the very nets you widened. I know, because it is what I did the first time.</p>
+<p>This brings me to a habit worth forming now, while your rules are still simple. After you build one in the editor, open the “Custom Rules” page in Board Setup and read what it wrote. A form can only offer the shapes its designer anticipated, and the shape you had in mind may be different, so the generated text is the only accurate statement of what the rule means. Nothing stops you editing it there, either. The two editors work on the same file, and you can move between them as you like, so the graphical one is a quick way to get most of the way and the text is where you finish the job.</p>
+<p>Whichever way you write it, use the “Check Rule Syntax” button before you close the dialogue. A single syntax error stops the design rules check from running at all, and a rule you believe is protecting your board, when in fact it does nothing, is more dangerous than having no rule at all.</p>
+<p>One last thing to know is that custom rules are not stored in the board file. They are written in a separate file beside it, with a <code>.kicad_dru</code> extension. In a normal KiCad project that file already sits in the project folder next to the <code>.kicad_pcb</code>, so copying the folder, or committing the project to version control, carries the rules along with everything else. The risk appears when you back up or share individual files rather than the whole folder, because a board file sent on its own arrives with its rules missing.</p>
+<p>That’s as far as we take custom rules here. We have created one rule, aimed at the one thing net classes do not cover, which is all this board needs. Volume 3 goes deeper into the rule language, the rest of the constraint types, and what happens when two rules overlap and you have to work out which one applies.</p>
+<h2 id="sec:c03-violation-severity">Violation Severity</h2>
+<p>When you run the design rules checker, not every problem it reports is equally serious. The “Violation Severity” section lets you decide, for each kind of check, whether a violation is reported as an error, as a milder warning, or ignored entirely (Figure 3.8). Used well, it keeps the checker’s report focused on what matters for the board in front of you, so that an actual error is not lost among warnings you have already chosen to accept.</p>
+<p>Used carelessly, it hides real faults. Use the “Ignore” setting cautiously. Setting a check to “Ignore” disables that check across the whole board, which is far more sweeping than dismissing one specific violation you have looked at and judged harmless.</p>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-violation-severity.png" style="width:85.0%" /></p>
+<p>Figure 3.8: The top of the “Violation Severity” page, which runs on well past the bottom of this figure. Every check KiCad can make gets a row and a choice of three. The motor driver leaves every row at its default, but the page is worth reading slowly at least once, because knowing what the checker will and will not tell you is part of knowing what a clean report is worth.</p>
+<p>The motor driver keeps those defaults, and on most boards that is the right choice. Even so, it is worth knowing what a considered change looks like, because a few require no trade-off at all. Here are two to keep in mind:</p>
+<ol type="1">
+<li><strong>Switch on something that ships switched off.</strong> “Footprint has no courtyard defined” is set to “Ignore” by default, on the reasonable grounds that plenty of libraries omit courtyards. In this chapter and project, our situation is different because we drew a footprint by hand in Chapter 2, and a courtyard is often the sort of thing that gets left off a hand-drawn part. A potential result is that it stays invisible until two components overlap on the board (because the courtyard is missing). Raising this one to “Warning” is helpful because it only reports a problem like the above when there is one.</li>
+<li><strong>Promote a warning that matters more on your board than on most.</strong> “Copper connection too narrow” is a “Warning” by default, and it fires when a zone reaches a pad through a neck of copper thinner than the minimum connection width. On a board where the ground pour is the return path for motor current, that neck is the very failure this chapter has worked to prevent, so making it an “Error” puts it among the entries you have to resolve rather than among the ones you can pass over while you work through the DRC report. This one comes with a catch that shows how the two pages work together: the imported constraints leave the minimum connection width at zero, and a check with nothing to measure against never fires no matter how you set its severity. Give the constraint a real number first, then decide how loudly you want to hear about it.</li>
+</ol>
+<p>There is also a third move worth knowing, because it removes the need to use “Ignore” in the first place. When a check is right in general and wrong in one specific place, don’t be tempted to switch it off across the board. Scope the exception with a custom rule instead, using the same editor you met in the previous section. A rule can carry its own severity:</p>
+<pre><code>(rule &quot;Allow connector silk to intersect board edge&quot;
+    (constraint silk_clearance)
+    (severity ignore)
+    (condition &quot;A.memberOfFootprint(&#39;J*&#39;) &amp;&amp; B.Layer==&#39;Edge.Cuts&#39;&quot;)
+)</code></pre>
+<p>That leaves the silkscreen check working everywhere except on connector footprints at the board edge, where the overlap is deliberate. It is more work than clicking a radio button, but unlike switching the check off, it leaves the check working everywhere else.</p>
+<p>In my own boards I change very little on this page, and I would leave any check I was unsure about switched on.</p>
+<p>One last thing to look for. The violation severity page may have been changed, even though you did not change it. Remember the fabricator’s capability file you imported back in the “Design Rules” section? That file carries severity settings as well as constraints, and importing it applies both. On this board the import moved three rows. “Drilled hole too close to other hole”, visible in Figure 3.8, now reads “Error” where KiCad’s own default is “Warning”. That is NextPCB telling you their process takes hole spacing seriously. Further down the page, past what the figure shows, two checks for through-hole and non-plated holes sitting inside a courtyard have been turned down to “Ignore”. That is a judgement you may or may not agree with. Neither change is wrong, but both were made on your behalf, and this page is the only place they are visible.</p>
+<h2 id="sec:c03-component-classes">Component Classes (K9)</h2>
+<p>As you already know, net classes group nets. The new ‘component classes’ feature, added in KiCad 9, groups parts. A component class is a named label you attach to one or more components, in the schematic or in Board Setup, and unlike a net class it says nothing about clearance or track width. Its job is organisational, as it lets you refer to a group of parts by name, so that you can scope a custom design rule to just those parts, or mark a set of components as a repeated channel<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> for a multi-channel layout.</p>
+<p>On the two-motor capstone you can work without them, but they are worth introducing here. The moment a board has repeated sections, component classes are how you tell KiCad that a group of parts belongs together. Chapter 9’s four-motor extension of that capstone is a good example of this. A part can hold more than one class, and you can assign classes by hand or by rules that match on reference, footprint, sheet, and more.</p>
+<p>Three things they let you do are worth naming, so that you can recognise the situation when you meet it. The first is that a custom rule can be aimed at a group of parts rather than at a group of nets, which is how a requirement like “keep three millimetres between anything in the H-bridge and anything in the logic block” becomes something the checker can enforce rather than something you have to remember. The second is that a component class is one of the ways KiCad recognises a repeated block, so that a section of the board can be placed and routed once and then repeated across its copies. Chapter 9’s four-motor extension is built that way, with its second driver stage a copy of the first, and Chapter 10’s multi-channel recipe walks through how the repeating is done. The third is the simplest and the one you will use most: a class is a handle for selecting things, so that you can highlight every part in a functional block at once and see where each one was actually placed on the board (Figure 3.9).</p>
+
+<p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-component-classes.png" style="width:85.0%" /></p>
+<p>Figure 3.9: Component classes on a board of mine that has enough parts to need them, the Smart Drive rather than the motor driver. “Assign component class per sheet” is ticked at the top, which alone gives every schematic sheet a class of its own, and below it two assignments name their sheets explicitly. The boxed one gathers everything on the <code>/RP2040/</code> sheet into an RP2040 class, and the small button at the end of its row, marked by the arrow, highlights those parts on the canvas. The result is the block picked out on the left: the microcontroller, its crystal, and its supporting passives, shown as a group rather than as a list of reference designators.</p>
+<p>Your board is now set up the way a current-carrying design needs: a sensible stackup, a floor of manufacturable constraints, a Power net class that will keep your motor copper wide, a menu of track sizes to route with, a custom rule that enforces the width of that power copper, and a first look at the class groupings you will use as boards get more demanding. The setup is done before a single track is placed, which is exactly the point. With the rules in place, the next step is to pour copper and give it thermal relief around the parts, and that is where we go next.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>These three words (“net”, “line”, “track”) are not synonyms. A ‘net’ is the <em>logical</em> connection, the set of pins the schematic declares must sit at the same potential. A ‘line’ is informal <em>shorthand</em> for a signal net, used when you name it by what it carries, so ‘the sleep line’ is the net that carries the sleep signal. A ‘track’ is the <em>physical</em> copper you lay on the board to make that net real. The net is the intent; the track is the copper.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><strong>Neck-down</strong>: a deliberate, local reduction in the width of a track, made so that a wide track can reach a pad or pass through a gap narrower than the track itself. The track returns to its full width once it is clear of the obstruction. The narrowed section still carries the whole current of the run, so a neck-down is kept as short as the geometry allows.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><strong>Channel</strong>: one instance of a circuit block that a board repeats several times over, such as one input stage of a multi-input mixer, or one motor stage of a two-motor driver. In a multi-channel layout you place and route a single channel by hand, and KiCad copies that placement and routing onto the identical copies. Chapter 9’s four-motor extension is built this way, and Chapter 10 walks through the procedure.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 
 </div>
 <script>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚧 Creating Custom Footprints — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<title>Creating Custom Footprints — KiCad Like a Pro, 5th Edition — Volume 2</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -258,10 +258,433 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
-<h1 class="note-title">🚧 Creating Custom Footprints</h1>
-<div class="draft-pending">
-This chapter is still being written and will appear in a future update.
-</div>
+<h1 class="note-title">Creating Custom Footprints</h1>
+<p>The symbol you drew in the last chapter has a corresponding physical device, that in KiCad is represented by a footprint, but that footprint doesn’t exist yet. Drawing it is what we’ll do in this chapter. Compared to drawing the schematic symbol, drawing the footprint is a more tedious task, but at the same time the more interesting half of authoring the DRV8833. A symbol is an abstract drawing that captures electrical information about the part, but a footprint has to match the physical reality of the actual component. The footprint has to capture the physical characteristics of the copper the part actually solders to, and every dimension has to match the package drawing in the datasheet, not just look “about” right. If you get a symbol slightly wrong, the worst outcome is that the schematic will look slightly weird. But if you get a footprint wrong, the part will not fit, or will not solder, and you find out only after you have paid a factory to build the board.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c02-editor-layers">Footprint Editor, Layer by Layer</a>
+    </li>
+    <li><a href="#sec:c02-wizard">The Footprint Wizard</a>
+    </li>
+    <li><a href="#sec:c02-pad-stacks">The Exposed Thermal Pad and Its Pad Stacks (K9)</a>
+    </li>
+    <li><a href="#sec:c02-grid-array-aside">An Aside: The Pad Rows, Faster, with the Grid Array</a>
+    </li>
+    <li><a href="#sec:c02-courtyard-silkscreen">The Courtyard and the Silkscreen</a>
+    </li>
+    <li><a href="#sec:c02-fields">Fields and the Embedded Datasheet</a>
+    </li>
+    <li><a href="#sec:c02-3d-shape">3D-Shape Association</a>
+    </li>
+  </ul>
+</details>
+
+<p>The DRV8833 comes in a sixteen-pin ‘HTSSOP’ package, a thin small-outline package with one feature that makes it a perfect teaching part: an exposed thermal pad on its underside. That pad is a slab of metal the chip uses to expel its heat into the board. This element gives us an excellent learning opportunity, because it turns what would be a routine sixteen-pad footprint into a complete lesson about copper, vias, and solder paste. A simpler part would let you skip that lesson. Also, this part is one we’ll be using in the capstone project, and Figure 2.1 shows where the chapter is going. As always, keep the datasheet’s mechanical drawing open beside you (https://www.ti.com/lit/ds/symlink/drv8833.pdf); it gives you every measurement you are about to need. Start on its page 3, because the same chip is sold in three different packages, and the first thing to get right is which of them you are drawing (Figure 2.2).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-complete.png" style="width:85.0%" /></p>
+<p>Figure 2.1: Where this chapter is going: the finished <code>HTSSOP-16-1EP_DRV8833_PD</code> in the Footprint Editor. The sixteen perimeter pads run 1 to 8 down the left and 9 to 16 up the right, and the exposed thermal pad fills the middle with its grid of twelve thermal vias. The magenta rectangle enclosing everything is the courtyard, and the silkscreen carries a corner mark at each corner with the pin 1 dot at the top left. The grey rounded outline and the <code>${REFERENCE}</code> text belong to <code>F.Fab</code>, and the blue lines are the two <code>User.2</code> dimensions that record the body, with the 5 mm length legible down the right side. The status bar reads “Pads 33”, which is everything in the list above added together.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-PWP-package-top-view.png" style="width:65.0%" /></p>
+<p>Figure 2.2: The DRV8833’s packages, on page 3 of the datasheet. The boxed one, the “PWP Package, 16-Pin HTSSOP”, is the part this chapter draws: eight leads down each side, and the black slab in the middle labelled “GND (PPAD)”, which is the exposed thermal pad that becomes pad 17. The “PW Package” below it is the same pinout without that pad, and the “RTY Package” to the right is a WQFN, which carries the same functions on different pin numbers. Keep that last one in mind; it is the trap when you check your pad numbering later.</p>
+<h2 id="sec:c02-editor-layers">Footprint Editor, Layer by Layer</h2>
+<p>Open the Footprint Editor. Like the Symbol Editor, you can reach it from the main project window, which is the route I take here, or from the PCB editor, or from the schematic editor, and it looks like a pared-down PCB editor with a library browser on the left (Figure 2.3).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-open-footprint-editor.png" style="width:85.0%" /></p>
+<p>Figure 2.3: Opening the Footprint Editor from the main KiCad window. The highlighted “Footprint Editor” entry in the launcher describes itself as the place to edit global and project footprint libraries. Below it is the editor it opens: an empty canvas, the “Appearance” panel on the right listing every layer you are about to work on, and a title bar reading “[no footprint loaded]” because you have not made anything yet.</p>
+<p>A footprint has to live in a library, so make a new one before you draw anything. Choose “File” and then “New Library”, and you meet the same two independent choices you met in Chapter 1: the folder decides where the file goes, and the radio buttons at the bottom of the dialogue decide which table registers it. For a part you expect to reuse, like this motor driver, choose “Add new library to global library table”. I call mine <code>peter_footprints</code>, and I will use that name for the rest of the chapter (Figure 2.4).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-create-new-library.png" style="width:85.0%" /></p>
+<p>Figure 2.4: The “New Footprint Library” dialogue. (1) “Add new library to global library table”, the choice this chapter makes. (2) The name, <code>peter_footprints.pretty</code>. (3) The file type filter, which reads “KiCad footprint library paths (*.pretty)“, and the”Save” button beside it. As in Chapter 1, the library is being written into the chapter’s project folder, which is convenient while you are following along, though a library you mean to reuse is better kept somewhere stable outside any single project.</p>
+<p>One thing here is very different from the symbol library. A symbol library is a single <code>.kicad_sym</code> file holding every symbol in it, but a footprint library is a folder whose name ends in <code>.pretty</code>, holding one <code>.kicad_mod</code> file for each footprint inside it. That is why KiCad calls it a library path rather than a library file. Because of this arrangement, you can move a single footprint from one library to another by moving one file, and a version control system will tell you exactly which footprints changed rather than reporting that “the library” changed.</p>
+<p>With the library in place, click “New Footprint” in the top toolbar. KiCad drops an empty footprint onto the canvas without asking you anything, which is disconcerting if you are expecting to be prompted for a name. The prompt comes when you save: click the save button, and the “Save Footprint As” dialogue appears, where you pick the library and type the name (Figure 2.5). I use <code>HTSSOP-16-1EP_DRV8833_PD</code>, which reads as sixteen pins, one exposed pad, the part it is for, and the <code>_PD</code> suffix I put on everything I authored myself. Click “OK” and you have a named, empty footprint to work in (Figure 2.6).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-create-new-footprint.png" style="width:65.0%" /></p>
+<p>Figure 2.5: Creating the footprint. (1) The “New Footprint” button. (2) The save button, which is what brings up the naming dialogue. (3) <code>peter_footprints</code>, the library the new footprint goes into. (4) The name, <code>HTSSOP-16-1EP_DRV8833_PD</code>. (5) “OK”.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-new-blank-footprint.png" style="width:85.0%" /></p>
+<p>Figure 2.6: The named, empty footprint. The status bar reads “Pads 0”, and the only things on the canvas are the three text items every new footprint starts with: “REF**“, the value (which KiCad has set to the footprint’s own name), and a <code>${REFERENCE}</code> text on <code>F.Fab</code>. The grid is at 0.5 mm, which is fine for now and far too coarse for the pads later on.</p>
+<p>A footprint is built up on several layers, each carrying a different kind of information. The most structured way to draw one is to work through them in order. Think of it as four passes over the same part:</p>
+<ul>
+<li>The ‘fabrication layer’ (<code>F.Fab</code>) carries the true outline and the reference marks that document what the part is. You draw the package body here at its datasheet dimensions, so the rest of the footprint has something honest to sit against.</li>
+<li>The ‘copper layers’ carry the pads, the metal the leads actually solder to. This is the pass that has to be exactly right.</li>
+<li>The ‘courtyard’ (<code>F.CrtYd</code>) is a keep-out boundary drawn a small margin outside the part. It is what stops the layout tool from letting a neighbour crowd the part, so it matters even though no copper or ink is printed from it.</li>
+<li>The ‘silkscreen’ (<code>F.Silkscreen</code>) carries the printed outline and the pin-1 mark that a human reads when placing and orienting the part by hand.</li>
+</ul>
+<p>In this chapter we’ll do those four passes in that order, with the clarification that copper takes two passes rather than one, because the sixteen perimeter pads and the exposed thermal pad are different jobs with different numbers behind them. The perimeter pads are in this section, and the thermal pad has a section of its own.</p>
+<p>Start on <code>F.Fab</code>, where the job is to draw the package body at the size the manufacturer says it is. You do not measure anything or estimate anything here; every number comes off the mechanical drawing near the back of the datasheet, which for this part is the drawing labelled <code>PWP0016C</code> on page 26 (Figure 2.7). Dimensions this footprint needs are spread across pages 22 to 28, so keep all of them within reach rather than just the one page. If you have not read a package drawing before, it looks forbidding, so let’s take its top view apart before we draw anything (Figure 2.8), because once you can read one of these you can author a footprint for any part you will ever meet.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-package-outline-example-pg26.png" style="width:65.0%" /></p>
+<p>Figure 2.7: Page 26 of the datasheet, the <code>PWP0016C</code> package outline, reproduced whole so you can see what one of these pages holds. There is a top view at the top left, a side view beside it, a bottom view below showing the thermal pad and its “17”, and a magnified detail of a single lead at the bottom right. The top view is the one we decode next, enlarged in Figure 2.8.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-package-outline-body-dimensions.png" style="width:85.0%" /></p>
+<p>Figure 2.8: The top view of the <code>PWP0016C</code> package drawing from the DRV8833 datasheet, which is where every dimension in this footprint comes from. The plastic body is the plain rectangle in the middle; the sixteen leads stick out of its left and right edges, numbered 1 to 8 down the left and 9 to 16 up the right. The hatched square at the top left is the pin 1 index area.</p>
+<p>Two conventions unlock most of it. Where you see two numbers stacked without a symbol between them, the upper one is the maximum and the lower one is the minimum, so “5.1 over 4.9” means the real part is somewhere between 4.9 mm and 5.1 mm, and the nominal size is the midpoint, 5.0 mm. Where a dimension is prefixed with a count like “14X”, that count tells you how many places on the part the dimension applies to. Beyond those, “TYP” marks a typical value, any number in parentheses is for reference only rather than a controlled dimension, and every linear dimension on a TI drawing is in millimetres. Table 2.1 walks through each marking in Figure 2.8 in turn.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>On the drawing</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>6.6</code> over <code>6.2</code>, marked <code>TYP</code></td>
+<td>The overall span across the leads, measured from the lead tips on one side to the lead tips on the other: 6.6 mm at most, 6.2 mm at least, 6.4 mm nominal. This is not the body. It is how far the leads reach, so it is the number the pad rows and the courtyard have to accommodate, not the number you draw the body at.</td>
+</tr>
+<tr>
+<td><code>4.5</code> over <code>4.3</code>, measured from datum <code>B</code></td>
+<td>The body width, the moulded plastic on its own, across the package: 4.5 mm at most, 4.3 mm at least, so 4.4 mm nominal. This is the width of the <code>F.Fab</code> rectangle.</td>
+</tr>
+<tr>
+<td><code>5.1</code> over <code>4.9</code>, marked <code>NOTE 3</code></td>
+<td>The body length, along the two rows of leads: 5.1 mm at most, 4.9 mm at least, so 5.0 mm nominal. This is the height of the <code>F.Fab</code> rectangle. Note 3 at the foot of the drawing warns that the figure excludes mould flash, protrusions and gate burrs, which may add up to 0.15 mm per side, so a real part can be a whisker fatter than the drawing admits.</td>
+</tr>
+<tr>
+<td><code>14X</code> beside <code>0.65</code></td>
+<td>The lead pitch, centre to centre, 0.65 mm. The “14X” says the dimension applies in fourteen places: seven gaps in each row of eight leads. This is the single most important number in the drawing, because getting it wrong ruins every pad at once.</td>
+</tr>
+<tr>
+<td><code>2X</code> beside <code>4.55</code></td>
+<td>The distance from the first lead’s centre to the last lead’s centre in one row, which is seven pitches of 0.65 mm. The “2X” says it applies to both rows. Check your finished pad row against this number; if it comes out at 4.55 mm, your pitch is right.</td>
+</tr>
+<tr>
+<td><code>16X</code> beside <code>0.30</code> over <code>0.19</code></td>
+<td>The width of each lead, all sixteen of them: 0.30 mm at most, 0.19 mm at least. Your copper pad has to be comfortably wider than this.</td>
+</tr>
+<tr>
+<td><code>A</code>, <code>B</code> and <code>C</code> in boxes</td>
+<td>The ‘datums’, the reference features that every other dimension is measured from. A and B are the body’s two centrelines in this view; C is the seating plane, the flat surface the part rests on, and it appears in the side view rather than here.</td>
+</tr>
+<tr>
+<td>The crosshair symbol, then <code>0.1 M</code>, then <code>C A B</code></td>
+<td>A ‘feature control frame’, which states a tolerance rather than a size. Each lead may sit up to 0.1 mm away from its true position, measured relative to datums C, A and B, with the “M” meaning the tolerance is stated at maximum material condition. That positional tolerance is a large part of why a pad is drawn longer and wider than the lead it has to catch.</td>
+</tr>
+<tr>
+<td><code>PIN 1 INDEX AREA</code></td>
+<td>The hatched square marking where the moulding identifies pin 1, which is the top-left corner in this view. It tells you which corner of your footprint needs the pin-1 markings.</td>
+</tr>
+<tr>
+<td><code>PWP0016C</code></td>
+<td>TI’s own drawing number for the package. It is worth quoting when you name your footprint, and worth searching for when you want to check your work against someone else’s.</td>
+</tr>
+</tbody>
+</table>
+<p>Table 2.1: Reading the markings on the <code>PWP0016C</code> package drawing.</p>
+<p>Two more numbers live in the side view, which Figure 2.8 leaves out because the footprint doesn’t need them. The package is 1.2 mm tall at most, and all sixteen lead tips have to lie within 0.1 mm of one plane, so the part sits flat instead of rocking. Those matter to the 3D model and to the assembler, not to your copper.</p>
+<p>So the body is 4.4 mm wide and 5.0 mm long, and those are the only two numbers the <code>F.Fab</code> pass needs. The number to be careful about here is 6.4 mm. It is the boldest width on the drawing, so it is the one your eye goes to, but it measures the span across the leads rather than the plastic, and the pads and the courtyard are what account for the leads in the next two passes. Draw the body at 6.4 mm and its outline will run straight down the middle of all sixteen pads as soon as you place them.</p>
+<p>Set the Footprint Editor’s units to millimetres. The control is the units button on the left toolbar, which cycles through inches, mils and millimetres each time you click it. Click and hold it instead, and a palette opens so that you can pick millimetres directly. Then put the active layer on <code>F.Fab</code>, and draw a rectangle centred on the origin, using the 0.1 mm line width KiCad uses for this layer. Getting it roughly right with the mouse is enough, because the properties dialogue is where you make it precise: select the rectangle, open its properties, and “Start X”, “Start Y”, “End X” and “End Y” are the four fields that set the two corners (Figure 2.9). Set them to (-2.2, -2.5) and (2.2, 2.5), which is the 4.4 by 5.0 body centred on the origin. Typing the corners is not the only correct way to get there. Dragging the rectangle into shape on the canvas, by eye, works just as well when the grid is fine enough for the precision the shape needs, and a body outline is forgiving enough that this is how I drew mine. Match the grid to the job: 0.1 mm is plenty for a body outline read off a datasheet to one decimal place, but the pads and vias later in this chapter want a grid an order of magnitude finer. That is the whole of the body geometry. While the drawing tools are out, switch to a user layer such as <code>User.2</code> and reach for the same orthogonal dimension tool you used to record a board’s height in Volume 1, once across the width and once down the length, so that the two numbers you took off the datasheet are recorded in the footprint itself (Figure 2.10). Nothing is fabricated from a user layer, but the next person to open this footprint, quite possibly you in a couple of years, can then see where its size came from without going back to page 26.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-start-end-x-y.png" style="width:85.0%" /></p>
+<p>Figure 2.9: Typing a rectangle’s corners instead of dragging them. In the Properties panel, boxed here, “Start X”, “Start Y”, “End X” and “End Y” are the four fields that set the two corners, and the red arrows tie each corner on the canvas back to the pair of fields that positions it. The “Layer” row reads <code>F.Silkscreen</code> because this capture was taken while drawing a silkscreen rectangle, but the four coordinate fields behave identically on <code>F.Fab</code>, and the values shown are the (-2.2, -2.5) and (2.2, 2.5) corners the text sets, with the 4.4 by 5 mm body they produce reported below them.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-rectangle-fab.png" style="width:85.0%" /></p>
+<p>Figure 2.10: The body drawn and dimensioned on <code>F.Fab</code>. Note the 0.1 mm grid, and the active layer named in the toolbar and highlighted in the “Appearance” panel on the right. Arrows mark the rectangle tool and the dimension tool. Both dimensions live on <code>User.2</code>, recording the body as 4.4 mm across and 5 mm down.</p>
+<p>Next, soften the corners. Select the rectangle, right-click, and choose “Shape Modification”, then “Fillet Lines” (Figure 2.11). Enter a radius of 0.2 mm, and all four corners round off in a single step (Figure 2.12). This one is cosmetic rather than structural: a moulded plastic body is not perfectly sharp at its corners either, and the rounded outline reads as a body rather than as the hard edge of a printed line. Two neighbours in that submenu are worth knowing so you do not reach for them by mistake. “Chamfer Lines” cuts a corner off across the diagonal instead of rounding it, and “Dogbone Corners” adds the relief a milling cutter needs at an inside corner.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-shape-modification.png" style="width:85.0%" /></p>
+<p>Figure 2.11: The “Shape Modification” submenu, reached by right-clicking the selected rectangle. Of the three tools it offers, “Fillet Lines” is the one that rounds a corner.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-fillet-radius.png" style="width:45.0%" /></p>
+<p>Figure 2.12: The “Fillet Lines” dialogue. A 0.2 mm radius softens the outline without making it look deliberately rounded.</p>
+<p>That leaves nothing in the outline to say which end pin 1 is, because all four corners now look alike, so mark it explicitly. Draw a small circle on <code>F.Fab</code> just inside the pin 1 corner, the top-left one in this view, and you have answered the <code>PIN 1 INDEX AREA</code> on the package drawing (Figure 2.13). Keep it small enough to sit clear of the outline and of the pads to come. Because the mark lives on the fabrication layer, it survives even when the silkscreen gets crowded out later, and on a part this fine-pitched it will be.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pin-1-marker.png" style="width:65.0%" /></p>
+<p>Figure 2.13: The pin 1 corner, zoomed well in. Rounding comes from the fillet, and the circle just inside the corner is the pin 1 mark. Arrows show the circle tool and the <code>F.Fab</code> layer it is drawn on.</p>
+<p>Finish the layer by moving all three text items off the body altogether: the value above it, the reference below it on <code>F.Silkscreen</code>, and a <code>${REFERENCE}</code> text on <code>F.Fab</code> below that (Figure 2.14). On many parts you would leave the designator sitting inside the outline, which is where an assembler looks for it, but this one is about to grow a thermal pad that fills the body from edge to edge, so there is no clear space left in the middle to put it. One thing not to be alarmed by while you drag them around: <code>${REFERENCE}</code> is a variable rather than literal text, and the long string you see in the editor resolves to the instance designator once the footprint is on a board, which can be something as short as <code>U1</code>.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-body-complete.png" style="width:85.0%" /></p>
+<p>Figure 2.14: The finished <code>F.Fab</code> layer. Corners are rounded, the circle at the top left marks pin 1, and all three text items sit clear of the body. Both dimensions on <code>User.2</code> stay with the footprint as a record of where its size came from.</p>
+<p>Now let’s continue to the copper, which is the pass that has to be exactly right. Its numbers come from a second drawing one page ahead in the datasheet. In the datasheet, the package outline describes the part, while the ‘land pattern’ describes the copper you put underneath it (Figure 2.15). Notice that every dimension on this one is written in parentheses. By the convention you have just learned, that makes all of them reference values, because a land pattern is a recommendation rather than a property of the part. Note 6 at the foot of the page says so outright: the IPC-7351 standard may specify an alternate design. KiCad’s own HTSSOP footprint takes exactly that liberty, drawing pads of 1.575 by 0.4 mm where this drawing asks for 1.5 by 0.45. Both put the outer edge of the copper in the same place, 3.65 mm out from the centre of the part, and differ only in how they split that reach between the length of a pad and its distance from the origin.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-dimensions-datasheet.png" style="width:65.0%" /></p>
+<p>Figure 2.15: The <code>PWP0016C</code> land pattern from page 27 of the DRV8833 datasheet, which is where the copper dimensions come from. The sixteen perimeter pads are the two columns; the square in the middle is the thermal pad, with its solder mask opening dashed around it and its via grid inside. The two panels at the foot of the page show how metal and solder mask relate in each of the two kinds of pad.</p>
+<p>Table 2.2 goes through it marking by marking. The two columns of pads are this pass, and the square in the middle belongs to the next section, but the drawing is easier to read once and in full than to come back to twice.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>On the drawing</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>16X (1.5)</code></td>
+<td>The length of each pad, all sixteen of them, 1.5 mm. This is the long axis, pointing outwards from the body, and it is the “Pad size X” field in KiCad.</td>
+</tr>
+<tr>
+<td><code>16X (0.45)</code></td>
+<td>The width of each pad, 0.45 mm, which is the “Pad size Y” field. This is the axis the pitch divides up. Set it beside the lead width from Table 2.1, 0.30 mm at the most, and you can see the pad is half again as wide as the metal it has to catch.</td>
+</tr>
+<tr>
+<td><code>(R0.05) TYP</code></td>
+<td>The corner radius of each pad, 0.05 mm. Barely visible at this size, but it is the reason the pads are rounded rectangles rather than plain ones.</td>
+</tr>
+<tr>
+<td><code>14X (0.65)</code></td>
+<td>The pitch, centre to centre, the same 0.65 mm the package outline gave you. Meeting it twice is a useful check that you have read both drawings the same way.</td>
+</tr>
+<tr>
+<td><code>(5.8)</code></td>
+<td>The distance between the centres of the two columns of pads, and the easiest number on this drawing to misread. It is not the outer span of the copper. Half of it, 2.9 mm, is how far each column sits from the origin.</td>
+</tr>
+<tr>
+<td><code>SYMM</code> beside a centreline symbol</td>
+<td>‘Symmetrical’, meaning the pattern is mirrored about both of these axes. That symmetry is what lets you build one column and produce the other from the same numbers.</td>
+</tr>
+<tr>
+<td><code>(3.4)</code> and <code>(5)</code>, both marked <code>NOTE 9</code></td>
+<td>The thermal pad’s copper, 3.4 mm across and 5.0 mm down, which is very nearly the whole area of the body. Note 9 warns that the size may have to change to satisfy a creepage requirement.</td>
+</tr>
+<tr>
+<td><code>(2.46)</code> and <code>(2.31)</code></td>
+<td>The solder mask opening over the thermal pad. Both are smaller than the metal underneath, which makes this a ‘solder mask defined’ pad: the mask rather than the copper decides the shape of the solderable area.</td>
+</tr>
+<tr>
+<td>The diameter symbol and <code>0.2</code>, marked <code>TYP VIA</code></td>
+<td>The finished diameter of each thermal via, 0.2 mm.</td>
+</tr>
+<tr>
+<td><code>(1) TYP</code>, <code>(1.2) TYP</code> and <code>(0.6)</code></td>
+<td>The grid the thermal vias sit on: 1 mm apart across the pad, 1.2 mm apart down it, with the nearest row 0.6 mm from the horizontal centreline.</td>
+</tr>
+<tr>
+<td><code>NON-SOLDER MASK DEFINED</code> and <code>SOLDER MASK DEFINED</code></td>
+<td>The two panels at the foot of the page, each showing the 0.05 mm relationship between metal and mask. The perimeter pads are the first kind, with copper smaller than the opening over it. The thermal pad is the second.</td>
+</tr>
+</tbody>
+</table>
+<p>Table 2.2: Reading the markings on the <code>PWP0016C</code> land pattern.</p>
+<p>Start with pad 1 and get everything about it right, because the other fifteen are copies of it. You can trust KiCad’s own tools to get you there: the mouse and pointer for placing something roughly, the grid and grid snap for landing on a step you choose, the alignment guides that appear when an edge or a centre lines up with another object, and the alignment commands in the right-click menu for squaring up several selected pads at once. The coordinates that appear through this section, typed into a dialogue, read off the status bar, or checked with a ruler, are there to show you exactly where things land; typing one is simply another of these tools, not the only correct way to work. Pick the pad tool from the right-hand toolbar and click near the top left of the body to drop a pad on the canvas (Figure 2.16). What lands there is KiCad’s default pad rather than the one you want, so open its properties and fill it in from Table 2.2 (Figure 2.17). “Pad type” comes first, and “SMD” is the setting that makes this a surface-mount pad: copper on one side of the board and no drilled hole. That choice affects what the design rule check and the pick-and-place export read when they decide what kind of pad they are dealing with. “Pad number” should already read 1. Set “Pad shape” to “Rounded rectangle”, the size to 1.5 mm by 0.45 mm, and the corner radius to 0.05 mm, which KiCad will express as a ratio of the pad’s smaller dimension once you type it. Then check the three layers on the right, which are what the “SMD” type gives you: <code>F.Cu</code> for the copper itself, <code>F.Mask</code> so the solder mask opens over it, and <code>F.Paste</code>, so the stencil puts solder paste on it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-drop-pad-1.png" style="width:65.0%" /></p>
+<p>Figure 2.16: The first pad, dropped on the canvas beside the body. Nothing about it is right yet except that it exists: it carries the pad tool’s default shape and size, and it is sitting wherever the click landed.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-1-properties.png" style="width:85.0%" /></p>
+<p>Figure 2.17: The “Pad Properties” dialogue for pad 1, with the three fields that define the pad boxed: “Pad type”, set to “SMD”; “Pad number”, already 1; and the 1.5 by 0.45 mm size. On the right, <code>F.Cu</code> is the copper layer, and <code>F.Paste</code> and <code>F.Mask</code> are the two technical layers left ticked. Two values in this capture are still provisional: the corner size is KiCad’s default 15 per cent rather than the 0.05 mm radius the text sets, and the y position of -2 is a round number we correct in a moment.</p>
+<p>Position doesn’t need to be exact yet. Nudge pad 1 with the mouse, using the grid and the alignment guides KiCad draws when an edge or a centre lines up with another object, until it sits roughly where the top of the left-hand column belongs, just outside the body’s left edge. What has to be exact is the pitch between pad centres, because that number comes straight off the datasheet, and you fix it in the next step by placing pad 2 relative to pad 1 rather than by typing a position. The column’s position against the body isn’t fixed yet either. Once all eight pads on this side exist, you square the column up and centre it against the <code>F.Fab</code> outline in a single pass, which is a more reliable way to land on an exact position than aiming for one now.</p>
+<p>Pad 2 introduces the technique that places the rest of the column, and that technique will save you a lot of time on the parts you draw next (Figure 2.18). Set the grid to 0.05 mm first, because the move you are about to make is far finer than the 0.5 mm KiCad started you on. Pick the pad tool again and notice that KiCad has numbered the new pad 2 for you, since 1 is taken. Drop it directly on top of pad 1, then press the space bar. That zeroes the relative coordinate readout in the status bar, so <code>dx</code> and <code>dy</code> now measure from where the pad is sitting rather than from the footprint’s origin. Move the pad down until the status bar reads <code>dx 0.0000</code> and <code>dy 0.6500</code>, and click. Pad 2 is now exactly one 0.65 mm pitch below pad 1, and you got it there without typing a coordinate or doing any arithmetic.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-place-pin-2.png" style="width:85.0%" /></p>
+<p>Figure 2.18: Placing pad 2 by relative movement, with the grid boxed at 0.0500 mm in the top toolbar. (1) The pad tool, which numbers the new pad 2 because 1 already exists. (2) Pad 1, where the new pad was dropped and the space bar pressed to zero the readout. (3) Pad 2 after the move. (4) The status bar, reading <code>dx 0.0000 dy 0.6500</code>, which is the whole of the measurement: no sideways drift, one pitch down.</p>
+<p>Repeat that for pads 3 to 8 and the left-hand column is finished, at exactly the right pitch and in the wrong place (Figure 2.19). Eight pads at 0.65 mm span 4.55 mm from the first centre to the last, which is the <code>2X 4.55</code> dimension you read in Table 2.1, so a column centred on the body has to start half of that above the centreline. Select all eight pads and move them up until they straddle it (Figure 2.20). You will need a finer grid than 0.05 mm to land on it, because half of 4.55 mm is 2.275 mm, so drop the grid to 0.025 mm. When the column is centred, pad 1 reads -2.275 in y and pad 8 reads 2.275. Those two numbers are your check, and they are the coordinates I would have had you type at the start.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-left-pads-offset.png" style="width:45.0%" /></p>
+<p>Figure 2.19: The left-hand column, eight pads at the correct pitch, sitting low against the body. The pitch is right, so nothing here needs redrawing; the whole column simply has to move up.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-left-pads-offset-corrected.png" style="width:65.0%" /></p>
+<p>Figure 2.20: The same column after the move, centred on the body’s horizontal centreline. The grid is boxed at 0.0250 mm in the toolbar, which is what makes the 0.275 mm half-step reachable.</p>
+<p>Build the right-hand column the same way, then bring the two together. I find it easier to work in that order: get the spacing right inside each column first, then set the distance between the columns, and only then position the pair against the body. Each of those is one thing to get right rather than three at once. The distance between the columns is the <code>(5.8)</code> from Table 2.2, measured centre to centre, and the ruler is the quickest way to confirm it (Figure 2.21). Sixteen filled rectangles at this pitch are hard to read while you work, so it is worth turning on the mode that draws pads as outlines instead; the toggles for it sit in the left-hand toolbar, and Figure 2.21 was captured with it on.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pads1-16-positioned-outline-mode.png" style="width:85.0%" /></p>
+<p>Figure 2.21: All sixteen perimeter pads in place, drawn in outline mode so the body and the numbers show through. The ruler runs between the two columns and reads 5.800 mm, which is the check that the column spacing is right. Pads 1 to 8 run down the left and 9 to 16 up the right, the way an integrated circuit is numbered.</p>
+<p>Then check the numbering against the datasheet’s pin table rather than against your memory of it. That table lists two packages side by side, and the trap is that the “WQFN” column comes first, so it is the one your eye lands on: you want the “HTSSOP, TSSOP” column to its right. The two really do differ, and not subtly. AOUT1 is pin 16 on the WQFN and pin 2 on the part you are drawing.</p>
+<p>What you have now is a conventional footprint. The thermal pad is where it stops being conventional.</p>
+<h2 id="sec:c02-wizard">The Footprint Wizard</h2>
+<p>Before we tackle the thermal pad by hand, it is worth knowing that KiCad will draw a regular footprint for you in about a minute. The ‘Footprint Wizard’ lives inside the Footprint Editor, and it generates the land pattern for a standard package family, BGA, QFN, DIP, SOIC, and many more, from a short list of parameters. You pick the generator that matches your package, type in the pad count, the pitch, and the body dimensions from the datasheet, and the wizard draws the pads and outline as you go. When it looks right, you export it into the Footprint Editor and carry on refining it there.</p>
+<p>For a plain package, the wizard is the sensible starting point, and I reach for it often. For the DRV8833 it produces most of the footprint. It will lay out the sixteen perimeter pads at the correct pitch faster than you could by hand. What it will not do for you is the part that actually matters here, because a standard generator produces a standard land pattern, and the exposed thermal pad, its via field, and its split paste opening are an example of non-standard details that make this footprint worth authoring. So let the wizard build the frame, and then finish the interesting part yourself. Chapter 10 includes a recipe that uses the wizard end to end, and that is where to start when your next part is a plain one.</p>
+<h2 id="sec:c02-pad-stacks">The Exposed Thermal Pad and Its Pad Stacks (K9)</h2>
+<p>The exposed pad under the DRV8833 is a large area of copper on the top layer that the chip’s metal underside solders to. Give it pad number 17, the number you gave the “PAD” pin when you drew the symbol in the last chapter, because that shared number is the only thing that ties the two together in the netlist. If you leave a thermal pad unnumbered, nothing in the schematic refers to it, which means the design rule check has no opinion about whether it reaches ground.</p>
+<p>Before you draw this pad, look at the shape of what you are about to build, because it’s easy to make a mistake here. The thermal pad is not a single pad. It contains copper on the top layer, copper on the bottom layer, one opening in the solder mask, two openings in the solder paste, and twelve small plated holes that are there to tie the top copper to the bottom. Each of those sits on its own layer, and KiCad expects you to place them as separate objects that share an origin. Table 2.3 lists the whole set, and every number in it comes off the land pattern you decoded in Table 2.2. Figure 2.22 is the same list drawn rather than tabulated, with one arrow per row.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Object</th>
+<th>Layer</th>
+<th>Pad number</th>
+<th>Position</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The exposed pad</td>
+<td><code>F.Cu</code></td>
+<td>17</td>
+<td>0, 0</td>
+<td>3.4 by 5 mm rectangle</td>
+</tr>
+<tr>
+<td>The bottom landing</td>
+<td><code>B.Cu</code></td>
+<td>17</td>
+<td>0, 0</td>
+<td>2.8 by 4.4 mm rectangle</td>
+</tr>
+<tr>
+<td>The solder mask opening</td>
+<td><code>F.Mask</code></td>
+<td>none</td>
+<td>0, 0</td>
+<td>2.46 by 2.31 mm rectangle</td>
+</tr>
+<tr>
+<td>The solder paste openings</td>
+<td><code>F.Paste</code></td>
+<td>none</td>
+<td>±0.615, 0</td>
+<td>two rounded rectangles, 0.99 by 1.86 mm</td>
+</tr>
+<tr>
+<td>The thermal vias</td>
+<td>all copper layers</td>
+<td>17</td>
+<td>a grid, 3 across by 4 down</td>
+<td>twelve, 0.6 mm pad on a 0.3 mm hole</td>
+</tr>
+</tbody>
+</table>
+<p>Table 2.3: The five kinds of object that make up the exposed thermal pad.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-17-stack-complete-annotated.png" style="width:85.0%" /></p>
+<p>Figure 2.22: The finished thermal pad, with one numbered arrow for each row of Table 2.3, in the same order. (1) The exposed pad, 3.4 by 5 mm of copper on <code>F.Cu</code>. (2) The bottom landing, 2.8 by 4.4 mm on <code>B.Cu</code>, on the other side of the board. (3) The single opening in the solder mask, comfortably smaller than the copper it sits inside. (4) The two solder paste openings, side by side in the middle of that opening. (5) One of the twelve thermal vias, which are what join (1) to (2). The courtyard and the silkscreen are visible as well, because this capture comes from the finished footprint; you draw those two in a later section.</p>
+<p>Two of those five deserve a closer look before you build them, because it’s easy to get them confused. The exposed pad and the bottom landing are both copper, both numbered 17, and both rectangles at the origin. What separates them is the substrate of the board itself, as they sit on opposite sides of it. The exposed pad is what the chip touches. This is the copper that the metal surface under the DRV8833 chip solders to.</p>
+<p>The bottom landing is on the underside of the PCB (the B.Cu), where the chip cannot reach it, and its job is to receive the heat the vias bring down. Note that this is not a drawing convention or a placeholder for something else. The fabricator etches it in copper exactly as it etches the pad on top. Its ultimate purpose is to attach a heatsink to that bottom pad, or press it against a metal case, or simply let a broad area of copper shed heat into still air.</p>
+<p>Here I want to clarify something. You may be thinking of a PCB as a structure with the components on the front and the routing on the back. A two-layer board (and in fact any multi-layer PCB) can have components and routing on both top and bottom layers. Copper is exactly the same element on both sides, and the back of a board carries tracks, zones, components and heat management just as the front does. Pad 17 is the first time in this book where we design it to exist on both top and bottom copper layers.</p>
+<p>Start with the copper, which is the simplest of the five. Add a pad, set its type to “SMD” and its shape to “Rectangular”, give it a size of 3.4 mm by 5 mm, and place it at the origin. Be careful as to which pair of numbers you are typing: 3.4 by 5 is the metal, from the two dimensions marked <code>NOTE 9</code> in Table 2.2. The 2.46 by 2.31 pair further down that table is the opening in the solder mask, and putting the mask numbers in the copper field is the easiest mistake to make in this whole footprint. Now go to the “Technical layers” checkboxes in the same dialogue and clear both <code>F.Mask</code> and <code>F.Paste</code>, so the pad carries copper and nothing else.</p>
+<p>That last step will feel wrong, so let me justify it before you commit to it. On the sixteen perimeter pads you left those boxes ticked and KiCad opened the mask and laid the paste in the shape of the pad, which was the correct approach. Here it isn’t. The mask opening has to be 0.47 mm narrower than the copper across the pad and 1.345 mm shorter down it, and KiCad’s per-pad solder mask expansion is a single value applied equally on every side. One value can’t produce two different insets. So the mask and the paste come off this pad, and you place them yourself in a moment.</p>
+<p>While the dialogue is open, two settings on its other tabs matter. Set the fabrication property to “Heatsink pad”, which is metadata (not geometry). This tells the Gerber files, and anyone reading them, that this copper is here to move heat rather than a signal. Then set the pad’s connection to copper zones to “Solid”. This way, a ground pour that reaches this pad should reach it with unbroken metal, instead of connecting via thermal relief’s four thin spokes as it happens with, say, GND THT pads. We want unbroken metal (not thermal relief spokes) because we don’t want a broken heat path. That choice does have a cost when you come to solder the part by hand: a pad connected solid to a large ground pour conducts the heat from your soldering iron away into the copper, so the joint takes a long time to reach the temperature at which solder flows. Chapter 4 takes the trade-off up properly when you pour the zone. Figure 2.23 is the finished dialogue, with the copper set and the technical layers cleared.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-17-stack-F-cu.png" style="width:85.0%" /></p>
+<p>Figure 2.23: Pad 17 as copper and nothing else. “Pad type” is “SMD”, the boxed “Pad number” is 17, the boxed size is 3.4 by 5 mm, the position is the origin, “Copper layers” reads <code>F.Cu</code>, and every box under “Technical Layers” is clear, so this pad generates no mask opening and no paste. “Fabrication property” at the bottom right is set to “Heatsink pad”. The zone connection lives on the “Connections” tab and is out of sight here.</p>
+<p>Next comes the second pad, the landing on the underside. Add a matching pad on <code>B.Cu</code>, 2.8 mm by 4.4 mm, at the same origin, with the same “Heatsink pad” property and the same “Solid” zone connection. Number it 17 as well (Figure 2.24).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-17-stack-B-cu.png" style="width:85.0%" /></p>
+<p>Figure 2.24: The bottom landing. Only two things differ from Figure 2.23, and they are the two that matter: “Copper layers” reads <code>B.Cu</code>, and the size is 2.8 by 4.4 mm. The pad number is still 17.</p>
+<p>Two pads carrying the same number looks like an error, but it isn’t. KiCad reads them as one electrical artefact, both connected to electrical net pin 17 of the schematic. It has to work this way, because an SMD pad in KiCad exists on one copper layer, front or back and never both. There is no single pad that can exist in different shapes at both the top and bottom copper layers. If you were expecting a pad stack<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> to do that job, adjust the expectation now; I will come back to what pad stacks really do once the vias are in.</p>
+<p>The mask opening is next, and it uses a kind of pad you have not met yet. Add a pad and set its “Pad type” to “SMD Aperture”. An ‘aperture pad’ has no hole and no electrical connection of any kind; it exists only to put a shape on a technical layer<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, which is what you need here. Leave its number blank, clear every layer except <code>F.Mask</code>, make it a 2.46 mm by 2.31 mm rectangle, and place it at the origin (Figure 2.25). Look at the result: metal 3.4 by 5 mm, with a window in the mask 2.46 by 2.31 mm in the middle of it. The mask is smaller than the copper, so the mask, not the copper, decides the shape of the solderable area. That is what made this a solder mask defined pad back in Table 2.2.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-17-stack-F-Mask.png" style="width:85.0%" /></p>
+<p>Figure 2.25: The solder mask opening, made with an aperture pad. Choosing “SMD Aperture” greys out “Pad number” and sets “Copper layers” to “None” for you, so <code>F.Mask</code> is the only box ticked anywhere in the dialogue. The preview at the right shows what that produces: a 2.46 by 2.31 mm window and no metal at all.</p>
+<p>Now the vias. Until this point, pad 17 is two separate pieces of copper: a slab on the top layer and a matching slab on the bottom layer, joined only by sharing the same pad number and net, not by any physical connection between them. The vias are what turn that pair of slabs into a real path for heat. A ‘thermal via’ is a small-plated hole that carries heat, and here ground as well, from the top pad down through the board to the copper below. One via helps a little. Twelve, stitched in a grid across the pad, give the chip a genuine way out.</p>
+<p>Place one and let the array tool produce the rest. Placing twelve identical holes on an exact grid is what an array is for, and the aside that follows this section puts the same tool to work on the pad rows. Add a pad at (-1, -1.8), set its type to “Through-hole” and its shape to “Circular”, give it a 0.6 mm pad diameter on a 0.3 mm hole, and set its “Copper layers” to “All copper layers” so the barrel connects top to bottom. Number it, again, 17. Clear every technical layer, so the via gets no mask or paste opening of its own. Then right-click it, choose “Create from Selection” and “Create Array”, and set up a grid three across and four down with a horizontal spacing of 1 mm and a vertical spacing of 1.2 mm. Leave “Renumber pads” switched off, because all twelve have to stay 17. Those three numbers are Table 2.2’s via grid: 1 mm across, 1.2 mm down, and the nearest row 0.6 mm off the horizontal centreline, which is where starting at -1.8 lands you (Figure 2.26).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-17-stack-through-hole-pads.png" style="width:85.0%" /></p>
+<p>Figure 2.26: One thermal via, and behind the dialogue the eleven copies the array produced. “Pad type” is “Through-hole”, the boxed number is 17, the position is (-1, -1.8), the boxed pad shape is “Circular” at 0.6 mm over a boxed round hole of 0.3 mm, “Copper layers” is boxed as “All copper layers”, every technical layer is clear, and “Fabrication property” is “Heatsink pad” again. On the canvas, the finished three by four grid sits inside the exposed pad with every hole numbered 17.</p>
+<p>The datasheet asks for a 0.2 mm finished via, and KiCad’s own library footprint for this package uses 0.2 mm. But, I decided to do this a bit differently. I have specified 0.3 mm, because 0.3 mm is the smallest hole most low-cost fabricators will drill on their standard two-layer service, and asking for 0.2 mm will likely result in a more expensive board, or a rejected order. Keeping a 0.6 mm pad around a 0.3 mm hole leaves the same 0.15 mm annular ring, so nothing else in the grid has to move. The trade is real, though, because a wider barrel wicks<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> more molten solder down and away from the joint at reflow<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. The datasheet’s own note on this land pattern asks for vias under paste to be filled, plugged or tented, and clearing those technical layers on the via is what tents them. Solder mask closes the bottom of each barrel, so the solder cannot drain out underneath. If your fabricator can drill 0.2 mm without charging you for it, then use 0.2 mm.</p>
+<p>Let’s continue with the pad stacks. KiCad 9 introduced the ‘pad stack’, which lets one pad carry a different copper shape on each layer instead of forcing a single shape through the whole board, and the vias are the one place in this footprint where that is useful. Open any of the twelve, find the “Padstack mode” dropdown, and change it from “Normal” to “Front/Inner/Back”, which is the state I captured Figure 2.26 in. The dialogue grows an “Edit layer” dropdown that selects which layer you are editing, and the geometry fields below it now describe that layer alone. Pick the front and leave the ring at 0.6 mm. Pick the back and set it to 0.8 mm. The third mode, “Custom”, gives you every layer independently, which is more control than a two-layer board can use.</p>
+<p>On the front, the via’s ring sits inside a pad 3.4 by 5 mm, so its diameter changes nothing: the copper is already there. The back is different, because until you pour a ground zone, that ring is the only copper the via has, and a wider one gives the heat somewhere to spread. That is the entire benefit of these two settings: a larger ring on the back copper and nothing more. It is an excellent use of the feature, and it is better to meet pad stacks here, on a pad you already understand, than on the high-density and rigid-flex boards.</p>
+<p>That leaves the solder paste. If you get this one wrong, the part (the DRV8833 chip) can fail to solder properly even when every pad and via is exactly right. Paste reaches the board through a ‘stencil’, a thin metal sheet with an opening cut over each pad, and the opening over a given pad is its ‘paste aperture’. Over a small signal pad, one aperture the size of the pad is exactly right, and that is what KiCad gives you by default. Over a pad this large it is wrong. A single opening 2.46 by 2.31 mm lays down so much paste that the chip floats up on the molten solder at reflow, tilts, and makes a poor thermal joint, or bridges to a neighbour on its way down.</p>
+<p>The solution is to split the large ground pad in two. Add another aperture pad on <code>F.Paste</code> only: a rounded rectangle 0.99 mm by 1.86 mm, with its corner size left at KiCad’s default ratio of 0.25. Place it at (-0.615, 0), then array it two across with a spacing of 1.23 mm (Figure 2.27). Splitting the opening trades one flood of paste for two controlled dabs; Figure 2.28 lays the two designs side by side so you can see exactly how much paste each one puts down. Rounded corners release paste more cleanly than square ones, which is TI’s own advice on the same page.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-pad-17-stack-F-paste.png" style="width:85.0%" /></p>
+<p>Figure 2.27: One of the two paste apertures. It is an “SMD Aperture” again, with <code>F.Paste</code> boxed as its only layer, shaped as a “Rounded rectangle” of 0.99 by 1.86 mm with the corner size left at 25 per cent. “Position X” reads 0.615 because this is the right-hand one of the pair; its twin sits at -0.615 mm.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02_paste-split-comparison_v10.png" style="width:85.0%" /></p>
+<p>Figure 2.28: A single paste opening against the split design this footprint uses, both drawn over the same 3.4 by 5 mm copper pad. On the left, the paste opening is the same rectangle as the solder mask opening, so the two coincide and the red outline is what flags it: 5.68 mm² of paste, the entire mask window, in one flood. On the right, the dashed mask outline is visibly larger than the two paste apertures it holds, which total 3.58 mm², 63 per cent of the window, in two dabs clear of the mask edge.</p>
+<p>Be aware that the datasheet does not ask you to split the paste opening in two. Its stencil page specifies a single opening scaled to the thickness of the stencil, and 2.46 by 2.31 mm is that opening for a 0.125 mm stencil.</p>
+<p>Splitting it is what KiCad’s own library does for this package and what the stencil design standard permits, so both answers are appropriate; what actually matters here is the total volume of paste, not the number of openings you divide it into. I decided to split it because two openings make the reasoning visible in the Gerber files, and because it teaches a good habit. Next time you have to work with a thermal pad larger than this one, you’ll know what to do. Remember this pad when you reach the manufacturing chapter; the solder paste discussion is particularly important because of the choice you make now.</p>
+<p>Let’s finish pad 17 by double-checking it. In the editor, there are seventeen objects piled into the space of one, and this makes it difficult to click on any of them. The best way to go about this inspection is to use the pad table, which lists every pad in the footprint in a single grid where you can read the numbers straight off: two pads numbered 17 at the sizes in Table 2.3, twelve more numbered 17 at their grid positions, and three unnumbered aperture pads. Run the footprint checker from the “Inspect” menu. Then use the “Appearance” panel to show one layer at a time, which is the quickest way to catch a stray aperture. On its own, <code>F.Mask</code> should be one window in the middle of the pad and nothing else; <code>F.Paste</code> should be the two rounded rectangles; <code>B.Cu</code> should be the landing, with all twelve back-side rings sitting inside it. The 3D viewer is worth a look too: it renders the mask opening and the two paste rectangles together, at once, exactly as a real board would show them (Figure 2.29).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-solder-mask.png" style="width:85.0%" /></p>
+<p>Figure 2.29: The finished thermal pad, rendered in the 3D viewer. (1) The edge of the solder mask opening, the gold-toned window that exposes the copper beneath. (2) The two solder paste rectangles sitting inside that window, rendered in a lighter, silver tone. The dark circles are the thermal vias, and the grey pads either side are the sixteen perimeter pads.</p>
+<p>Pad 17 is finished, and the footprint now tells the truth about copper, mask, paste and heat. Two layers are still missing, and before we draw them I want to take you back to the pad rows, because there is a much faster way to lay them out.</p>
+<h2 id="sec:c02-grid-array-aside">An Aside: The Pad Rows, Faster, with the Grid Array</h2>
+<p>This section is a detour. We are not going to change anything in the work we’ve done so far, but I do want to introduce a better way to work with multiple pads arranged in an array pattern. The wizard earlier in this chapter was one way to save yourself work on a regular package. The ‘array’ tool is the other, and it’s a good fit for our scenario, because it works on any selection rather than only on a package family that the wizard happens to know about. I am demonstrating it on the sixteen perimeter pads you placed by hand, so that you can compare the two routes on work you have already done.</p>
+<p>Keep in mind the following clarifications before we get to the figures:</p>
+<ol type="1">
+<li>Pad 17 looks wrong in the screenshots that follow, but it isn’t. I captured this detour earlier in the build, when pad 17 was still a single copper pad, so in Figures 2.28 to 2.32 it appears as one plain rounded rectangle in the middle of the body rather than as the five-object stack of the last section. Nothing about the thermal pad has changed, and nothing in this detour touches it.</li>
+<li>Don’t follow along on your own footprint. The first step here deletes fifteen pads. Read the detour instead, or save the footprint under a second name and experiment on the copy. There is no reason to demolish work you have just finished. Having said that, you can consider saving your work so far, and then start a new custom footprint if you want to follow along.</li>
+</ol>
+<p>With that said, here is the starting point (Figure 2.30): everything gone except pad 1, which is the pad the array copies, and pad 17, which stays where it is throughout.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-restart-with-grid-array.png" style="width:45.0%" /></p>
+<p>Figure 2.30: The starting point for the detour. Pads 2 to 16 are deleted, pad 1 is still in its place at the top left, and the <code>F.Fab</code> body and its pin 1 circle are untouched. Pad 17 sits in the middle as the single copper pad it was when I captured this, rather than as the finished stack.</p>
+<p>Select pad 1, right-click it, and follow “Create from Selection” to “Create Array”, or press “Ctrl+T” (Figure 2.31). The dialogue that opens describes a grid, and every number it asks for is one you have already read off the datasheet (Figure 2.32):</p>
+<ol type="1">
+<li>“Horizontal count” 2 and “Vertical count” 8, which is two columns of eight pads.</li>
+<li>“Horizontal spacing” 5.8 mm and “Vertical spacing” 0.65 mm, which are the distance between the columns from Table 2.2 and the pitch from Table 2.1.</li>
+<li>“Renumber pads” ticked, with “Vertical, then horizontal” and “Reverse numbering on alternate rows/columns”. This is the group that makes the array produce an integrated circuit rather than a spreadsheet. An IC is numbered in a loop rather than a raster, down one side and back up the other, so without that reversal you would find pin 9 at the top right where pin 16 belongs.</li>
+<li>“From start value” with “Pad numbering start” at 1, so that the copy of pad 1 is numbered 1 rather than taking the next free number.</li>
+</ol>
+<p>That is the entire pad pattern in a single operation, and it depends on reading correctly the 5.8 mm figure from the datasheet rather than mistaking it for the outer span of the copper.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-start-grid-array.png" style="width:85.0%" /></p>
+<p>Figure 2.31: Reaching the array tool. The selected pad’s right-click menu carries a “Create from Selection” submenu, and “Create Array…” is the last of its four entries, with the “Ctrl+T” shortcut beside it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-grid-array-properties.png" style="width:85.0%" /></p>
+<p>Figure 2.32: The “Create Array” dialogue, filled in for this footprint. The boxes mark the counts, the two spacings, the “Vertical, then horizontal” numbering direction, and “Reverse numbering on alternate rows/columns”. Look at “Grid Position” at the bottom left as well: it is set to “Centre on source items”, which is what decides where the finished array lands.</p>
+<p>Click “OK” and the sixteen pads appear, correctly spaced, correctly numbered, and in the wrong place (Figure 2.33). That is “Centre on source items” doing exactly what it says. The array is centred on pad 1’s old position rather than on the body, so the whole block sits up and to the left, with the right-hand column lying across the middle of the part.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-grid-array-generated-pads.png" style="width:65.0%" /></p>
+<p>Figure 2.33: The sixteen pads the array produced. The numbering is exactly right, 1 to 8 down the left column and 16 to 9 down the right, and the whole block is centred where pad 1 used to be rather than on the body.</p>
+<p>Moving them is the last step. Remember to use the selection filter so that you can select all pads (only) in one gesture (Figure 2.34). The panel at the bottom right of the editor decides what a rubber-band selection is allowed to pick up, so clear everything in it except “Pads” and you can drag a box across the whole footprint without catching the body outline, the dimensions or the text. Select the sixteen perimeter pads, take pad 17 back out of the selection if the box caught it as well, and move the block until it sits symmetrically around the body. Then check it exactly as you did before: the ruler between the two columns should read 5.800 mm, and pads 1 and 8 should read -2.275 and 2.275 in y.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-grid-array-positioned-properly.png" style="width:85.0%" /></p>
+<p>Figure 2.34: The pads moved into place, and the “Selection Filter” panel that made it easy, with everything unticked except “Pads”. Pad 17 is exactly where it always was, in the middle of the body.</p>
+<p>That is the end of the detour. Two routes now exist to the same sixteen pads: by hand, one relative move at a time, which is what this chapter did and what I would recommend the first time, because it teaches you the grid, the relative readout and the pitch all at once; and the array, which does the whole pattern in one dialogue once you know what its numbers mean. Use the second one on your next part. The footprint this chapter delivers is the one with the fully built pad 17, and that is the one waiting for you in the capstone.</p>
+<h2 id="sec:c02-courtyard-silkscreen">The Courtyard and the Silkscreen</h2>
+<p>The courtyard comes next, on <code>F.CrtYd</code>. It is a keep-out boundary, the outline the design rule check reads to decide whether a neighbouring part is crowding this one. Nothing is printed or plated from this layer, so it is easy to treat as optional, and that would be a mistake: a footprint without one will let you build a board you cannot assemble. It is also the quickest of the four passes, because the boundary itself is one rectangle. Draw it a small clearance outside the widest thing on the footprint, which here means the pads rather than the body, since the leads reach further than the plastic does. The datasheet has nothing to say about how much clearance to leave; like the land pattern itself, this is a layout convention rather than a property of the part. 0.25 mm is what KiCad’s own libraries use, and it leaves enough room for a pick-and-place machine’s placement tolerance and for an iron or a hot air nozzle to reach this pad without touching the part beside it. You can go tighter on a dense, machine-assembled board, or looser if you expect to rework this part by hand; 0.25 mm is a sensible, comfortable default rather than the only correct number (Figure 2.35).</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-courtyard.png" style="width:85.0%" /></p>
+<p>Figure 2.35: The courtyard, drawn as a single rectangle. <code>F.Courtyard</code> is boxed in the “Appearance” panel, because you make it the active layer before you draw, and the arrows mark the rectangle tool and the boundary itself. The magenta rectangle clears the pads, which are the widest thing on this footprint, by 0.25 mm on every side.</p>
+<p>Finish on <code>F.Silkscreen</code>, the layer a human reads when placing the part by hand. Here you want an outline and a pin-1 mark, and here you also meet the compromise that fine-pitch parts force. Silkscreen ink can’t be printed on top of a pad, and on this package the two pad rows sit right along the body’s left and right edges, so a rectangle around the body is not available to you at all. What I draw instead is a corner mark at each of the four corners, a pair of short strokes meeting in an L, set outside the pad rows where there is clear board to print on. Four of those tell an assembler where the part’s corners fall without a single line crossing copper. Then the pin-1 mark: a small filled dot just outside the row beside pad 1, in the corner that the <code>PIN 1 INDEX AREA</code> on the package drawing pointed at (Figure 2.36).</p>
+<p>The quickest way to get that dot is a text item. Place one on this layer and set its content to a single bullet character, ‘•’, which is Unicode U+2022. You can copy it from your operating system’s character map or from any web page that carries one. Mine is set at a 1 mm text size with a 0.1 mm thickness, which prints as a dot a little under half a millimetre across. If you would rather not deal with the character at all, draw a small circle instead, open its properties, and tick “Filled shape”.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-silkscreen-complete.png" style="width:85.0%" /></p>
+<p>Figure 2.36: The finished silkscreen, with <code>F.Silkscreen</code> boxed as the active layer in the “Appearance” panel. Arrows mark the four corner marks, set outside the pad rows and clear of all copper, and the pin 1 dot at the top left. The <code>F.Fab</code> outline, the pads, the thermal pad and the magenta courtyard show through underneath.</p>
+<p>Of everything on this layer, the dot is the mark I would never leave out. The corner marks are a convenience; the pin-1 dot is what stops a part going onto the board rotated by 180 degrees, which on this chip would wire the motor supply straight into a bridge output.</p>
+<p>Four passes done, which include the body, the copper, the courtyard and the silkscreen, with the thermal pad layered through the middle of them. The geometry is now finished. What the footprint still lacks is the paperwork that records which part this is, and the model that lets you see it.</p>
+<h2 id="sec:c02-fields">Fields and the Embedded Datasheet</h2>
+<p>Everything so far has been done on the canvas or in a pad dialogue, with the Properties panel down the left side of the editor showing you what the selected object is. That panel is useful, but there is more information we must give to the footprint using a separate dialogue box. Click the footprint properties button in the top toolbar, or double-click an empty spot on the canvas, and the “Footprint Properties” dialogue opens on six tabs: “General”, “Layers”, “Clearance Overrides”, “Pad Connections”, “3D Models” and “Embedded Files” (Figure 2.37). The last two are where this chapter finishes.</p>
+<p>Start on “General”, which holds the four fields every library footprint is born with: “Reference”, “Value”, “Datasheet” and “Description”. They are the same four you met on the symbol in Chapter 1, they match it name for name, and none of them can be deleted. Two are already filled in, because KiCad set “Reference” to <code>REF**</code> and “Value” to the footprint’s own name when you saved it. “Description” is worth a line of plain English for the benefit of anyone browsing the library later. “Datasheet” is the interesting one.</p>
+<p>That field contains a route back to the document (the datasheet) this chapter came out of, and you have three ways to fill it. You can paste the manufacturer’s web address, which works from any machine with a connection and stops working the day the manufacturer reorganises its website. You can also point it at a copy of the PDF on your local file system, which never breaks but only resolves on the machine that holds the file (so it won’t work if you share this project with others). Or you can point it at that local copy and have KiCad embed the PDF into the footprint, which is what I do and what Figure 2.37 shows. The field reads <code>kicad-embed://drv8833.pdf</code> rather than a path, because the document itself is now stored inside the footprint. The cost is a larger file, so this is a trade-off you should consider. Embedding this datasheet of just under a megabyte, took my footprint from 57 kB to 1.2 MB. The advantage of embedding is a footprint that arrives on someone else’s machine with its datasheet already attached, and for a part you authored yourself that is usually the better trade.</p>
+<p>Doing the embedding takes four steps. Open the “Embedded Files” tab of the same “Footprint Properties” dialogue, click the add button beneath the empty list, and choose the PDF wherever it sits on your disk. KiCad copies the contents into the footprint there and then, and the file appears in the list beside its “Embedded Reference”, which is the <code>kicad-embed://drv8833.pdf</code> address. Right-click that reference and choose “Copy Embedded Reference”. Then go back to the “General” tab and paste it into the “Datasheet” field. Nothing is written beside your project, and the original PDF can be moved or deleted afterwards without breaking the field. The recipe on embedded files in Chapter 10 covers the mechanism in full, including the shortcut a symbol offers and how to export an embedded copy back out to disk.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-datasheet.png" style="width:85.0%" /></p>
+<p>Figure 2.37: The “General” tab of “Footprint Properties”, with the six tabs across the top and the four default fields in the table. The boxed “Datasheet” row reads <code>kicad-embed://drv8833.pdf</code>, the address KiCad uses for a file it has stored inside the footprint, rather than a path to a PDF sitting somewhere on my disk. “Value” carries the footprint’s name, and the “Metadata” and “Fabrication Attributes” panels below hold the description, the keywords a library search reads, and the “Component type” of “SMD”.</p>
+<p>The Footprint Editor has an action that opens the current footprint’s datasheet, so a field you filled in once becomes a single click to page 26 the next time you need to check a dimension. One wrinkle worth knowing before you move on is that when the part later reaches a board through the schematic, KiCad fills these four fields from the symbol’s matching fields, so set the symbol’s “Datasheet” field as well and the two will agree wherever the part turns up.</p>
+<h2 id="sec:c02-3d-shape">3D-Shape Association</h2>
+<p>A footprint is complete once it has its pads and outlines, but a footprint with a 3D model attached is far more useful, because it lets you see the finished part on the board and check that nothing collides before you send the board to a fabricator. The model is not something you will find in the Properties panel on the left of the editor, which has no row for it. It lives on the “3D Models” tab of the same “Footprint Properties” dialogue you were just in. The model file has to be in one of three formats, STEP<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, VRML<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> or IDF<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>, and in practice you meet the first two: STEP is the dimensionally accurate one, and it is what KiCad uses when it exports a board for mechanical work, while VRML looks better in the viewer. KiCad’s own library ships both versions of every model it covers, with the footprints pointing at the VRML one and the STEP substituted when you export.</p>
+<p>Before you can attach anything, though, check that the models are on your computer at all, because there is a fair chance they are not. KiCad’s 3D models are a separate library from its footprints, and they take up a great deal of space, so several of the installers make them optional. Plenty of readers have installed KiCad and have every footprint but no models to go with them. The library is published at https://gitlab.com/kicad/libraries/kicad-packages3D. Download it, unpack it somewhere stable outside any one project, then tell KiCad where you put it: open “Preferences” and then “Configure Paths”, and set <code>KICAD10_3DMODEL_DIR</code> to that folder (Figure 2.38). Mine lives in a shared folder alongside my other KiCad assets. That one path fixes the whole standard library at once rather than just this footprint, because every stock KiCad footprint reaches its model through the same variable.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-set-3d-model-directory.png" style="width:85.0%" /></p>
+<p>Figure 2.38: The “Configure Paths” dialogue, with the boxed <code>KICAD10_3DMODEL_DIR</code> pointing at the copy of the model library I downloaded and unpacked. The <code>-master</code> on the end of my folder name is a giveaway that I took the repository as a zip rather than installing a packaged release; the name does not matter, only that the variable points at the folder holding the <code>.3dshapes</code> directories. The other rows are the paths KiCad set up for itself when it was installed.</p>
+<p>Manufacturers and community repositories publish models for most common packages, so you rarely have to build one, and this part is a good example of why. KiCad already carries <code>HTSSOP-16-1EP_4.4x5mm_P0.65mm_EP3.4x5mm.step</code> in its <code>Package_SO.3dshapes</code> library, drawn to the same dimensions you spent this chapter reading off the datasheet. The harder case is a part nobody has published a model for, which means you must build one in a mechanical CAD tool rather than in KiCad; Volume 3 takes that up, where a short parametric script turns dimensions you have already decoded into a STEP file.</p>
+<p>So, go ahead and open the “3D Models” tab and click the folder button under the empty model list, which brings up the “Select 3D Model” browser (Figure 2.39). Work down to <code>Package_SO.3dshapes</code> and find <code>HTSSOP-16-1EP_4.4x5mm_P0.65mm_EP3.4x5mm.step</code>. Two things to do before you click “OK”. Look at the preview on the right, which turns the part over for you, because the model you want is the one with the exposed pad on its underside, and the same family carries near-identical names that differ only in a mask suffix. Then tick “Embed model” at the bottom left, which is the box that decides whether the footprint carries the file or merely points at it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-select-3d-model.png" style="width:85.0%" /></p>
+<p>Figure 2.39: Choosing the model. (1) The folder button on the “3D Models” tab, which opens the browser. (2) <code>HTSSOP-16-1EP_4.4x5mm_P0.65mm_EP3.4x5mm.step</code>, inside <code>Package_SO.3dshapes</code>. (3) “Embed model”, ticked. (4) “OK”. The preview at the right shows the part from underneath, with the pale rectangle of the exposed pad in the middle of it, which is how you confirm you have the model with the thermal pad rather than one of its neighbours in the list. The “Configure Paths” button in the bottom corner reaches the same dialogue as Figure 2.38, for when the folders you expect are missing.</p>
+<p>Embedding is a habit worth forming here, and Figure 2.40 shows what it produced. KiCad 9 and later versions let a footprint carry its own files inside itself, so instead of a path into my model library the entry now reads <code>kicad-embed://HTSSOP-16-1EP_4.4x5mm_P0.65mm_EP3.4x5mm.step</code>, an address for a copy stored in the footprint. Hand the file to someone else, or open it on a machine that never downloaded the model library, and the part still appears rather than a broken link to a file that exists only on your own machine. Also, notice that nothing needed adjusting: the scale is left at 1, and the rotation and offset are all zero. That is what a well-made library model gives you, because it is drawn with its origin on the footprint origin and its seating plane on the board. The three groups of fields down the left side are there for the models that are not so obliging, and you will meet one of those soon enough. Confirm the part in this preview, and again in the 3D viewer once the footprint is on a board: body square over the pads, exposed pad meeting the copper, nothing sticking out where a neighbour has to go.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-completed-3D.png" style="width:85.0%" /></p>
+<p>Figure 2.40: The “3D Models” tab with the model attached. The boxed entry is the <code>kicad-embed://</code> address of the embedded copy rather than a path on my disk, and the “Show” box beside it is ticked. “Scale” reads 1 on all three axes and “Rotation” and “Offset” are zero, because the library model needs no correction. In the preview the chip sits square on the pads with its leads on the copper and <code>REF**</code> printed on the board beside it.</p>
+<p>Both files are inside the footprint now, and the “Embedded Files” tab is where you see them together (Figure 2.41). The datasheet went in through a field on the “General” tab and the model through a tick box in a file browser, but they arrived in the same place and are managed the same way from here.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-embedded-files.png" style="width:65.0%" /></p>
+<p>Figure 2.41: The “Embedded Files” tab, listing the two files this footprint now carries: the STEP model and <code>drv8833.pdf</code>. Each is shown beside the <code>kicad-embed://</code> reference that stands in for a filesystem path everywhere else in KiCad.</p>
+<p>Save the footprint, close the editor, and place it on a board to see the whole of this chapter arrive at once (Figure 2.42). The status bar is the last check on the build. It reads “Pads 33”, which is the sixteen perimeter pads, the two rectangles of pad 17, the twelve thermal vias and the three aperture pads, and every one of those is an object you drew on purpose. “Vias 0” beside it is correct rather than alarming, because the twelve thermal vias belong to the footprint as pads; the board’s own via count only rises when you route one yourself.</p>
+
+<p><img src="/assets/klp5e-vol2/ch02/ch02-layout-new-footprint-in-layout-editor.png" style="width:85.0%" /></p>
+<p>Figure 2.42: The finished footprint placed in the PCB editor. Everything the chapter built is here and selected: the two pad rows numbered 1 to 16, the thermal pad with its via grid, the magenta courtyard, the silkscreen corner marks and the pin 1 dot at the top left, and the two <code>User.2</code> dimensions recording the 4.4 by 5 mm body. The status bar reads “Pads 33” and “Vias 0”. The embedded datasheet and the embedded 3D model came along as well, and open from this footprint’s properties here exactly as they did in the editor.</p>
+<p>You have authored both custom parts the capstone needs: a symbol drawn for readability and a footprint drawn for reality, with a thermal pad that already anticipates the copper and paste decisions still to come. Two parts, one component, sitting in your own library and ready to place. What they need now is a board to live on, and a board that carries motor current cannot be designed like the signal boards you built in Volume 1. Let’s set it up properly in the next chapter, starting with the net classes that decide which copper is wide and which is thin.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>A <strong>Pad stack</strong> is a KiCad feature, introduced in version 9, that lets a single pad or via carry a different copper shape on each layer of the board rather than forcing one shape through the whole stack. It is most useful on vias and through-hole pads where the copper needs to differ between the front and back of the board.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A <strong>Technical layer</strong> is a non-copper layer in a KiCad board or footprint that carries manufacturing information rather than electrical signals. Solder mask, solder paste, silkscreen, courtyard, and fabrication layers are all technical layers; they tell the manufacturer where to apply mask, paste, and markings, while copper layers carry the circuit itself.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><strong>Barrel wicking</strong> describes the capillary action that draws molten solder down through the plated barrel of a via during reflow, draining it away from the surface joint. The wider the via barrel, the more solder it wicks, which is why vias under solder paste are often tented with solder mask to seal the bottom and stop the solder from escaping.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><strong>Reflow</strong> is the name of the soldering process in which a board with solder paste and placed components is heated in an oven until the paste melts and flows, then cools into solid solder joints. It is the standard method for assembling surface-mount boards.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p><strong>STEP</strong> is a standard exchange format (ISO 10303) for 3D mechanical models, used by KiCad for component 3D models and for exporting a finished board into a mechanical CAD package. STEP files carry dimensionally accurate solid geometry, which makes them the right choice when the model needs to represent the part’s true shape and size for mechanical fit checks.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p><strong>VRML</strong> is the Virtual Reality Modeling Language, a 3D format (<code>.wrl</code>) that KiCad uses for component models shown in its built-in 3D viewer. VRML models render with surface colours and textures that make a board look realistic on screen, but they are not dimensionally accurate solids, so they are not suitable for mechanical fit checks. A VRML model is not written into a STEP export either; the exporter substitutes the matching STEP file instead.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p><strong>IDF</strong> is the Intermediate Data Format, an older exchange standard (IDFv3) for sharing a board’s mechanical outline, hole positions, and component footprints with a mechanical CAD package. KiCad exports IDF as a pair of files (<code>.emn</code> for the board, <code>.emp</code> for the library), carrying the minimum mechanical data a mechanical designer needs: board shape, cutouts, and component outlines. It is rarely used for individual component models in practice, which is why you meet STEP and VRML instead.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 
 </div>
 <script>
