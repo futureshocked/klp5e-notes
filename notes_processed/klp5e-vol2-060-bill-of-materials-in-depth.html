@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚧 Bill of Materials, In Depth — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<title>Bill of Materials, In Depth — KiCad Like a Pro, 5th Edition — Volume 2</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -258,10 +258,141 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
-<h1 class="note-title">🚧 Bill of Materials, In Depth</h1>
-<div class="draft-pending">
-This chapter is still being written and will appear in a future update.
-</div>
+<h1 class="note-title">Bill of Materials, In Depth</h1>
+<p>The board is designed. The copper is poured, the parts are placed, and the net classes set the track widths for the power and signal nets. What you do not have yet is a list of what actually goes on it. That list is the ‘bill of materials’, or BOM. It is a very detailed shopping list of every component the board needs, in the right quantities. It also carries the ordering details that someone needs in order to buy the parts and build the board. You made a first, simple BOM in Volume 1. Here, we’ll go deeper, because a real board needs more from its BOM. This one carries supplier part numbers, so that a person can actually order from it. It groups identical parts onto a single line. And, for a board like the capstone that has variants, it describes more than one build from a single design.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c05-builtin-bom">The Built-in BOM</a>
+    </li>
+    <li><a href="#sec:c05-bom-plugins">BOM Plugins</a>
+    </li>
+    <li><a href="#sec:c05-fab-template">When the Manufacturer Supplies the Template</a>
+    </li>
+    <li><a href="#sec:c05-field-templates">Field-Name Templates</a>
+    </li>
+    <li><a href="#sec:c05-design-variants">Design Variants and DNP (K10)</a>
+    </li>
+  </ul>
+</details>
+
+<h2 id="sec:c05-builtin-bom">The Built-in BOM</h2>
+<p>In KiCad 10 the bill of materials is produced by the ‘Symbol Fields Table’, the same spreadsheet view you used to bulk-load the DRV8833’s pins and to fill fields in earlier chapters. The BOM is not a separate tool any more. It is that same table, but exported via the “Export” tab. In the schematic editor, open the Symbol Fields Table from the “Tools” menu, then “Generate Bill of Materials”, or by clicking the icon that looks like a spreadsheet from the top toolbar. Once the Symbol Fields Table is open, notice the two tabs in the right pane. The “Edit” tab allows you to choose what goes into the BOM, the rows and the columns, and the “Export” tab allows you to choose the format of the file that comes out. The BOM is written to the disk when you press “Export” at the bottom.</p>
+<p>Start on the “Edit” tab. Every field your symbols carry is available as a column, and you tick “Include” on the ones you want in the list. Here, you will see fields like the reference, the value, the footprint, and the custom fields you added when you authored the parts. This is where the work you did in Chapter 1 becomes useful. Your DRV8833 carries an “MPN” field and a supplier code, so it arrives in the BOM as a fully specified line with a real part number, not as a mystery chip someone has to identify later. Give a column a friendlier heading by editing its “BOM Name”, and add a computed column with a ‘virtual field’. A virtual field is a column that KiCad fills in for you, and it exists only in the Symbol Fields Table and in the exported BOM: it adds nothing to the symbols themselves. Two of them are useful here. <code>${QUANTITY}</code> fills in the count of each grouped part, and <code>${ITEM_NUMBER}</code> numbers the rows.</p>
+<p>Grouping is a useful feature that turns a raw list of parts into a bill you can order from. Tick “Group By” on the fields that make two parts belong to a group, typically value and footprint, and every part that matches on those fields collapses onto one line with a quantity. The decoupling capacitors become a single row that says “100 nF, 0603, quantity 7”, which is how you would buy them. KiCad includes presets for this, which you can see in the “View presets” dropdown widget in the middle of the left pane. Of the various options, “Grouped By Value and Footprint” is the sensible default for a board like this, and you can save your own once you settle on a layout you like.</p>
+<p>There are two attributes that control whether a part appears at all in the BOM. A component marked ‘exclude from BOM’, which you would set on a mounting hole or a fiducial, never appears in the list because it is not something you buy. A component marked ‘do not populate’ (DNP) is different. It is a real part that this particular build leaves off, so it still appears in the BOM, flagged as DNP, unless you also choose to hide DNP parts. We will rely on that distinction in the last section of this chapter.</p>
+<p>Figure 5.1 puts those controls in one view, on the capstone’s own parts.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-details.png" style="width:100.0%" /></p>
+<p>Figure 5.1: The “Edit” tab, which controls what the BOM contains. “Include” (❶) picks which of your symbols’ fields become columns in the bill (❸), and “Group By” (❷) picks which of those fields make two parts the same. Grouping has collapsed the seven 100 nF capacitors onto one row of quantity 7, and the two sense resistors onto one of 2; the disclosure triangles (❹) expand a grouped row to show the individual parts inside it. Read the “DNP” column (❺) carefully, because the last section of this chapter uses that one attribute to build two products from this design.</p>
+<p>When the columns and grouping look right, move to the “Export” tab to choose the file format. The choices are comma-separated values (CSV), tab-separated values, and a semicolon-separated form. CSV is the one to reach for, because any spreadsheet or ordering system will read it, and you can still tune the exact delimiters if a particular tool needs something different. Set the output path, press “Export”, and you have your BOM.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-details-export.png" style="width:100.0%" /></p>
+<p>Figure 5.2: The “Export” tab (❷), which controls what the file looks like. The delimiter settings (❸) set the punctuation between and around fields, and the format presets (❹) fill them all in at once: “CSV” here. The output path (❺) is where the file is written, and the “Preview” pane (❻) shows the exact text that will go into it before you press “Export” (❼). Two things here belong to the last section of the chapter. The first is the variant selected in the left panel (❶). The second is the <code>${VARIANT}</code> in the output path, which KiCad replaces with that variant’s name, and which is why the preview’s sense-resistor row already reads “DNP”.</p>
+<p>Open the exported file in a text editor or spreadsheet application. It contains a small table that anyone can read, sort and price (Figure 5.3). This is the artefact you send to a supplier or an assembly house.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-details-export-libreoffice.png" style="width:100.0%" /></p>
+<p>Figure 5.3: The exported <code>bom_without-sense.csv</code> opened in LibreOffice Calc. Every decision from the previous two figures has carried through to the file. The columns are the ones ticked “Include”, the seven decoupling capacitors are a single row with a quantity of 7, and the sense resistors are a single row of 2 carrying “DNP” in its own column, so that whoever builds this board knows to leave them off. A plain CSV like this opens in any spreadsheet application and pastes into most ordering systems, which is the whole reason to prefer it over a prettier format.</p>
+<p>The PCB editor can also produce a BOM, under “File”, “Fabrication Outputs”, “Bill of Materials”. That one lists the footprints on the board and gives you nothing to configure: no choice of columns, no grouping, and no format other than CSV. KiCad’s own documentation keeps it for legacy reasons and recommends the schematic’s exporter instead, so treat it as a fallback for a board-only workflow with no schematic. When you have a schematic, and here you always will, generate the BOM from it.</p>
+<h2 id="sec:c05-bom-plugins">BOM Plugins</h2>
+<p>The built-in table covers the great majority of what you will ever need. Now and then, though, an assembly house or a parts supplier requires a BOM format that the table cannot quite produce. Maybe it’s a particular column order, a specific header row, or a layout their machine expects. For those cases KiCad keeps its older, script-driven BOM generators, reached through “Tools” and “Generate Legacy Bill of Materials”. These are ‘plugins’ in the plain sense: small programs, usually written in Python, that read your design and write out whatever format they were built to produce.</p>
+<p>KiCad supplies several generators, and they are a useful starting point (Figure 5.4). Select one and the panel beside the list tells you what it produces: how it groups, how it sorts, and which fields it writes. The one used here groups by value, symbol name, footprint and DNP, and it collects every additional field your symbols carry without your having to name them, so the “MPN” and “Supplier” columns you have been filling in arrive in the output automatically. Others take extra field names as arguments instead, which is why the dialogue shows you the exact command KiCad will run: you can hand-edit that command, or point the tool at a script of your own or one from the community.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-libreoffice-legacy-bom-generate.png" style="width:65.0%" /></p>
+<p>Figure 5.4: The legacy “Bill of Materials” dialogue. The list at the top left holds the generator scripts KiCad supplies, and selecting one (❶) fills the panel beside it with that script’s description: what it outputs, what it groups by, what it sorts by, and the fields it writes. Underneath, “Command line running the generator” shows the actual invocation, a Python interpreter followed by the script’s path and two placeholders, <code>%I</code> for the input netlist and <code>%O</code> for the output file. That box is editable, which is how you point KiCad at any generator script you like. “Generate” (❷) runs it.</p>
+<p>Run it, and you get a file (Figure 5.5).</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-libreoffice-legacy-bom.png" style="width:100.0%" /></p>
+<p>Figure 5.5: The generated file opened in a spreadsheet. A legacy generator writes a provenance header before the parts: the schematic it came from, the date, the version of KiCad that produced it, and the component count. Below that, under “Collated Components”, is the bill itself, grouped exactly as the script’s description promised, with the seven decoupling capacitors on one line. The custom fields carry through to the right-hand columns without having been named anywhere. Compare this with the file in Figure 5.3: same board, same parts, a completely different layout, which is the reason these scripts are still worth having.</p>
+<p>When a job requires a custom format, a plugin generates it. The rest of the time, the built-in Symbol Fields Table is faster and friendlier, and it is the one I use for my own boards.</p>
+<h2 id="sec:c05-fab-template">When the Manufacturer Supplies the Template</h2>
+<p>The previous section dealt with the case where a job needs a format the built-in table cannot produce. Here is the most common version of that case, and you will meet it the first time you order a board with the parts already fitted rather than a bare board. Many manufacturers publish their own BOM template and ask you to fill that in, rather than accept whatever your design software happens to produce. NextPCB is one of them, so you should look for a BOM template before you export anything for an assembly order.</p>
+<p>Fabricators offer BOM templates for a variety of reasons. A bill that arrives in the factory’s own layout goes straight into the systems that quote the job, check the parts against stock, and feed the machine that places them. I suspect that a file already in their format saves somebody from re-typing yours into it, which is my own reading of why the quotes come back as quickly as they do rather than something I have been told. What I have seen for myself is what the sheet is used for afterwards, and I come back to that at the end of this section.</p>
+<p>For NextPCB, the template lives on the assembly quote page at <a href="https://www.nextpcb.com/pcb-assembly-quote">nextpcb.com/pcb-assembly-quote</a>. Work through to “Step 2: Assembly” and you will find a “BOM File” box that accepts an <code>xls</code>, <code>xlsx</code> or <code>csv</code> file, with a “Download BOM Template” link underneath it (Figure 5.6). Take the download. The page also prints the template’s own columns, filled with a few example rows, which is the fastest way to see what is expected of you without opening the file at all.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-nextpcb-template.png" style="width:85.0%" /></p>
+<p>Figure 5.6: NextPCB’s assembly quote page, at “Step 2: Assembly”. The “Download BOM Template” link sits under the “BOM File” upload box (arrow), and the table below it (box) is the template printed out, with example rows in it. Read those rows rather than only the headings. They tell you that a grouped designator cell is acceptable both as a comma-separated list, “C1,C2,C3,C4”, and as a range, “B2-B9”, which is exactly the pair of forms KiCad’s own grouped “Reference” column produces. Note the “Centroid File” box above it: an assembly order wants a position file as well as a bill, and Chapter 6 covers that pairing.</p>
+<p>The template asks for six columns, and only three of them carry an asterisk marking them as required. Table 5.1 takes them in order and says where each one already exists in your design.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Template column</th>
+<th>Required</th>
+<th>Where it comes from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S/N</td>
+<td>no</td>
+<td>A row number. Add the <code>${ITEM_NUMBER}</code> virtual field and KiCad fills it in.</td>
+</tr>
+<tr>
+<td>Designator</td>
+<td>yes</td>
+<td>The “Reference” column, with grouping on, so that one row reads <code>C2-C8</code>.</td>
+</tr>
+<tr>
+<td>Quantity</td>
+<td>yes</td>
+<td>The <code>${QUANTITY}</code> virtual field, which counts the parts in each grouped row.</td>
+</tr>
+<tr>
+<td>Manufacturer Part Number</td>
+<td>yes</td>
+<td>Your “MPN” field, filled in since Chapter 1.</td>
+</tr>
+<tr>
+<td>Procurement Type</td>
+<td>no</td>
+<td>Not a KiCad field. It says who supplies the part, and it is where a DNP part is declared. Check the manufacturer’s own notes for the codes they use.</td>
+</tr>
+<tr>
+<td>Customer Note</td>
+<td>no</td>
+<td>Free text, for anything a person at the other end needs to read.</td>
+</tr>
+</tbody>
+</table>
+<p>Table 5.1: NextPCB’s assembly BOM template, column by column, and where each column’s data already exists in your design.</p>
+<p>The three required columns are the designator, the quantity and the manufacturer’s part number, and KiCad produces all three. The designator is the “Reference” column, which with grouping switched on arrives in exactly the form the template shows. The quantity is the <code>${QUANTITY}</code> virtual field, counted from that same grouping. The part number is your “MPN” field, filled in on every symbol since Chapter 1. KiCad covers one of the optional columns as well, the row number, through <code>${ITEM_NUMBER}</code>. That leaves the procurement type and the customer note, which describe how a part is bought and what you want the factory to know about it. Nothing in your design holds either, so you type those two in yourself. This is where the field work saves you time. With an “MPN” on every part, filling the template in is a few minutes of copying. Without one, you have to look up a part number for every component on the board before you can start.</p>
+<p>So do not rearrange the file by hand. Go back to the Symbol Fields Table’s “Edit” tab and shape the export to fit the template there, using the same two controls you have already used. Tick “Include” on exactly the columns the template wants and untick the rest. Then set each column’s “BOM Name” to the template’s own heading, so that “Reference” exports as <code>Designator</code> and your “MPN” field exports as <code>Manufacturer Part Number</code>. Leave the grouping on value and footprint as it is. Export to CSV, open it, and paste the block into the template spreadsheet. You will still need to fill in two columns yourself, the procurement type and any note, because nothing in your design holds that information.</p>
+<p>The reason to do this in KiCad rather than in the spreadsheet is that it survives. Column names and grouping are saved in the project file, so the next export comes out in the manufacturer’s shape without your touching anything.</p>
+<p>Typically, if a manufacturer wants you to use their own BOM template, it’s because they want a document they control and understand to be used from the moment you place your order, until all parts have been locked in. That spreadsheet is not a form you submit and forget. It is the working document for the whole conversation about parts.</p>
+<p>In my own orders with NextPCB, their production engineers work on the sheet itself: they mark the rows they cannot source, or where the part number and the footprint disagree, or where a part has reached the end of its life, and they send it back with those cells flagged. You resolve them, and it comes back again. I have had a bill exchanged several times by email, always the same file, before every line was settled. To make this process faster and safer, use the “Customer Note” column to say what you actually mean, because something simple like “any 100 nF 0603 X7R is fine here” can help the manufacturing engineer find an equivalent part from their catalogue. Keep every version of the sheet you send, named by date, so that you can always check which parts you asked for before any substitutions were agreed.</p>
+<h2 id="sec:c05-field-templates">Field-Name Templates</h2>
+<p>A BOM is only ever as good as the fields behind it. If your custom IC carries a manufacturer’s part number, but most of your resistors do not, then the exported list has gaps where an ordering system needs data. The fix is to have KiCad attach that field to every symbol in advance, before anything has been entered into it. A ‘field-name template’ provides exactly that. A template is an empty field that KiCad automatically attaches to every symbol in the design, so that every part has the slot ready and only the value is left to enter.</p>
+<p>You can define templates in one of two places, and the place you choose decides if the new field will appear only in the current project, or in all projects. In “Schematic Setup” you add field-name templates that apply to the current project only, which is where the capstone keeps the fields that make it orderable (Figure 5.7). In “Preferences” you add templates that apply to every project you open on your computer, which is the place for the handful of fields you want on every board you ever draw (Figure 5.8). A template field can be visible or hidden on the schematic, and it can be marked as a URL field so that it becomes a clickable link. Set up a couple of these once, and every part in the design arrives with the same set of orderable fields ready to complete. That applies to the parts you author and to the stock parts you place from KiCad’s libraries. Then fill them in bulk from the Symbol Fields Table, and your BOM columns come out consistent, with nothing left blank.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-schematic-setup-field-name-template.png" style="width:85.0%" /></p>
+<p>Figure 5.7: Project-scope templates, on the “Field Name Templates” page of “Schematic Setup” (arrow). The three names in the box are the ones this board needs to be orderable: “MPN”, “Supplier” and “SupplierURL”. Note the tick in the “URL” column on “SupplierURL” and nowhere else. That setting turns a field’s contents into a clickable link, so that a supplier’s product page is one click away from the symbol. These three are stored in the project file, so anyone who opens this design gets them, and no other project on your machine is affected.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-schematic-preferences-field-name-template.png" style="width:85.0%" /></p>
+<p>Figure 5.8: Global-scope templates, on the matching page under “Preferences” (arrow). The dialogue looks almost identical to the one before it, as it implements the same kind of list, reached from a different place, with a different reach. Anything you add here is attached to every symbol in every project you open on this computer, so be very careful. One entry is enough to show the idea, “MPN_global”, named that way here only so that you can see which list a field came from when the two appear side by side.</p>
+<p>Where the two scopes meet is on the parts themselves. Open any symbol’s properties and both sets are simply there (Figure 5.9).</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-field-name-templates-symbol.png" style="width:85.0%" /></p>
+<p>Figure 5.9: The templates arriving on a real part, J1, the capstone’s 6-pin header. Above the boxes sit the fields every KiCad symbol has, from reference through to description. Below them, the three project templates (❶) have come through filled in, because this connector has been given its part number, its supplier and a link to the product page. The global template (❷) has come through too, but empty. That empty row is the point of the whole feature: nobody had to remember to add the field, so it cannot go missing. It is a slot, waiting, on every part in the design.</p>
+<h2 id="sec:c05-design-variants">Design Variants and DNP (K10)</h2>
+<p>Often one design has to be built in more than one configuration. The capstone is a small example of exactly this. The motor driver can be built with its optional current-sense resistors fitted, or without them, and those are two genuinely different products from one layout. The old way to handle this was to keep two copies of the project. I have done that on two boards. Both times the two copies became inconsistent without my noticing, and I only discovered it when the fabricated boards arrived. KiCad 10’s ‘design variants’ let a single project describe both builds at once.</p>
+<p>A variant is a named set of overrides applied on top of one base design. The base design remains the single definitive version, and each variant records only what differs from it. Every project starts with one implicit variant, the default, which is the base design with nothing overridden. You select the active variant from a dropdown in the main toolbar, present in both the schematic and the PCB editors, and the moment you pick one the display updates to show that configuration.</p>
+<p>The most common override, and the one the capstone uses, is ‘fitting’, which is simply whether a part is placed on the finished board at all. You mark the current-sense resistors ‘do not populate’ in the “without-sense” variant. They stay in the design, footprint included, so that the board still has a place for them. In that variant, though, they are drawn with an X through them on the schematic and on the board’s fabrication layers, flagged as DNP in that build’s bill of materials, and left off the assembled board. Switch back to the default and they reappear, fitted. A variant can do more than fit or omit a part. It can override almost any field, swapping a value, a footprint, or a part number for one build, and it can independently exclude a component from the BOM, from the pick-and-place position files, or from simulation. It can even be applied to a whole ‘hierarchical sheet’ at once, that is, to every part in one of the sub-schematics that a large design is split into. The single thing a variant may not change is a component’s reference designator, because that would produce a different netlist, which is beyond what an assembly variant is for.</p>
+<p>You create a variant by choosing “Add New Design Variant” from the toolbar dropdown, and you manage the set from the Symbol Fields Table, which has a variant list along its left side with buttons to add, delete, rename, and copy. Select a variant there and the grid switches to show its data, highlighting every cell that differs from the base so that all of your overrides are visible at once.</p>
+<p>Figures 5.10 and 5.11 show that mechanism working on the capstone. They are the same table, opened on the same design, and the only difference between them is which entry is selected in the variant list.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-symbol-table-variant-default.png" style="width:85.0%" /></p>
+<p>Figure 5.10: The base design in the Symbol Fields Table. The “Schematic variants” list at the foot of the left panel holds two entries, and “&lt; Default &gt;” is the one selected (❶), so the grid shows the design with nothing overridden. “Group symbols” is ticked at the top right, which is why R2 and R3 share a single row reading a quantity of 2 (❷) rather than appearing separately. That row’s “DNP” box is clear. This is the build with the current-sense resistors fitted.</p>
+
+<p><img src="/assets/klp5e-vol2/ch05/ch05-bom-symbol-table-variant1.png" style="width:85.0%" /></p>
+<p>Figure 5.11: The same table with “without-sense” selected instead (❶). One thing on the screen has changed: the “DNP” box on the R2, R3 row is now ticked, and KiCad has shaded the cell to mark it as an override rather than a value inherited from the base design (❷). Every other row reads exactly as it did, which is what makes that shading useful as a check: a cell you did not mean to change is easy to see. The footprints, the values and the reference designators are untouched, because a variant records the difference and nothing else.</p>
+<p>Variants are useful for the BOM as well. The export path supports variables, so you can use the <code>${VARIANT}</code> text variable, as in <code>bom_${VARIANT}.csv</code>, and each export is written to a file named after the variant it came from. Select a variant, export, select the next one, export again, and you have a separate, correct bill for each. The <code>${VARIANT}</code> variable ensures that one file holds the parts for the with-sense build and another holds the parts for the without-sense build, each already accounting for the DNP resistors, and with no risk that one export overwrites the other. Expect one oddity the first time you do this. Exporting under “&lt; Default &gt;” writes a file called <code>bom_.csv</code>, with nothing between the underscore and the extension, because the default variant has no name and the variable resolves to an empty string. That is correct behaviour rather than a fault. You can even put <code>${VARIANT}</code> into the title block so that a printed schematic states which configuration it represents.</p>
+<p>Variant data is defined in the schematic and passed to the board when you run “Update PCB from Schematic”, never the other way around. Always create and edit variants in the schematic editor, then push them to the PCB, where the same variant names appear in that editor’s dropdown. Follow that habit and one project will carry every version of a board you need to build.</p>
+<p>Your design is now complete on paper. An original board, drawn with parts you authored, set up for the current it carries, poured with a relieved ground, and described by a real bill of materials that can even account for more than one build. Only one question remains before you can order it, and it is the one that decides whether the factory can actually make what you have drawn. That is design for manufacturing, and it is where we go next.</p>
 
 </div>
 <script>
