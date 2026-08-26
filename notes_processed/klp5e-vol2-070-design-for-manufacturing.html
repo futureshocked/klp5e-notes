@@ -259,6 +259,7 @@
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
 <h1 class="note-title">Design for Manufacturing</h1>
+
 <p>You have a finished design and a bill of materials to build it from. The last question is whether a factory can actually make what you have drawn, and make it efficiently. This chapter answers it. The term ‘Design for manufacturing’, usually shortened to DFM, covers two related practices. First, checking a board against the real limits of the process that will fabricate and assemble it, before you pay for a batch of boards that cannot be built. And, second, shaping the design so that the board is quicker, cheaper and more reliable to build once it is in the factory.</p>
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
@@ -294,7 +295,7 @@
 <p>The checking part of that work is a short sequence of checks, and they are not interchangeable. Each check can reveal a larger set of potential issues to fix or improve compared to the one before it, and each requires a little more effort to run (Figure 6.1). The order is what makes the sequence worth having. A problem caught in the first check is fixed in the editor you already have open, while the same problem caught in the last one sends you back through the re-route, the re-plot and the re-upload before you can check it again. We work down that sequence first, then turn to the shaping half.</p>
 
 <p><img src="/assets/klp5e-vol2/ch06/ch06_dfm-sequence_v10.png" style="width:100.0%" /></p>
-<p>Figure 6.1: The DFM check sequence. Each stage is a gate: fix what it reports and run it again until it comes back clean. Then go on to the next one regardless, because a later check sees things an earlier one cannot. Stages 1 and 2 run inside KiCad with nothing exported; stages 3 to 5 work on your plotted Gerbers.</p>
+<p>Figure 6.1: The DFM check sequence. Each stage is a gate: fix what it reports and run it again until it comes back clean. Then go on to the next one regardless, because a later check sees things an earlier one cannot. Stages 1 and 2 run inside KiCad with nothing exported; stages 3 to 5 work on your plotted Gerbers. </p>
 <h2 id="sec:c06-manufacturability">Manufacturability Analysis</h2>
 <p>The good news is that most of the manufacturability check is something KiCad already does, if you tell it what your factory can do. The board-wide constraints live on the “Constraints” page of “Board Setup”, which is where Chapter 3 set them, and among them is a group of manufacturing limits:</p>
 <ul>

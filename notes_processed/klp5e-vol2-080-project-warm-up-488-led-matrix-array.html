@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚧 Project (Warm-up): 4×8×8 LED Matrix Array — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<title>Project (Warm-up): 4×8×8 LED Matrix Array — KiCad Like a Pro, 5th Edition — Volume 2</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -258,10 +258,921 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
-<h1 class="note-title">🚧 Project (Warm-up): 4×8×8 LED Matrix Array</h1>
-<div class="draft-pending">
-This chapter is still being written and will appear in a future update.
-</div>
+<h1 class="note-title">Project (Warm-up): 4×8×8 LED Matrix Array</h1>
+
+<p>In the capstone project for volume 2, which you will work on in the next chapter, you will need to author custom parts. But before doing that, in this warm-up project you will do something almost as valuable. You will work at scale by using KiCad’s features that allow you to duplicate a portion of a board with just a few clicks. The board of this project includes four 8-by-8 LED matrices sitting side by side under the control of a microcontroller. The main objective of this project is to draw one section well and then reuse that work instead of hand-placing the components for the other three sections. Four matrices give you 256 individually addressable LEDs in a display band 80 mm wide and 20 mm tall, which is enough to scroll a message, draw a bar graph, or count something down in characters large enough to read across a room.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c07-learn">What This Project Teaches You</a>
+    </li>
+    <li><a href="#sec:c07-scope">The Board We’re Building</a>
+    </li>
+    <li><a href="#sec:c07-source">Sourcing the Parts</a>
+    </li>
+    <li><a href="#sec:c07-power-budget">Planning the Power Before You Draw</a>
+    </li>
+    <li><a href="#sec:c07-process">The Process, With One Addition</a>
+    </li>
+    <li><a href="#sec:c07-setup">Schematic: Setup</a>
+    </li>
+    <li><a href="#sec:c07-first-cell">Building the First Cell</a>
+    </li>
+    <li><a href="#sec:c07-design-block">Capturing the Cell as a Design Block</a>
+    </li>
+    <li><a href="#sec:c07-mcu">MCU, Power, and Controls</a>
+    </li>
+    <li><a href="#sec:c07-stamping">Stamping Out the Other Three</a>
+    </li>
+    <li><a href="#sec:c07-erc">Annotate, Associate, and ERC</a>
+    </li>
+    <li><a href="#sec:c07-layout">Board and Layout</a>
+      <ul class="note-toc-sub">
+        <li><a href="#sec:c07-cell-differences">What the Copy Cannot Make Identical</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec:c07-k10-features">The KiCad 10 Features This Board Puts to Work</a>
+    </li>
+    <li><a href="#sec:c07-next">What You’ll Carry Into the Capstone</a>
+    </li>
+  </ul>
+</details>
+
+<p>Before any of this existed in KiCad, I drew a sketch of what it might look like on paper. You can see a refined version of this sketch in Figure 7.1. The sketch consists of a rough plan of both faces of the board, drawn to help me assess how large the final gadget would be and roughly where its components would sit. There is a finished 3D render of this board, and you will see it at the end of the chapter, but at this point I want to be realistic. First comes the idea, then the idea is committed to paper as a rough sketch, and then the design and implementation work continues. The 3D render typically comes at the end of the design work, and that’s why I didn’t want to show it at the very beginning of the chapter. Be warned, though, that once I start the layout design, this sketch will help me complete the first iteration of the board, but there is no guarantee that the final production-ready layout will match. I may decide to make changes to the layout for a variety of practical, aesthetic, engineering and production reasons. If I do deviate from the sketch, I will explain the reasons supporting the changes.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07_pcb-ideation-sketch_v10.png" style="width:85.0%" /></p>
+<p>Figure 7.1: The board as a sketch, before any of it was drawn in KiCad. The top face carries the four matrices in a single row, and beneath them everything that exists only once: the Arduino Nano down the left, then the power switch, the load switch that spares it the display current, and the USB-C receptacle near the right-hand edge, with the two buttons on the row below. The back carries nothing but the four MAX7219 drivers, each tucked under its own matrix with its current-setting resistor and its decoupling pair, which is the point of the drawing: one cell, four times over. The back is drawn see-through, so that each driver lines up with the matrix it serves rather than being mirrored. Only the 80 mm display band is a fixed number at this stage; the surrounding outline is a proposal.</p>
+<p>There are two things to notice in the sketch. The first is that the drawing is essentially one cell repeated four times. The cell contains a matrix display, a display driver placed on the back of the board, a current-setting resistor and a pair of decoupling capacitors. There is nothing different between the cell copies except the reference designators. The second is scale. The board is roughly 100 mm by 50 mm, but the exact dimensions are something we’ll determine in the layout editor. However, the 80 mm display band inside it comes from the four 20 mm matrices placed edge to edge. That is the only fixed dimension on the sketch.</p>
+<p>I built the first version of this board in the fourth edition of KiCad Like a Pro as a clock. This new modernised edition keeps the display, the two buttons and the power switch. I have also added a USB-C power receptacle (because it’s 2026), a P-channel MOSFET load switch so that the slide switch no longer has to carry the display current, and a new simplified board shape to make it easier to place the board in a project box. My inspiration for designing this gadget was the classic Pomodoro timer<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. For such a gadget, keeping time is not needed, and that is why I did not include a real time clock. I just need to be able to choose a timer preset, like a 10- or 15-minute session, and start/stop/reset the clock. This board counts down a work interval in the Pomodoro style, which the two buttons choose and start. Counting down a known number of minutes needs no absolute time reference, so nothing on the board has to know what day it is.</p>
+<p>What you are building is that LED matrix cell, four times over, driven from the Arduino Nano across three wires (Figure 7.2). You can consider this as a base project rather than a finished product. If you want time and date keeping capability, the neatest route is not to add an RTC chip but to swap the Arduino Nano for one of the WiFi-capable modules in the same footprint, and let it fetch the time from the network. The schematic barely changes, and you get many more capabilities in return, because a board on the network can also be controlled remotely. That opens up capabilities such as scrolling live notifications, a status board for something you run at home, and a countdown someone else can start from a phone.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-first-cell.png" style="width:85.0%" /></p>
+<p>Figure 7.2: One cell, which is the unit the whole board is built from. The LED controller in the middle is the MAX7219, and the sixteen wires leaving its right-hand side carry the eight columns and eight rows of the LED matrix beside it. <code>R1</code> above the driver sets its current ceiling, and the decoupling capacitors on the left hold the supply steady while it works. <code>DIN</code> and <code>DOUT</code> at the bottom of the driver are the two ends of the chain that will link this cell to the next three.</p>
+<p>Let’s start by reviewing the main learning objectives of this project, and then go and build it.</p>
+<h2 id="sec:c07-learn">What This Project Teaches You</h2>
+<p>I put this project before the capstone to help you become fluent with the machinery of a large schematic. The capstone, in the next chapter, builds on top of that fluency. These are the five new skills you’ll practice:</p>
+<ol type="1">
+<li><strong>Design blocks.</strong> You will capture one working cell once and stamp it out three more times, instead of drawing the same circuit four times. This is the main new skill of the chapter. You will meet it again in Chapter 9, where the four-motor extension uses the same feature on a bigger board.</li>
+<li><strong>Working at scale.</strong> The finished sheet carries several times the parts of anything you built in Volume 1, and many times the wires and nets. Those boards had only a few components each. Habits that work on a handful of parts, such as checking each connection by eye, eventually stop working as the size of the board grows.</li>
+<li><strong>Net classes that stand out.</strong> Chapter 3 set up the electrical half of a net class, the track widths and clearances. In this project, you fill in the graphic columns as well, so that the power rails stand out on the editor by using a distinct colour and weight. You will use net classes again in Chapter 8, for the motor nets (a motor draws its current continuously, while a multiplexed display draws it in short, hard bursts).</li>
+<li><strong>Net class assignment patterns matching multiple nets.</strong> Chapter 3 taught you the pattern syntax on a board where a pattern matched a few nets. On this board, one pattern matches over thirty nets.</li>
+<li><strong>Reading violations, not counting them.</strong> A violation that describes something you have not done yet is information rather than an error. You will learn how to use the information provided by the ERC or the DRC to improve your design, or to tell KiCad what is good or bad via the use of custom rules.</li>
+</ol>
+<p>In this project, you will not author a symbol or a footprint from scratch. One part on this board, the LED matrix itself, is not in KiCad’s standard library, and I supply it ready-made in the book’s project library for you to import.</p>
+
+<h2 id="sec:c07-scope">The Board We’re Building</h2>
+<p>As I mentioned earlier, the array is built from a single repeating unit I will call a ‘cell’. Each cell contains an 8-by-8 LED matrix, a driver chip that turns simple serial data into sixty-four individually controlled LEDs, and the local decoupling capacitors that driver needs. Four cells sit side by side and chain their data lines, so the microcontroller talks to the first cell and the rest follow. Add a microcontroller, a power input and a little supporting circuitry, and that is the board.</p>
+<p>Here is everything on it:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Part</th>
+<th>Qty</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TA08-81GWA 8×8 matrix, 20 mm</td>
+<td>4</td>
+<td>The display itself, 64 LEDs per panel</td>
+</tr>
+<tr>
+<td>MAX7219CWG+</td>
+<td>4</td>
+<td>One driver per matrix, fed by three wires</td>
+</tr>
+<tr>
+<td>10 kΩ resistor (<code>RSET</code>)</td>
+<td>4</td>
+<td>Sets each driver’s LED current ceiling</td>
+</tr>
+<tr>
+<td>100 nF + 10 µF capacitors</td>
+<td>4 pairs</td>
+<td>Local decoupling at each driver</td>
+</tr>
+<tr>
+<td>Arduino Nano v3.x</td>
+<td>1</td>
+<td>Drives the chain and runs the timer</td>
+</tr>
+<tr>
+<td>USB-C receptacle, power only (<code>J1</code>)</td>
+<td>1</td>
+<td>Regulated 5 V in</td>
+</tr>
+<tr>
+<td>5.1 kΩ resistor (<code>R7</code>, <code>R8</code>)</td>
+<td>2</td>
+<td><code>CC</code> pull-downs; the port will not turn on without them</td>
+</tr>
+<tr>
+<td>AO3401A P-channel MOSFET (<code>Q1</code>)</td>
+<td>1</td>
+<td>High-side load switch for the 5 V rail</td>
+</tr>
+<tr>
+<td>100 kΩ + 10 kΩ resistor (<code>R9</code>, <code>R10</code>)</td>
+<td>1 pair</td>
+<td>Gate bias for the load switch</td>
+</tr>
+<tr>
+<td>DPDT slide switch, C&amp;K JS202011AQN</td>
+<td>1</td>
+<td>Turns the board on and off, through the load switch. Only one pole is used</td>
+</tr>
+<tr>
+<td>Push button + 10 kΩ pull-up</td>
+<td>2</td>
+<td><code>MODE</code> and <code>SELECT</code></td>
+</tr>
+</tbody>
+</table>
+<p>The whole array runs on three signals from the Arduino Nano. Signals <code>CLK</code> on D13 and <code>LOAD</code> on D10 go to all four drivers at once, and <code>DIN</code> on D11 goes only to the first one. Each driver passes what it does not need out of its <code>DOUT</code> pin and into the next driver’s <code>DIN</code>, so the four chips form a chain that the Nano addresses as one long shift register. The two buttons are connected to D2 and D3, each held high by a 10 kΩ pull-up and pulled low when pressed.</p>
+<p>Everything except the matrix comes from KiCad’s standard libraries, so that you can spend all of your attention on the structure of the schematic rather than on looking for parts.</p>
+<h2 id="sec:c07-source">Sourcing the Parts</h2>
+<p>One of the parts in this project is not available in the standard library, so I have sourced it externally. I am also going to highlight a couple of potential traps worth knowing about before you order any of the parts, if you want to assemble this board.</p>
+<p><strong>The matrix comes from the book’s project library.</strong> The symbol <code>LED_Matrix_TA08-81GWA</code> and the footprint <code>LED_Matrix_TA08-81_20mm_8x8</code> are both available in <code>klp5e-ch07.kicad_sym</code> and <code>klp5e-ch07.pretty</code>, which ship with the project files in the book’s GitHub repository. Add them to this project’s library tables the way Volume 1’s Chapter 6 showed you, and the part is waiting in the chooser when you reach for it. If you prefer, you can download a TA08 part from a parts service like Snapeda. I did compare the one I created and share with you in the project library against one I found online while building this board. The two agree on every pin and every dimension. I decided to use my own because it puts the pin rows along the top and bottom edges rather than the left and right, which leaves the seam between neighbouring cells free for wiring. Also, mine insets the courtyard slightly so that four matrices can be placed edge to edge without raising clearance violations against each other. Figure 7.3 shows the footprint open in the Footprint Editor, which is where you can confirm it is properly installed after you add the library.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-LED_Matrix-TA08-custom.png" style="width:100.0%" /></p>
+<p>Figure 7.3: The project’s <code>LED_Matrix_TA08-81_20mm_8x8</code> footprint, open in the Footprint Editor after the <code>klp5e-ch07</code> library has been added. The library tree on the left shows the two parts the library ships, and the properties panel confirms where the footprint is coming from. On the canvas, the sixteen pads run in two rows of eight along the top and bottom edges, with pad 1 square and marked by the silkscreen dot at the bottom left. That arrangement is the reason for choosing this part over a catalogue one: it leaves the left and right edges clear, so that four of these can butt against each other and still have somewhere for the wiring to go.</p>
+<p><strong>The TA08 is column anode, and the TC08 is column cathode.</strong> These symbols are the same physical package with the internal diode array reversed, they sit next to each other in most catalogues, and the part numbers differ by one letter. If you substitute one for the other without re-mapping which driver output goes to which matrix pin, you will build a display that lights nothing at all and shows no sign of why. Be careful to order the TA08.</p>
+<p><strong>The matrix has a 2.5 mm pin pitch, not 2.54 mm.</strong> It is metric, and it is the most important dimension number on this board. You can measure it for yourself on the footprint with the PCB Editor’s measurement tool, which is worth doing once so you can confirm it really is 2.5 mm (Figure 7.4). In the schematic this number doesn’t matter, because the symbol’s pins sit on KiCad’s standard 1.27 mm grid just like the pins of every other symbol. But in the PCB Editor it is very important. The Arduino Nano is imperial, on a 2.54 mm header pitch with its two rows 15.24 mm apart. Its neighbours are metric: the slide switch shares the matrix’s 2.5 mm pitch, and the two push buttons sit on a spacing of their own, 6.5 mm one way and 4.5 mm the other. No single grid lands on all of that. The problem appears first in placement, when the cells have to sit at exactly 20.0 mm, which is 8 × 2.5 mm, and 20.0 mm is not a whole number of 2.54 mm steps. All this means that if you stay on the 100 mil grid you used for the Nano then the nearest you can reach is 20.32 mm, a 0.32 mm seam between neighbouring panels that grows to almost a millimetre across the four. So, you should match the grid to the job, as you did in Chapter 2, and lay this board out in millimetres.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-2.5-pitch.png" style="width:65.0%" /></p>
+<p>Figure 7.4: The measurement tool laid across pads 1 and 2 of the matrix footprint, reading <code>x: 2.500 mm</code>. Not 2.540 mm. The forty thousandths of a millimetre missing from each step are what the placement section later has to work around, because eight of them add up to 0.32 mm across a single panel.</p>
+<p>One more thing worth knowing before you draw is that the MAX7219 stock symbol arrives with no footprint assigned, so when you get to the footprint step you will have to choose its package yourself. It does carry footprint filters, <code>SOIC*7.5x15.4mm*P1.27mm*</code> and <code>DIP*7.62mm*</code>, which narrow the list to the wide-body SOIC this board uses and the through-hole alternative. Whether you see that short list or the whole library depends on the filter buttons in the Footprint Assignment tool’s toolbar, and I will come back to them at the footprint step. Either way, an unassigned footprint is normal for this part, not a sign that anything is wrong.</p>
+<h2 id="sec:c07-power-budget">Planning the Power Before You Draw</h2>
+<p>The display on this board draws significant current, especially when most or all of its LEDs are on. Therefore, we will need to carefully estimate the maximum current draw to expect.</p>
+<p>Each MAX7219 sets its LED current ceiling with a single resistor, <code>RSET</code>. At the 10 kΩ this board uses, each segment output can source about 40 mA. The datasheet characterises the part at 9.53 kΩ for exactly 40 mA, and 10 kΩ lands a little under that, which is the direction to err in.</p>
+<p>The word ‘Segment’ in that sentence is borrowed, and so is ‘digit’. Both come from alphanumeric and numerical displays. The MAX7219 was primarily designed to drive seven-segment numerals. For that reason it has eight digit outputs, <code>DIG0</code> to <code>DIG7</code>, one for each numeral position, and eight segment outputs, <code>SEG A</code> to <code>SEG G</code> plus <code>SEG DP</code>, one for each bar of the figure plus the decimal point. Eight digits of eight segments each come to 64 LEDs.</p>
+<p>An 8-by-8 matrix is also 64 LEDs, and that is why we can use the MAX7219 to drive it. The pin names stayed, but the geometry changed. On this board the eight <code>SEG</code> outputs source current into the matrix’s eight columns, which are its anodes, and the eight <code>DIG</code> outputs sink that current out of its eight rows, which are its cathodes. A digit is therefore one row of the matrix, and a segment is one column of it (Figure 7.5).</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07_digits-and-segments_v10.png" style="width:85.0%" /></p>
+<p>Figure 7.5: The same sixteen outputs, seen twice. On the left is the arrangement the names were invented for: eight segments make one numeral, and eight numeral positions sit side by side. On the right is what those outputs drive here. The eight <code>SEG</code> outputs feed the columns and source current into them, the eight <code>DIG</code> outputs take it back out of the rows, and <code>DIG2</code> is drawn as the row the driver has switched on. Every LED along that row can be lit at once, which is where the 320 mA comes from, while any one column carries only its own 40 mA. Below, the driver works through the eight rows in turn, each one lit an eighth of the time.</p>
+<p>The multiplexing is the next part of this arrangement to understand. The driver turns on one digit at a time, meaning one row at a time, and cycles through all eight fast enough that your eye sees a steady picture rather than a flicker. Each LED is lit one-eighth of the time, and so it is tempting to divide by eight and budget for the average. But the tracks do not carry the average current. At any instant exactly one row is active and all eight LEDs along it can be on, which puts 8 × 40 mA, about 320 mA, through that one driver. This current is drawn in hard bursts rather than smoothly. The four drivers plus the Arduino Nano (at roughly 20 mA) come to about <strong>1.3 A at worst case</strong>. That is the number the power supply and the tracks have to be sized for.</p>
+<p>The LEDs themselves are comfortable at that ceiling. At one-eighth duty, 40 mA averages 5 mA per LED, against the TA08’s 25 mA continuous rating, and the 40 mA peak sits well inside its 140 mA pulsed rating. The datasheet quotes 140 mA at one-tenth duty, and this board runs one-eighth duty, which means that the LEDs have to work slightly harder. The gap between 40 mA and 140 mA is wide enough to absorb the difference. Remember also that the MAX7219 carries an intensity register, so software dims the display below whatever <code>RSET</code> allows. <code>RSET</code> sets a ceiling rather than a working value, and copper sized for the ceiling will not be the cause of a fault.</p>
+<p>That number drives three of this board’s design decisions.</p>
+<p><strong>The supply.</strong> 1.3 A will not come through the Nano’s onboard regulator, or the Nano’s own USB lead. This board brings its power in over a USB-C receptacle, <code>J1</code>, and the Nano’s socket is used as a programming lead only. Both cables can be plugged in at the same time.</p>
+<p>Component <code>J1</code> is the same GCT power-only receptacle you met in Volume 1’s breadboard supply. It has two <code>VBUS</code> contacts, two <code>GND</code> contacts, <code>CC1</code> and <code>CC2</code>, and no data pins at all. Remember that a USB-C source waits to be asked before it switches its 5 volts on, and that is done by tying each <code>CC</code> pin to ground through a 5.1 kΩ resistor. Those are <code>R7</code> and <code>R8</code> here.</p>
+<p>What is new on this board is how much it then draws. Those two resistors claim default USB power, which is 500 mA, and this board draws 1.3 A. That works in practice, because a Type-C source, such as a laptop port or a USB-C power supply, enforces its own limit, and a supply advertising 1.5 A or 3 A will deliver what is drawn from it. However, the board is not measuring the voltage on <code>CC</code> and cannot tell you what it is plugged into. Checking the supply is therefore your responsibility, not something the circuit does for you.</p>
+<p>Feed <code>J1</code> from a regulated 5 V supply rated at 1.5 A or more. Nothing downstream will regulate or filter what you plug in, because <code>VBUS</code> becomes the board’s <code>+5V</code> rail and <code>+5V</code> goes straight to the Nano’s <code>5V</code> pin, bypassing the onboard regulator entirely. The alternative is to feed the Nano’s <code>VIN</code> pin instead and let the onboard regulator do the work. The problem with this is that the regulator will not survive 1.3 A, so don’t do it!</p>
+<p><strong>The switch.</strong> 1.3 A is also far more current than a slide switch of this size is built to carry. The C&amp;K JS202011AQN is rated for 0.3 A at 6 V, so this board asks more than four times what its contacts are specified for. On this board the switch does not carry it. For this, we use <code>Q1</code>, an AO3401A P-channel MOSFET rated 4 A, that sits between <code>VBUS</code> and <code>+5V</code> as a ‘high-side load switch’. Because of <code>Q1</code>, <code>SW1</code> does nothing but drive its gate. There is also <code>R9</code>, at 100 kΩ, which ties that gate to <code>VBUS</code>. In the off position the switch leaves the gate on an unconnected pin, so <code>R9</code> holds it at <code>VBUS</code>, there is no voltage between gate and source, the MOSFET is off, and the rail is dead. When you slide it to the <code>ON</code> position, the gate reaches ground through <code>R10</code>, 10 kΩ, so the two resistors divide <code>VBUS</code> between them, which puts the gate about 4.5 V below the source and turns the MOSFET hard on. <code>SW1</code> carries the 45 µA that flows through the divider, and the copper carries the 1.3 A. That is three extra parts, and in exchange the slide switch never carries the load current.</p>
+<p><strong>The copper.</strong> <code>+5V</code> and <code>GND</code> get a <code>Power</code> net class of their own, just as the motor driver’s supply did in Chapter 3. We’ll set this net class up in Schematic Setup now. Work the width out yourself in the Track Width tab of the Calculator Tools application, the way Chapter 3 showed you, rather than taking my word for it. Enter 1.3 A, a 10 °C temperature rise and 1 oz copper, and read the external-layer answer (Figure 7.6). It comes out at about 0.44 mm. The class specifies 1.00 mm, which carries about 2.39 A, because there is no reason to route a power rail at the minimum the arithmetic allows when the board has room for better.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-track-width-calculator.png" style="width:85.0%" /></p>
+<p>Figure 7.6: The Calculator Tools application on its “Track Width” page, worked for this board’s power rail. The two numbers you supply are the current and the temperature rise you will tolerate (❶), the copper weight goes in as a track thickness of 1 oz/ft² (❷), and the answer to read is the one under “External Layer Tracks” (❸), because both power rails on this board are routed on the outside. It comes back with 0.438888 mm, and the resistance, voltage drop and power loss below it are worked for the 20 mm conductor length in the parameters panel. The internal-layer figure beside it, 1.12 mm, is what the same current would need buried between layers, where the copper has nowhere to shed its heat.</p>
+<p>There is a third class this board could reasonably have. I will explain it, and leave it up to you if you want to introduce it. Each driver connects to its matrix through sixteen nets. Of those nets, eight carry columns and eight carry rows. They look like logic, but one group of them is not. A column net carries a single LED’s 40 mA, but a row net carries the entire active digit, which can draw the full 320 mA. A designer who gave those thirty-two row nets a class of their own would be well justified in doing so. I decided to keep them on <code>Default</code> at 0.25 mm because at 1 oz copper 0.25 mm carries about 0.87 A, so the 320 mA peak clears by nearly three times, and over a 20 mm run the track is about 39 mΩ, which drops around 13 mV. There is wide margin, and the drop is very small.</p>
+<h2 id="sec:c07-process">The Process, With One Addition</h2>
+<p>You already know the process. We will use the eight-step schematic workflow from Volume 1, which does not change because the board got bigger:</p>
+<ol type="1">
+<li><strong>Create the project and schematic.</strong> Create a home directory for the design and open the editor.</li>
+<li><strong>Place symbols.</strong> Drop a symbol for each part in the circuit.</li>
+<li><strong>Annotate.</strong> Give every part a unique reference designator.</li>
+<li><strong>Set component values.</strong> Tell each part what it actually is.</li>
+<li><strong>Wire and label.</strong> Connect the pins, and name the connections that matter.</li>
+<li><strong>Assign footprints.</strong> Tell each symbol which physical part it will become.</li>
+<li><strong>Electrical rules check.</strong> Ask KiCad to find your mistakes while they are still free to fix.</li>
+<li><strong>Hand off to layout.</strong> Save, and pass the design to the PCB Editor.</li>
+</ol>
+<p>The one addition sits between steps 5 and 6, which is the main focus for this chapter. Once the first cell is placed, annotated, valued and wired, you capture it as a <strong>design block</strong>, that is a named, saved copy of a working piece of circuit, stored in a library. You can then drop this design block back onto the sheet as a unit. Then you stamp it (copy it) three more times.</p>
+<p>The stamped copies arrive with question marks where their reference designators should be, because KiCad has no way to know which <code>U</code> they ought to be until they are on the sheet. That means step 3 runs a second time, after the stamping.</p>
+<p>Here is how the build is laid out, and which of the eight steps each part covers:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Section</th>
+<th>Steps</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Schematic: Setup</td>
+<td>1</td>
+<td>The project, the sheet, and the net classes, before anything is placed</td>
+</tr>
+<tr>
+<td>Building the First Cell</td>
+<td>2–5</td>
+<td>One complete, wired cell</td>
+</tr>
+<tr>
+<td>Capturing the Cell as a Design Block</td>
+<td>n/a</td>
+<td>The cell becomes a reusable part of the library</td>
+</tr>
+<tr>
+<td>MCU, Power, and Controls</td>
+<td>2–5</td>
+<td>The parts that exist only once, then the first working channel</td>
+</tr>
+<tr>
+<td>Stamping Out the Other Three</td>
+<td>n/a</td>
+<td>Three copies, and the cascade that links them</td>
+</tr>
+<tr>
+<td>Annotate, Associate, and ERC</td>
+<td>3, 6, 7, 8</td>
+<td>Re-annotation, footprints, and the check that ends the schematic</td>
+</tr>
+</tbody>
+</table>
+<p>Here is the sheet you are working toward (Figure 7.7). Keep it beside you as your guide.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-completed-schematic.png" style="width:100.0%" /></p>
+<p>Figure 7.7: The finished sheet. The four cells occupy the right two-thirds in a two-by-two arrangement, <code>U1</code> at the top left through <code>U4</code> at the bottom right, chained by <code>LINK1</code>, <code>LINK2</code> and <code>LINK3</code>. Everything that exists only once is gathered on the left: the Arduino Nano with a no-connect cross on every pin it does not use, the USB-C receptacle <code>J1</code> with <code>R7</code> and <code>R8</code> pulling its two <code>CC</code> pins down, the load switch <code>Q1</code> with <code>R9</code> and <code>R10</code> steering its gate from <code>SW1</code>, and the two buttons with their pull-ups at the bottom. The two <code>PWR_FLAG</code> symbols in the middle are what tell the checker that <code>GND</code> and <code>VBUS</code> really are driven. Every violet wire is a power rail, and they are violet because of a decision you will make before you place a single symbol.</p>
+<h2 id="sec:c07-setup">Schematic: Setup</h2>
+<p><strong>Step 1, create the project.</strong> Create a new project, give it a name without spaces, and open the Schematic Editor onto its blank sheet. Set the page to A3 in Page Settings and fill in the title block, because this board will not fit comfortably on A4. Add the project’s <code>klp5e-ch07</code> symbol and footprint libraries to this project’s library tables while the sheet is still empty, so that the matrix is waiting in the chooser when you reach for it.</p>
+<p>Next, set up the net classes before there is anything on the sheet to apply them to. Open Schematic Setup, go to the Net Classes page, and build two classes (Figure 7.8).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-netclasses.png" style="width:85.0%" /></p>
+<p>Figure 7.8: The Net Classes page with both classes defined. The upper table carries the classes themselves, and the <code>Power</code> row has its graphic columns filled in rather than left blank: a wire thickness of 0.254 mm, a deep violet colour swatch, and a line style set explicitly to Solid. The lower panel is where nets are attached to a class by pattern, and the panel on the right previews what the selected pattern currently matches, which here is the single net <code>+5V</code>.</p>
+<p>The <code>Power</code> nets carry the wide copper with a 1.00 mm track width, 0.30 mm clearance, and 0.80 mm vias with 0.40 mm drills. <code>Default</code> keeps the 0.25 mm track width you routed logic at in Chapters 3 and 4. Assign <code>+5V</code>, <code>GND</code> and <code>VBUS</code> to <code>Power</code> using the assignment patterns <code>*+5V</code>, <code>*GND</code> and <code>*VBUS</code>. <code>VBUS</code> inherits the same copper as <code>+5V</code> because it is the same current: it is the length of rail between the receptacle and the load switch, upstream of everything the switch controls. All three come from power symbols, so they arrive at the matcher as plain names without a sheet path in front of them, and the leading wildcard costs nothing while making the pattern robust if you later push the circuit down into a sub-sheet.</p>
+<p>To make the power nets easy to see in the schematic, fill in the graphic columns on the <code>Power</code> row as well. I made mine a deep violet at 10 mil (0.254 mm, which is what the dialogue displays), with the line style left explicitly on Solid.</p>
+<p>If what you see on your screen disagrees with mine in the book, check Preferences → Schematic Editor → Display Options. Here you’ll find a setting called <strong>Highlight netclass colours</strong>. With it switched on, the wire keeps the theme’s ordinary green and the net class colour is drawn as a halo around it instead of replacing it. It is switched off in the figures in this chapter, which is why the wires themselves are violet. If yours come out green with a violet glow, that setting is the reason, and either behaviour is fine as long as you know which one you are looking at.</p>
+<p>Finally, it is worth remembering that a net class track width is the width KiCad routes at by default, not a limit it enforces. Nothing stops you from putting a 0.2 mm track on the <code>+5V</code> net. The project closes that gap with a custom design rule, in the form the capstone uses:</p>
+<pre><code>(rule &quot;Power minimum width&quot;
+    (constraint track_width (min 0.8mm) (opt 1.0mm) (max 2.0mm))
+    (condition &quot;A.hasNetclass(&#39;Power&#39;)&quot;)
+)</code></pre>
+<p>That rule does not live in Schematic Setup with the net classes. It is typed into the board’s own Board Setup, on the “Custom Rules” page, and it will wait there until you reach the layout half of the chapter (Figure 7.9). With it in the project, a power track that is too thin will trigger a design rules violation rather than passing quietly.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-custom-drc-rule.png" style="width:85.0%" /></p>
+<p>Figure 7.9: The same rule entered on the “Custom Rules” page of Board Setup, under “Design Rules” in the left-hand tree. The editor checks the syntax as you type and reports “No errors found.” below the text, which is worth watching for, because a rule that will not parse is silently not applied. Note what the condition says: it selects by net class rather than by net name, so the rule keeps working when you add another power net later, as long as you assign it to <code>Power</code>.</p>
+<h2 id="sec:c07-first-cell">Building the First Cell</h2>
+<p>Now, we will draw the first design block which makes up one cell.</p>
+<p><strong>Step 2, place the symbols.</strong> Five symbols make a cell: the <code>MAX7219</code> driver, the <code>LED_Matrix_TA08-81GWA</code> from the book’s library, a resistor for <code>RSET</code>, and two capacitors for decoupling. Place the driver first and then the rest off it, with the matrix to its right so that the driver’s outputs face the matrix’s inputs, the resistor above and to the left, and the two capacitors to the left with room for their power symbols above and below (Figure 7.10).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-cell-design-block.png" style="width:85.0%" /></p>
+<p>Figure 7.10: The five symbols of the first cell, placed and nothing else. No wires, no values, and every designator still a question mark: <code>U?</code>, <code>DS?</code>, <code>R?</code> and two <code>C?</code>. The arrangement is doing real work even at this stage. The driver’s sixteen outputs on its right face the matrix’s sixteen inputs on its left, in the same order, which is what turns the wiring step into sixteen straight lines instead of a knot.</p>
+<p><strong>Step 3, annotate.</strong> Give the five parts their reference designators, either by letting auto-annotation hand them out as you place, or with the Annotate Schematic tool afterwards (Figure 7.11). You should end up with <code>U1</code>, <code>DS1</code>, <code>R1</code>, <code>C1</code> and <code>C2</code>, and no question marks left anywhere.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-cell-design-block-annotated.png" style="width:85.0%" /></p>
+<p>Figure 7.11: The same five symbols after annotation. <code>U?</code> has become <code>U1</code>, <code>DS?</code> has become <code>DS1</code>, and the passives are now <code>R1</code>, <code>C1</code> and <code>C2</code>. Their values are still the generic <code>R</code> and <code>C</code> that the symbols shipped with, because annotating a part says which one it is, not what it is. That is the next step.</p>
+<p><strong>Step 4, set the values.</strong> Three values to set, and each one is a decision rather than a formality (Figure 7.12):</p>
+<ul>
+<li><strong><code>R1</code>: <code>10k</code>.</strong> This is <code>RSET</code>, and it is the resistor that fixes the 40 mA per-segment ceiling the whole power budget was built on. The datasheet characterises the part at 9.53 kΩ; 10 kΩ is the nearest value everyone stocks and lands a little under 40 mA, which is the safe direction to miss in.</li>
+<li><strong><code>C1</code>: <code>100n</code>.</strong> The small ceramic that shorts the fast switching noise to ground close to the chip. A multiplexed driver supplies 320 mA from one digit to the next several thousand times a second, so this is not an optional garnish.</li>
+<li><strong><code>C2</code>: <code>10u</code>.</strong> The bulk reservoir that supplies those bursts locally, so that they are not drawn down the length of the board every time a digit changes.</li>
+</ul>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-cell-design-block-valued.png" style="width:85.0%" /></p>
+<p>Figure 7.12: The cell with its three values set. <code>R1</code> now reads <code>10k</code>, <code>C1</code> reads <code>100n</code> and <code>C2</code> reads <code>10u</code>, in place of the generic <code>R</code> and <code>C</code> of the previous figure. Everything else on the canvas is exactly where it was.</p>
+<p><strong>Step 5, wire and label.</strong> The driver connects to the matrix through sixteen nets, and the choice of matrix symbol makes this step easy. The matrix symbol’s pins are ordered to match the driver’s right-hand side, so the sixteen connections are sixteen straight horizontal wires, drawn one under the next, with nothing crossing anything (Figure 7.13). If you find yourself drawing a diagonal or routing a wire around the outside of a symbol, stop and check which pin you are on, because at this point in the board a mistake is easy to fix, but if you only notice it later, the effort will be much greater.</p>
+<p>Then, wire the power and the control lines:</p>
+<ul>
+<li><code>V+</code> on pin 19 goes to <code>+5V</code>, and <strong>both</strong> ground pins, 4 and 9, go to <code>GND</code>. The MAX7219 has two ground pins and they are not alternatives; leaving one unconnected gives you a chip that half works in ways that are unpleasant to diagnose.</li>
+<li><code>ISET</code> on pin 18 goes through <code>R1</code> to <code>+5V</code>.</li>
+<li>Each capacitor sits between <code>+5V</code> and <code>GND</code> with its own pair of power symbols, right beside the driver it serves.</li>
+<li><code>CLK</code> and <code>LOAD</code> get labels of those names, because they are shared by all four drivers.</li>
+<li><code>DIN</code> and <code>DOUT</code> get no labels at all. Leave them as bare pins. This matters enormously and I will explain why in the next section, but the short version is that a label here would eventually short all four drivers together because these nets are used for the communication between the cells.</li>
+</ul>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-cell-design-block-wired.png" style="width:85.0%" /></p>
+<p>Figure 7.13: The first cell, fully wired. The sixteen driver-to-matrix connections run as sixteen straight horizontal lines with nothing crossing anything. <code>CLK</code> and <code>LOAD</code> arrive on the left as labels, because those two signals are shared. <code>DIN</code> and <code>DOUT</code> at the bottom of the driver are still bare pins, drawn with the small open circle that means nothing is attached, and that is deliberate. The power wiring is the part to look at, though: every <code>+5V</code> and <code>GND</code> connection is violet and noticeably heavier than the green logic around it, without you having touched a single wire’s properties.</p>
+<p>This is the figure where the setup section shows its result. Back at step 1 you filled in a colour and a width for a class of nets that did not exist yet. Here, the first violet rail appears on the editor when you draw it, and from now on you will know whether a net belongs to the power class just by looking at the colour of its line.</p>
+<h2 id="sec:c07-design-block">Capturing the Cell as a Design Block</h2>
+<p>A design block has to live in a library, exactly as a symbol or a footprint does, so make one before you save anything. Open the Design Blocks panel, right-click anywhere in its library tree, and choose “New Library…” (Figure 7.14). I called mine <code>klp5e-ch07-blocks</code> and kept it with the project, because this block is specific to this board. A block you expect to reuse across projects would go into a library of its own, in the same way that Chapter 2’s footprint went into a global one.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-cell-design-block-new-library.png" style="width:65.0%" /></p>
+<p>Figure 7.14: Creating the library from the Design Blocks panel’s context menu. “New Library…” is the entry to choose. The two libraries already listed behind the menu are ones I had from earlier work, and a fresh installation will show fewer, or none at all.</p>
+<p>With the library in place, select the whole cell, all five symbols with their wires, labels and power symbols, and save it as a design block. Give it a name that describes it, <code>MAX7219-Cell</code>, and a description. Once it is saved it will appear in the Design Blocks panel alongside the symbol and footprint libraries you are used to (Figure 7.15 and Figure 7.16).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-cell-design-block-save-selection-as-block.png" style="width:85.0%" /></p>
+<p>Figure 7.15: Saving the selection. The whole cell is selected on the canvas (❶), the destination library <code>klp5e-ch07-blocks</code> is highlighted in the panel (❷), and the context menu offers two ways to make a block (❸). “Save Selection as Design Block…” is the one to use here, because you want the five symbols you selected rather than the entire sheet. Note what is inside the selection box: the wires, the labels and the power symbols are all in it, not just the parts.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-cell-design-block-available.png" style="width:85.0%" /></p>
+<p>Figure 7.16: The saved block, ready to use. <code>MAX7219-Cell</code> now sits inside <code>klp5e-ch07-blocks</code> in the panel (❶), the description you gave it is shown below the list (❷), and the preview at the bottom shows the cell exactly as it was captured (❸). The description helps you capture the reason for capturing this block, and any other details that will be useful months or years later. Below the preview, leave “Place as group” ticked and “Keep annotations” clear, so that each copy arrives as one movable unit carrying question marks rather than duplicate designators.</p>
+<p>We will use the design block soon.</p>
+<p>An important characteristic of design blocks to remember is that <strong>a design block reproduces the labels it captured.</strong> Any net label inside the block is copied verbatim into every stamped instance, which means every instance ends up on the same net. For <code>CLK</code> and <code>LOAD</code> that is what you want, because all four drivers do share those two signals, and the block having them saves you drawing them four times. For <code>DIN</code> and <code>DOUT</code>, not so. Four copies of a block containing a label called <code>DIN</code> gives you four drivers with their data inputs wired together, and four copies of a <code>DOUT</code> label ties every output to every input. The chain would collapse into a single net, all four chips would be driven in parallel, and the schematic would look correct while describing a circuit that does not work. That is why <code>DIN</code> and <code>DOUT</code> were left as bare pins in the last section, and why the links between cells get their own unique names after the stamping rather than before it.</p>
+<h2 id="sec:c07-mcu">MCU, Power, and Controls</h2>
+<p>Before making copies, finish the parts of the board that exist only once, so that you can prove one channel works before you multiply it.</p>
+<p><strong>Steps 2 to 4 again, for the single parts.</strong> Place and annotate the Arduino Nano, the USB-C receptacle, the AO3401A, the SPDT slide switch, the two push buttons and the six resistors that go with them, then set their values (Figure 7.17): <code>5.1k</code> for <code>R7</code> and <code>R8</code>, <code>100k</code> for <code>R9</code>, <code>10k</code> for <code>R10</code>, and <code>10k</code> for the buttons’ pull-ups <code>R5</code> and <code>R6</code>.</p>
+<p>Wire the power input as described in the power section, in three steps:</p>
+<ol type="1">
+<li><strong>The receptacle.</strong> <code>J1</code>’s two <code>VBUS</code> contacts tie together and become the <code>VBUS</code> net. Its two <code>GND</code> contacts and its shield stake go to <code>GND</code>. <code>CC1</code> and <code>CC2</code> each reach <code>GND</code> through their own 5.1 kΩ resistor, <code>R7</code> and <code>R8</code>.</li>
+<li><strong>The load switch.</strong> <code>VBUS</code> goes to <code>Q1</code>’s source. <code>Q1</code>’s drain becomes the <code>+5V</code> rail that feeds everything else on the board. <code>R9</code> bridges gate to source, and <code>R10</code> runs from the gate to <code>SW1</code>’s common pin, which is pin 2 on both the symbol and the real part.</li>
+<li><strong>The switch.</strong> One of <code>SW1</code>’s two throw pins, pin 1, goes to <code>GND</code>. The other throw, pin 3, is left unconnected, deliberately, and you will tell KiCad so with a no-connect flag at the ERC step rather than wiring it to something to keep the checker quiet. Slide the switch one way and the common meets <code>GND</code>, which pulls the gate down through <code>R10</code> and turns the rail on. Slide it the other way and the common meets nothing, so <code>R9</code> holds the gate at <code>VBUS</code> and the rail is off.</li>
+</ol>
+<p>One thing about <code>SW1</code> is worth settling now to prevent confusion later. The symbol is a three-pin <code>SW_SPDT</code>, but the footprint you will assign in step 6 is the six-pad <code>SW_CK_JS202011AQN_DPDT_Angled</code>, because the C&amp;K part that fits this board is a two-pole switch. This board needs one pole, so the second pole’s three pads sit on the board with nothing on them. That is a deliberate choice rather than an oversight. The spare pads cost nothing, they raise no violation, and the part is the one you can actually buy. Order the DPDT part, not an SPDT one, or it will not fit the land pattern.</p>
+<p>Each button ties its Nano pin to ground when pressed, with a 10 kΩ pull-up holding that pin high the rest of the time.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-added-power-mcu.png" style="width:85.0%" /></p>
+<p>Figure 7.17: The parts that exist only once, placed and wired, with cell 1 visible at the top right for scale. The power input runs along the bottom: <code>J1</code> with <code>R7</code> and <code>R8</code> taking its two <code>CC</code> pins to ground, then <code>R9</code>, <code>R10</code> and <code>SW1</code> around <code>Q1</code>. Trace the load switch and you can see the point of it. <code>VBUS</code> arrives at <code>Q1</code>’s source and leaves its drain as <code>+5V</code>, both violet, while the only thing <code>SW1</code> touches is the gate side of <code>R10</code> in ordinary green. The 1.3 A never goes near the slide switch.</p>
+<p><strong>Step 5, wire the first channel.</strong> Connect the Nano to cell 1 (Figure 7.18). <code>CLK</code> on D13 and <code>LOAD</code> on D10 attach to the labels you already placed in the cell. <code>DIN</code> on D11 goes to <code>U1</code>’s <code>DIN</code> pin, and this is the first link of a chain you will extend later, so give it its own name, <code>DIN1</code>, rather than a generic one. The buttons get names too: <code>MODE</code> on D2 and <code>SELECT</code> on D3.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-one-channel-complete-wiring.png" style="width:85.0%" /></p>
+<p>Figure 7.18: One complete channel. <code>D11</code> on the Nano carries the label <code>DIN1</code>, and the same label sits on <code>U1</code>’s <code>DIN</code> pin at the top right, so the two are one net without a wire running between them. <code>LOAD</code> on <code>D10</code> and <code>CLK</code> on <code>D13</code> reach the cell the same way. This is a whole signal path, from a microcontroller pin to a driver pin, and it works before anything has been copied.</p>
+<p>Compare this figure with the previous one, and you will see that several parts have moved. The buttons and the load switch group are not where they were. Do not be surprised when that happens in your own sheet, and do not try to match my arrangement figure for figure. A schematic gets rearranged constantly as it fills up. What a symbol connects to is what matters, and where it sits is a matter of legibility, which is a judgement you keep revising.</p>
+<p>You now have one cell that is completely wired, from a microcontroller pin to a matrix pin, before you have made a single copy of anything.</p>
+<h2 id="sec:c07-stamping">Stamping Out the Other Three</h2>
+<p>Place the <code>MAX7219-Cell</code> block from the Design Blocks panel three more times (Figure 7.19), arranging the four cells in a 2×2 grid with the cell you already wired in the top left. Space them evenly, and leave a clear margin between them. Each cell carries power symbols above and below its capacitors, and if two cells overlap by even a small amount you can land one cell’s <code>GND</code> symbol on the next cell’s <code>+5V</code> symbol and short the supply to ground across the whole board.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-four-channel-complete-wiring.png" style="width:100.0%" /></p>
+<p>Figure 7.19: Four cells on the sheet, three of them placed in about as many seconds. Only the top-left cell reads <code>U1</code>, <code>DS1</code>, <code>R1</code>, <code>C1</code> and <code>C2</code>. The other three carry <code>U?</code>, <code>DS?</code>, <code>R?</code> and <code>C?</code>, because a stamped copy has no way of knowing which one it is until the whole sheet is annotated. Look at what did come across intact: every wire, every power symbol, and the <code>CLK</code> and <code>LOAD</code> labels. That is the whole of the previous section’s drawing, reproduced three times over, which is work you didn’t have to repeat.</p>
+<p><strong>Extend the cascade.</strong> With the copies placed, link them into a chain that runs top left to top right, top right to bottom left, and bottom left to bottom right. Every hop goes from one cell’s <code>DOUT</code> to the next cell’s <code>DIN</code>, and each gets its own label, <code>LINK1</code>, <code>LINK2</code> and <code>LINK3</code> (Figure 7.20). We now have three uniquely named nets, one per gap, which make this a chain rather than a bus. The copies still read <code>U?</code> at this point, which is why the chain is described by position; the annotation pass in the next section turns those four positions into <code>U1</code> through <code>U4</code> in that same order. Use labels rather than wires for these links, which keeps the schematic tidy.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-four-channel-cascade.png" style="width:100.0%" /></p>
+<p>Figure 7.20: The cascade, drawn as three pairs of labels rather than three long wires across the sheet. <code>LINK1</code> leaves the first cell’s <code>DOUT</code> (❶) and arrives at the second cell’s <code>DIN</code> (❷). <code>LINK2</code> does the same between the second and third (❸ and ❹), and <code>LINK3</code> between the third and fourth (❺ and ❻). Each name is used exactly twice, once at each end of one hop, which is what makes this a chain of four drivers rather than one net with four chips hanging off it. The last cell’s <code>DOUT</code> is left bare, because nothing follows it.</p>
+<p>One thing not to do yet is run the ERC. Until the copies’ <code>U?</code>, <code>DS?</code>, <code>R?</code> and <code>C?</code> designators are made unique, KiCad cannot tell three components from one component mentioned three times, and it will tell you so, with a banner warning that the results are incomplete and dozens of errors reporting correctly drawn wires as not connected to anything.</p>
+<h2 id="sec:c07-erc">Annotate, Associate, and ERC</h2>
+<p><strong>Step 3, again.</strong> Run the Annotate Schematic tool over the whole sheet, ordering the designators by position so that the cell in the top left is <code>U1</code> and the numbering follows the layout rather than the order in which you happened to stamp things (Figure 7.21). The three copies pick up <code>U2</code>, <code>U3</code> and <code>U4</code>, their matrices become <code>DS2</code> to <code>DS4</code>, and the capacitors run from <code>C1</code> through <code>C8</code>.</p>
+<p>Now run the ERC. This is the first check on the complete sheet, and it comes back with a long list of violations. Most of them are the Nano’s unused pins, and the rest are the <code>+5V</code> and <code>GND</code> rails, which carry no <code>PWR_FLAG</code> yet. Every one of them describes something you have not done rather than something you did wrong, which is how to read a violation list. It reports the state of the work as much as it reports genuine errors.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-four-channel-annotated.png" style="width:100.0%" /></p>
+<p>Figure 7.21: The sheet after re-annotation, with no question mark left anywhere. The four drivers are <code>U1</code> to <code>U4</code>, their matrices <code>DS1</code> to <code>DS4</code>, the current-setting resistors <code>R1</code> to <code>R4</code>, and the decoupling pairs <code>C1</code> through <code>C8</code>. Because the annotation was ordered by position, <code>U1</code> is the top-left cell and the numbering follows the reading order of the sheet, which is also the order in which <code>LINK1</code>, <code>LINK2</code> and <code>LINK3</code> pass the data along.</p>
+<p><strong>Step 6, assign footprints.</strong> Open the Footprint Assignment tool and pair each symbol with its physical part (Figure 7.22). The matrices take the footprint from the book’s library; everything else is standard:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Footprint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DS1</code>–<code>DS4</code></td>
+<td><code>klp5e-ch07:LED_Matrix_TA08-81_20mm_8x8</code></td>
+</tr>
+<tr>
+<td><code>U1</code>–<code>U4</code></td>
+<td><code>Package_SO:SOIC-24W_7.5x15.4mm_P1.27mm</code></td>
+</tr>
+<tr>
+<td><code>R1</code>–<code>R10</code></td>
+<td><code>Resistor_SMD:R_0603_1608Metric</code></td>
+</tr>
+<tr>
+<td><code>C1</code>, <code>C3</code>, <code>C5</code>, <code>C7</code> (100n)</td>
+<td><code>Capacitor_SMD:C_0603_1608Metric</code></td>
+</tr>
+<tr>
+<td><code>C2</code>, <code>C4</code>, <code>C6</code>, <code>C8</code> (10u)</td>
+<td><code>Capacitor_SMD:C_0805_2012Metric</code></td>
+</tr>
+<tr>
+<td><code>A1</code></td>
+<td><code>Module:Arduino_Nano</code></td>
+</tr>
+<tr>
+<td><code>J1</code></td>
+<td><code>Connector_USB:USB_C_Receptacle_GCT_USB4125-xx-x-0190_6P_TopMnt_Horizontal</code></td>
+</tr>
+<tr>
+<td><code>Q1</code></td>
+<td><code>Package_TO_SOT_SMD:SOT-23</code></td>
+</tr>
+<tr>
+<td><code>SW1</code></td>
+<td><code>Button_Switch_THT:SW_CK_JS202011AQN_DPDT_Angled</code></td>
+</tr>
+<tr>
+<td><code>SW2</code>, <code>SW3</code></td>
+<td><code>Button_Switch_THT:SW_PUSH_6mm</code></td>
+</tr>
+</tbody>
+</table>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-four-channel-footprints.png" style="width:100.0%" /></p>
+<p>Figure 7.22: The Footprint Assignment tool with every symbol on the sheet paired. The middle column is the table above, made real. The four highlighted <code>U1</code> to <code>U4</code> rows are the ones that cost you the most effort, because the MAX7219 arrives with no footprint assigned, so <code>SOIC-24W_7.5x15.4mm_P1.27mm</code> has to be applied four times by hand. Look at the three “Footprint Filters” buttons in the toolbar and at the status line below, which reports what the right-hand panel is currently showing: here it lists 15916 footprints, the whole library. Switch the filters on and the symbol’s own <code>SOIC*7.5x15.4mm*P1.27mm*</code> filter cuts that list down to the package you actually want.</p>
+<p><strong>Steps 7 and 8, check and hand off.</strong> Take the remaining violations down to zero (Figure 7.23). Here is how to address the various ERC issues:</p>
+<ul>
+<li>Most of what is left is the Arduino Nano’s unused pins. Put a no-connect flag on each one you genuinely are not using. A no-connect flag is a statement that you considered the pin and chose to leave it alone, which is different from having forgotten it.</li>
+<li>Add a <code>PWR_FLAG</code> to <code>GND</code>. The board’s ground arrives through a USB-C receptacle, and a connector pin is not something KiCad recognises as a power source, so it warns that the net is not driven. The flag tells it that power really does enter here. <code>VBUS</code> needs the same treatment for the same reason.</li>
+</ul>
+<p>It is always worth adding useful annotations, just like you would add comments to a program. Add text notes to the sheet recording what the board expects of its supply, and why. Mine carry four lines: that <code>J1</code> must be fed from a regulated 5 V supply rated 1.5 A or more, that four MAX7219s at <code>RSET</code> = 10k draw about 1.3 A worst case, that the Nano’s <code>5V</code> pin bypasses its onboard regulator, and that <code>A1</code>’s USB socket is for programming, with both cables free to be connected at once. The person who builds this board in the future might be you, and the schematic is where they will look first for any documentation.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-schematic-complete-zero-erc.png" style="width:85.0%" /></p>
+<p>Figure 7.23: The Electrical Rules Checker. “Violations (0)”, and zero against both Errors and Warnings. Behind the dialogue you can see what took it there: a blue cross on each of the Nano’s unused pins, and the <code>PWR_FLAG</code> symbols on the rails. Note the “Ignored Tests (4)” tab beside the violations. It is worth opening once to see which checks are switched off in this project, because a test you have disabled reports nothing whether the board is right or wrong.</p>
+<p>Now that the sheet is full, go back to Schematic Setup for one last exercise. On the Net Classes page, add a new assignment pattern and type <code>*ROW*</code> into it. The “Nets matching” panel fills with thirty-two entries, every row net on the board at once (Figure 7.24). You are not going to keep this pattern, so delete the row once you have looked at it; the value is entirely in the looking.</p>
+<p>What that list is really telling you is how much a part’s pin names are worth. The driver-to-matrix nets were not named by you. They took their names automatically from the matrix symbol’s pins, and because those pins are called <code>COL1</code> to <code>COL8</code> and <code>ROW1</code> to <code>ROW8</code>, thirty-two of them can now be described in one line of pattern. If the symbol’s pins had been called <code>1</code> to <code>16</code>, no pattern would be able to separate the rows from the columns, and giving those thirty-two nets a class of their own would mean selecting them by hand. This is why using a well-made part is important.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-ROW.png" style="width:85.0%" /></p>
+<p>Figure 7.24: One pattern, thirty-two matching nets. The <code>*ROW*</code> row has been added below the three power patterns and left on <code>Default</code>, since the objective is to look rather than to reclassify anything. The panel on the right lists what it matched, beginning <code>Net-(DS1-ROW1)</code> and running past the edge of the dialogue: eight rows on each of four matrices, all selected by five characters of pattern.</p>
+<p>One last thing before continuing with the layout is a reminder that <strong>a clean ERC is not proof that the schematic is correct.</strong> The ERC checks that pins are connected to something reasonable. It does not check that they are connected to the right thing. On a board with this many driver-to-matrix nets, the failures that are most likely to happen are a wire that ends a fraction of a millimetre off a pin, or a row swapped with a column. Neither produces an ERC violation. The way to check that is to export the netlist and read what it says: which nets exist, and what is on them. Export it with “File” then “Export” then “Netlist…”, and leave the format on the KiCad tab. What you get is a plain text file listing every net in the design and every pin on it. There is nothing proprietary about it, and you can open it in any editor.</p>
+<p>Reading ninety-odd nets by eye is slow, error-prone work, and it is exactly the kind of work a computer should be doing. So the project files include <code>tools/checknet.py</code>, a hundred-line Python script that reads the netlist and checks it against what this board is supposed to be. This script is not part of KiCad, and it doesn’t use the KiCad API. It simply opens a text file and reads it. I did not write it by hand. Instead, I described the checks I wanted the script to perform to Claude, an AI assistant from Anthropic, and it produced the script. I then checked and confirmed its work, which is the part that matters and the reason I am willing to include it in the book.</p>
+<p>I decided to create this script because of a real defect on this board. While wiring the cascade I ran a wire horizontally from one cell’s <code>DOUT</code> to the next cell’s <code>DIN</code>. Those two pins sit at the same height on opposite sides of the chip, so the wire passed straight through the next driver’s <code>DOUT</code> pin on its way across, and the four separate links became one net. All four drivers ended up wired in parallel, listening to the same signal. The sheet looked correct, the ERC reported nothing, and the board would have gone to the fabricator that way. The netlist is what found it.</p>
+<p>Run it from the project directory:</p>
+<pre><code>python3 tools/checknet.py net.net --cell 1     # repeat for cells 2, 3 and 4
+python3 tools/checknet.py net.net --cascade 4</code></pre>
+<p>The <code>--cell</code> form asserts that a cell’s sixteen SEG and DIG nets hold exactly two pins each, the driver’s and its own matrix’s, and that both of the driver’s ground pins are tied. The <code>--cascade</code> form follows the chain, checking that each <code>DOUT</code> reaches only the next chip’s <code>DIN</code>, that <code>CLK</code> and <code>LOAD</code> reach all four drivers, and that the four <code>DIN</code> nets are still four distinct nets rather than one. That last assertion is the one that would have caught the wire above. A passing run says so:</p>
+<pre><code>  OK   cell 1: 16 SEG/DIG nets exclusive to U1&lt;-&gt;DS1, both grounds tied
+  OK   cascade: DOUT-&gt;DIN chain over 4 cells, CLK/LOAD shared, DINs distinct</code></pre>
+<p>Run with no options at all, it prints every net and the pins on it, which is worth doing once for the picture it gives you.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-checknet-passing.png" style="width:100.0%" /></p>
+<p>Figure 7.25: The five checks passing on the finished project. The four <code>--cell</code> runs are the ones that prove each driver reaches its own matrix and nothing else, sixteen nets at a time; the <code>--cascade</code> run is the one that proves the chain is a chain, rather than four drivers wired in parallel and looking perfectly correct on the sheet. This is the output the schematic has to produce before the layout is worth starting.</p>
+<p>This script is written for this board alone. The MAX7219 and matrix pin numbers are typed into it, so it is not a tool you can point at your next design. What to take from this is that KiCad’s exports are plain text, so any check you can describe in words you can also write down and run. Volume 3 takes this up properly, in the part on extending KiCad with Python.</p>
+<h2 id="sec:c07-layout">Board and Layout</h2>
+<p>You are on the eight-step layout workflow from Volume 1’s Chapter 5. There are two things about this board that are different from the previous boards in this book. The first is that part of the board is repetitive, and as a result a large portion of the placement and routing can be done once and copied rather than drawn four times over. The second is that the board’s through-hole parts do not share a measurement system: the TA08-81GWA matrix (<code>DS1</code> to <code>DS4</code>) is metric on a 2.5 mm pitch, the Arduino Nano is imperial on 2.54 mm, and the switch and buttons are metric again on spacings of their own. This means that the grid you have used since Chapter 3 cannot reach the position the matrices have to land on. We will address both issues below.</p>
+<p>Here is the board you are working toward (Figure 7.26). Keep it beside you, as you did with the finished sheet.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-complete-intro.png" style="width:100.0%" /></p>
+<p>Figure 7.26: The finished layout for the LED matrix array, with the ground pour hidden so that the tracks can be read. The four matrices sit edge to edge across the top as one display band, <code>DS1</code> to <code>DS4</code>. Everything that exists once is in the row beneath: the Arduino Nano placed in landscape at the left with its programming socket labelled <code>DATA</code> at the board edge, the two buttons labelled <code>MODE</code> and <code>SELECT</code>, the slide switch between <code>ON</code> and <code>OFF</code> with <code>Q1</code>, <code>R9</code> and <code>R10</code> beside it, and <code>J1</code> at the right edge under <code>POWER</code> and <code>5V 1.5A MIN</code>. A mounting hole sits inside each filleted corner.</p>
+<p>The plan behind this layout is to place the four matrices at exactly 20.0 mm apart and lock them. We will lay out and route one cell on the back of the board, behind its own matrix. Then we will get KiCad to copy that cell onto the other three, positioning each copy against its own matrix so that the exact pitch survives the copy. What remains after that is the shared wiring, the copper pour, and the checks.</p>
+<p><strong>Millimetres, not mils.</strong> Back in “Sourcing the Parts” you measured the matrix’s pin pitch and found 2.5 mm rather than 2.54 mm. That measurement decides which grid you work on for the rest of this board.</p>
+<p>Two dimensions of the matrix are most important here. The first is its pin pitch, meaning the distance from the centre of one pin to the centre of the next along a row, which is 2.5 mm. The second is the width of its body, which is 20.0 mm, or exactly eight pin pitches. Because the four matrices have to sit edge to edge with no gap between their bodies, the horizontal spacing from the centre of one matrix to the centre of the next must also be 20.0 mm.</p>
+<p>Let’s examine that requirement against the grid. The 100 mil grid you have used since Chapter 3 is 2.54 mm, and it moves a part in whole steps of that size. One step is 2.54 mm, two steps are 5.08 mm, three steps are 7.62 mm, and so on. No number of steps adds up to 20.0 mm. Seven steps come to 17.78 mm and eight steps come to 20.32 mm, so the closest this grid can put the second matrix to its correct position is 20.32 mm from the first, which is 0.32 mm too far.</p>
+<p>That error repeats at every join. Four matrices have three joins between them, so the fourth matrix ends up 0.96 mm to the right of where it belongs, and the display band measures 80.96 mm across instead of 80.0 mm. Each join opens by a further 0.32 mm, and a display that should read as one screen reads as four panels placed near each other.</p>
+<p>To address this discrepancy, we will work this board in millimetre grids (Figure 7.27). A 1 mm grid suits the outline, and 0.25 mm or 0.5 mm suits the parts that have no exact position to hit. One thing to know before you set them is that the grid list, the fast-grid shortcuts and the overrides below are all KiCad preferences rather than project settings, so they follow you into every board you open next, including the imperial ones from Volume 1. Change them for this board, and change them back when you go back to an imperial design. The important habit, though, is knowing when to stop using the grid at all. The four matrices are not nudged into place on any grid; their positions are typed, which is what the next step does. When you route, let the router snap the track to the pad rather than to the nearest grid point, so that a 2.5 mm pitch part and a 2.54 mm pitch part can share a board without either of them having to sit on the other’s grid. KiCad also lets you give different kinds of object their own grid, under “Preferences” then “PCB Editor” then “Grids”, where a set of grid overrides can put footprints on one spacing and tracks and text on another. The whole set can be switched on and off from the left toolbar, so it costs nothing to try.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-grid.png" style="width:85.0%" /></p>
+<p>Figure 7.27: The Grids page of the PCB Editor’s preferences, set up for this board. The list on the left is scrolled down to its millimetre entries, with the 1 mm grid active. “Fast Grid Switching” puts 1 mm on “Alt+1” for the outline and 0.25 mm on “Alt+2” for fine work, so the two grids this board needs most are a keystroke apart. Below that, each kind of object is given its own spacing: 0.25 mm for footprints and pads, 0.1 mm for tracks and for the vias that go with them, 0.5 mm for text, and 1 mm for graphics, which is the grid the board outline is drawn on. None of it touches the four matrices, whose positions are typed rather than snapped.</p>
+<p><strong>Now set the board up.</strong> The grid is one of two things to settle before a part is placed. The other is the board itself, and it requires two settings to be reviewed. One is the stackup. The other is the constraints.</p>
+<p>Open Board Setup and start with the fabricator’s numbers rather than your own. At the bottom left of the dialogue is “Import Settings from Another Board…”. Click it and point it at NextPCB’s “Simple” capability file (Figure 7.28). That file is an ordinary empty board with the factory’s limits already set in its Board Setup, and Chapter 10 covers where to download it and why you need both the <code>.kicad_pcb</code> and the <code>.kicad_pro</code> files placed in the same directory. This import provides the set of numbers the factory guarantees its process can hold. These are the minimum sizes for fabrication, which include a 0.127 mm track, a 0.09 mm annular ring, a 0.48 mm via on a 0.15 mm drill, 0.25 mm from a hole to any copper and to any other hole, 0.5 mm from copper to the board edge, and silkscreen text no smaller than 0.762 mm at 0.125 mm thick. These are the numbers that your design must not go below.</p>
+<p>Be careful with the checklist in the dialogue, because two of its groups would undo work you have already done. Leave “Net classes” unticked, since ticking it would replace <code>Power</code> and <code>Default</code>, the two classes you built before you placed a single symbol, with the template’s single one. Also, leave “Custom rules” unticked for the same reason, because the rule you are about to type would be cleared along with it. “Predefined track &amp; via dimensions” stays out too, because on this board the widths come from the net classes rather than from a menu. Tick the rest as the figure shows.</p>
+<p>The “Violation severities” option changes how loudly KiCad complains. This import project file moves three rows: “Drilled hole too close to other hole” becomes an error where KiCad’s own default is a warning, and the two checks for plated and non-plated holes sitting inside a courtyard are turned down to “Ignore”. Those three settings are NextPCB’s judgements rather than yours, and Chapter 3’s “Violation Severity” section shows where to find the severity table and how to read it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-nextpcb-constraints-import.png" style="width:85.0%" /></p>
+<p>Figure 7.28: The “Import Settings” dialogue, pointed at NextPCB’s “Simple” capability file. What is left unticked matters as much as what is ticked. “Net classes” is left alone so that the <code>Power</code> and <code>Default</code> classes you built in Schematic Setup survive the import, and “Custom rules” is left alone so that the rule you are about to type has somewhere to go. “Design rule constraints” is the group carrying the factory’s limits, and “Violation severities” quietly rewrites three rows on the Violation Severity page.</p>
+<p>Now repair the stackup, because the import has just changed it. NextPCB’s template is a four-layer board and “Board layers and physical stackup” was one of the groups you ticked, so yours is a four-layer board too at this moment. Open “Physical Stackup” and set “Copper layers” back to 2. The inner copper and the prepreg<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> either side of it go away, but their thickness does not. KiCad folds it into the core, which now reads 1.569981 mm and leaves the board 1.659981 mm thick. That figure is the template’s four-layer build-up. Type 1.51 mm into the core and the total at the foot of the page reads 1.6 mm (Figure 7.29), which is the standard two-layer board every low-cost fabricator quotes. After any stackup import, you should read the total at the foot of the page before you close the dialogue, because a stackup always arrives carrying the build-up of the board it came from.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-board-stackup-1.6mm.png" style="width:85.0%" /></p>
+<p>Figure 7.29: The “Physical Stackup” page after the copper layers have been set back to 2. The core is typed to 1.51 mm (❶) rather than the 1.569981 mm the import left behind, so that “Board thickness from stackup” reads exactly 1.6 mm (❷). Above and below the core sit the two 0.035 mm copper layers, which is the 1 oz copper every track width in this chapter assumes.</p>
+<p>The table below is what the page should read when you are done.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Type</th>
+<th>Material</th>
+<th>Thickness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F.Silkscreen</td>
+<td>Top silk screen</td>
+<td>n/a</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>F.Paste</td>
+<td>Top solder paste</td>
+<td>n/a</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>F.Mask</td>
+<td>Top solder mask</td>
+<td>Not specified</td>
+<td>0.01 mm</td>
+</tr>
+<tr>
+<td>F.Cu</td>
+<td>Copper</td>
+<td>n/a</td>
+<td>0.035 mm</td>
+</tr>
+<tr>
+<td>Dielectric 1</td>
+<td>Core</td>
+<td>FR4</td>
+<td>1.51 mm</td>
+</tr>
+<tr>
+<td>B.Cu</td>
+<td>Copper</td>
+<td>n/a</td>
+<td>0.035 mm</td>
+</tr>
+<tr>
+<td>B.Mask</td>
+<td>Bottom solder mask</td>
+<td>Not specified</td>
+<td>0.01 mm</td>
+</tr>
+<tr>
+<td>B.Paste</td>
+<td>Bottom solder paste</td>
+<td>n/a</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>B.Silkscreen</td>
+<td>Bottom silk screen</td>
+<td>n/a</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>Those five thicknesses add up to the 1.6 mm the page reports. The dielectric constant<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> of 4.2 and the loss tangent<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> of 0.02 on the core, and the 3.3 on each solder mask layer, came across with the template and can be left as they are, since they only do work when you are designing to a controlled impedance, which this board is not. The one number in the table to think about carefully rather than accept is the 0.035 mm on each copper layer. That is 1 oz copper, the cheap standard, and it is what the <code>Default</code> class’s 0.25 mm and the <code>Power</code> class’s 1.00 mm were sized against for the 1.3 A this board draws. If you order a board in 2 oz copper, both of those widths need looking at again, because thicker copper carries the same current in a narrower track.</p>
+<p>Two things remain to do. Go to the “Net Classes” page and confirm that <code>Power</code> arrived with the 1.00 mm track width you gave it in Schematic Setup. Net classes are a property of the project rather than of the sheet, so they cross over on their own, and the import you just ran was set to leave them alone. Then go to the “Custom Rules” page and type in the <code>Power</code> minimum width rule exactly as Figure 7.9 shows it, watching for the “No errors found.” message below the text box. Notice where its numbers sit against everything else on this page. The rule’s 0.8 mm minimum is more than six times the 0.127 mm floor you imported a moment ago. That is the layering Chapter 3 describes, working on a real board. The factory’s number says what can be made, the class says what you draw by default, and the rule says what you will not be allowed to go below on a power net. From now on a power track drawn too thin will trigger a design rules violation.</p>
+<p><strong>Step 1, import from the schematic.</strong> If the handoff at the end of the schematic worked, the PCB Editor is already open with your parts on the canvas. If not, press “F8” to bring them across.</p>
+<p>One option in that dialogue is critical (Figure 7.30). Tick <strong>“Group footprints based on symbol group”</strong>. Later you will ask KiCad to treat each cell as a repeated unit, and one of the ways it recognises such a unit is a named group of footprints. Three of your four cells are already groups on the schematic, because you left “Place as group” ticked when you stamped them out (Figure 7.16), and this option carries those groups across to the board. Forgetting it is not a serious problem, since you can group the footprints by hand on the board later, but of course it is faster to simply import the group names now.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-import-settings.png" style="width:85.0%" /></p>
+<p>Figure 7.30: The import dialogue, with the one option that is most important on this board. “Group footprints based on symbol group” (❶) carries the schematic’s cell groups across to the board, and those groups are what the multi-channel tools recognise later as repeated units. The option below it, “Apply design block layouts to new groups”, stays unticked, because the cell you saved as a design block carries a circuit but no layout. Confirm that the message panel reads “Total warnings: 0, errors: 0” (❷) before you click “Update PCB”.</p>
+<p>The footprints then arrive as a cluster, laced with the ratsnest (Figure 7.31). We’ll separate and position them (with the help of the schematic editor) after we first draw the draft board outline.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-imported.png" style="width:65.0%" /></p>
+<p>Figure 7.31: The parts as they arrive. Every footprint lands in one loose cluster, tied together by the ratsnest, which is KiCad’s list of connections still to be made. The four matrices are the large outlines down the left, and the four drivers are the tall two-row footprints across the top. Nothing here is placed; it is only present.</p>
+<p><strong>Step 2, set up the board outline.</strong> Switch to the 1 mm grid, make <code>Edge.Cuts</code> the active layer, take the rectangle tool from the right-hand toolbar, and draw a rectangle 100 mm wide and 50 mm tall (Figure 7.32). Draw it on clear canvas beside the parts rather than around them, since the parts will be brought to the board in the next step rather than the board built around them where they happen to have landed. If the drag does not finish on exactly 100 by 50, select the rectangle, press “E”, and type the four corner coordinates rather than nudging the edges towards them. Those two numbers come from the sketch at the front of the chapter, and they are simple arithmetic. The display band is a fixed 80.0 mm, so a 100 mm board leaves 10 mm of margin at each end. The band is 20.0 mm tall and sits near the top, which leaves roughly 25 mm across the bottom of the board for the Arduino Nano lying on its side, the two buttons, the switch and the power input.</p>
+<p>As the layout work continues, the height of the outline is likely to change. Volume 1’s power supply board ended up shorter than its original sketch because the real footprints did not need the room the pencil drawing reserved. This board may go the other way, because the Nano is 43 mm long and the row below the display band has a lot to fit. So, draw the rectangle, place the parts, and drag the bottom edge to suit what you find.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-draw-board-outline.png" style="width:100.0%" /></p>
+<p>Figure 7.32: Drawing the outline. The grid is switched to 1 mm (❶), <code>Edge.Cuts</code> is the active layer (❷), and the rectangle tool is chosen from the right-hand toolbar (❸). The rectangle (❹) is drawn on clear canvas beside the parts rather than around them, because the parts will come to the board rather than the board to the parts. The marker at the top left of the sheet (❺) is the grid origin, still where KiCad leaves it. Moving it is the next job.</p>
+<p>KiCad keeps several points to measure from. We will work with reference to those points shortly, so it is worth taking a short detour to explain what they are. An ‘origin’ is a zero point, the place coordinates are counted from. The ‘page origin’ is fixed at the top-left corner of the drawing sheet and cannot be moved, and it is the one KiCad has been measuring from so far. The ‘grid origin’ is the point the grid lines up on, and this one you can put wherever you like. If you move it, every grid dot on the canvas will move with it, so positions are counted from the point you chose. Dialogues can work from it as well, including the placement dialogue in the next step. By customising the grid origin, you can use board dimension referencing rather than sheet referencing. Two further origins exist that this board does not need. The drill/place file origin is the zero that fabrication outputs can be measured from, and the local origin is the temporary one you set with the space bar, which is how you placed the second pad of the DRV8833 footprint in Chapter 2.</p>
+<p>Now that you know what the grid origin is, we’ll continue with two small jobs to finish the outline, in a specific order.</p>
+<p><strong>First, set the grid origin at the rectangle’s top-left corner</strong> (Figure 7.33), so that every position you type in the next step is measured from that point. Zoom in on the corner until the 1 mm grid dots are clearly apart, choose “Place” then “Grid Origin”, and click it. You drew the rectangle on the 1 mm grid and <code>Edge.Cuts</code> is still the active layer, so the click snaps onto the corner rather than landing near it. If you would rather type the position than click it, “Edit” then “Grid Origin…” takes X and Y as numbers, and the rectangle itself tells you what they are: select it, press “E”, and compare “Start X” and “Start Y” with “End X” and “End Y”. The top-left corner is the smaller figure in each pair, because Y counts downwards from the top of the sheet.</p>
+<p>Two things about the readout are worth knowing. The first is that the status bar will not read 0, 0 at that corner, because the coordinates it shows are measured from the page origin rather than from the grid origin. To confirm the origin landed where you meant, open “Edit” then “Grid Origin…”, which reports the stored X and Y; they should match the rectangle’s top-left corner (Figure 7.34). The second is that you can change which origin the readout counts from. “Preferences” then “PCB Editor” then “Origin &amp; Axes” lets you set “Display origin” to “Grid origin”, which changes the coordinates KiCad shows in every project.</p>
+<p><strong>Second, round the four corners.</strong> Select the rectangle, right-click, choose “Shape Modification” then “Fillet Lines”, and enter a 2 mm radius. Do this after the origin, because filleting replaces the rectangle with four lines and four arcs, and the sharp corner you just used stops existing.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-new-grid-origin.png" style="width:45.0%" /></p>
+<p>Figure 7.33: The grid origin moved onto the rectangle’s top-left corner. Zoomed in this far, the 1 mm grid dots are clearly apart, so the click lands on the corner rather than near it. Every position you type in the next step is measured from this point.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-new-grid-origin-confirmed.png" style="width:65.0%" /></p>
+<p>Figure 7.34: Confirming the origin rather than trusting it. “Edit” then “Grid Origin…” reports the stored position, here 116 mm and 76 mm. Those are page coordinates, so your two numbers will differ from mine. What matters is that they match the rectangle’s “Start X” and “Start Y” exactly. If they are out by a fraction of a millimetre the click missed the corner, and you can type the right figures straight into this dialogue.</p>
+<p>With both jobs done, the outline is ready to receive the parts (Figure 7.35).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-ready-for-placement.png" style="width:100.0%" /></p>
+<p>Figure 7.35: The outline finished and empty. It measures 100 mm by 50 mm, corners filleted at 2 mm, and the grid origin on the top-left corner. The parts are still in their cluster to the left, waiting to be brought in. The bottom edge remains provisional, since the Nano and the row below the display band may yet ask for more room.</p>
+<p><strong>Step 3, place the components.</strong> This step has four jobs on this board, and they are best done in the order below, because each one depends on the last.</p>
+<p><strong>The four matrices come first.</strong> They are the only parts whose positions are not a matter of judgement, and you will position everything else on the board around them. Each matrix footprint has its anchor at the centre of its body, so a matrix centred 20 mm in from the left edge occupies the strip from 10 mm to 30 mm, and four of them at 20 mm intervals fill 10 mm to 90 mm. That is the 80 mm band, centred, with 10 mm to spare at each end.</p>
+<p>Place <code>DS1</code> roughly, then select it and open “Position Relative To…” from the right-click “Position” submenu, or with “Shift+P” (Figure 7.36). Choose the grid origin as the reference point, which is the corner you set a moment ago, and enter an offset of 20 mm in X and 15 mm in Y. If the dialogue asks you for a distance and an angle instead of an X and a Y, look at the “Use polar coordinates” checkbox below the two fields. Ticked, it switches the pair to polar, and the dialogue may well open that way. Clear it and the fields read as the figure shows them. Repeat for the other three, changing only the X figure: 40, 60 and 80. All four then measure from the same corner, so no error accumulates along the row and any one of them can be corrected later without disturbing its neighbours. You could instead place each matrix 20 mm from the one before it, which shows the pitch more vividly, at the cost of every matrix depending on the one to its left.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-position-ds1.png" style="width:100.0%" /></p>
+<p>Figure 7.36: Placing a matrix by typing rather than by dragging. “Use Grid Origin” (❶) sets the reference to the board corner from step 2, and the line above the buttons confirms it: “Reference location: grid origin”. The offset fields (❷) carry the exact position, here 20 mm across and 15 mm down for <code>DS1</code>, with “Use polar coordinates” clear below them. Click “OK” (❸). The other three matrices use this same dialogue with only the X figure changed.</p>
+<p>With all four placed, lock them, because from here on every other part is positioned against them, and an accidental move will cause problems later. Right-click and choose “Lock”, or press “L”. KiCad marks a locked item with a coloured shadow around it rather than with a padlock, and that shadow can be recoloured in your colour scheme or hidden altogether from the “Objects” tab of the Appearance panel, so if you cannot see it, look there first. Locking has a second effect. A locked item cannot be selected at all unless “Locked items” is ticked in the Selection Filter at the lower right. That is the setting to reach for the moment you try to pick <code>DS1</code> as a reference point in the next section, and again later when you come to group cell 1’s footprints and <code>DS1</code> will not join the selection.</p>
+<p>Now look at what you have (Figure 7.37). The four matrices read as a single 32-by-8 canvas, and the joins between them are not obvious. Inside a matrix the dots sit 2.48 mm apart, and across a join they sit 2.64 mm apart, a difference of 0.16 mm that you would need a ruler to find. Had you placed these on the 100 mil grid instead, every join would have opened by a further 0.32 mm, putting 2.96 mm across a join against 2.48 mm inside a panel, and the finished band would measure 0.96 mm wider than it should. The display would then read as four panels rather than as one screen.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-position-ds1-ds2-ds3-ds4-locked.png" style="width:100.0%" /></p>
+<p>Figure 7.37: The four matrices at exactly 20.0 mm pitch, typed rather than dragged: 20, 40, 60 and 80 mm across from the grid origin, and all four 15 mm down from it. The pads run straight across all four panels, and the joins take a ruler to find. This is the figure the whole 2.5 mm pin pitch argument was for. On the imperial grid the nearest reachable pitch is 20.32 mm, and by the fourth panel the band would be 0.96 mm too wide.</p>
+<p><strong>The driver goes on the back, under its own matrix.</strong> Before you flip or rotate anything, it helps to have both editors open side by side, the Schematic Editor on one side and the PCB Editor on the other (Figure 7.38). KiCad keeps the two views linked. Click a part in the schematic and the layout editor selects the matching footprint and centres it on the canvas, wherever it currently sits. I work this way through most of the placement and routing that follows, because it lets me confirm I am looking at the right one of the four drivers without hunting for it by eye.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-schematic-layout-editors-sidebyside.png" style="width:100.0%" /></p>
+<p>Figure 7.38: The two editors open side by side, schematic on the left and the PCB Editor on the right. Clicking on <code>U1</code> in the schematic (❶) selects the matching <code>U1</code> footprint in the layout and centres it on the canvas (❷), without you having to search for it among the other three drivers.</p>
+<p>Select <code>U1</code> and press “F” to flip it to <code>B.Cu</code>, then press “R” to rotate it 90°, so that its long axis runs parallel to the matrix’s two pin rows. That rotation is needed because of the geometry of the matrix and driver footprints. The matrix’s pin rows are 15.0 mm apart, and its pads are 1.7 mm across, which leaves a clear channel of 13.3 mm between them. Rotated as described, the SOIC-24W spans 11.35 mm across its two rows of pads, which fits inside that channel with 0.98 mm at each side.</p>
+<p>Centre <code>U1</code> under <code>DS1</code> with “Position Relative To…” again, this time using “Select Item…” to pick <code>DS1</code> itself as the reference and leaving the offset at zero. <code>DS1</code> is locked, so tick “Locked items” in the Selection Filter at the lower right before you try to pick it, or the “Select Item…” picker will pass over it as though it were not there. Then select <code>R1</code> and the two capacitors, press “F” to flip all three to <code>B.Cu</code> alongside the driver, and place them in the space at each end of the cell: the package is 15.4 mm long inside a 20.0 mm cell, so there is a little over 2 mm at each end, which is enough for three small passives if you keep them tight against the driver. You only do this once. The other three cells’ passives arrive on the correct side automatically when “Repeat Layout” copies cell 1 later in this section, because the rule areas it works from cover both copper layers.</p>
+<p>Two habits make this easier. The first is to measure rather than trust. Reach for the ruler on the right-hand toolbar and lay it across the gap between the driver’s pad row and the matrix’s. The board is on a 1 mm grid, but the ruler can still report a distance that does not fall on that grid, because it locks onto a pad’s edge rather than onto the nearest grid line, provided “Snap to pads” is switched on. If yours reads a round number instead of about 0.98 mm, open “Preferences” then “PCB Editor” then “Editing options” and set “Snap to pads” to “Always” in the “Magnetic Points” section (Figure 7.39). With that in place the ruler confirms the figure the arithmetic gave you (Figure 7.40).</p>
+<p>The second habit is to open the Selection Filter at the lower right and tick “Footprints” only, so that a click picks up the whole part rather than a pad underneath the cursor. On a board this dense that one setting saves a great deal of irritation.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-magnetic-snap.png" style="width:85.0%" /></p>
+<p>Figure 7.39: The “Magnetic Points” section of “Preferences” then “PCB Editor” then “Editing options”. Setting “Snap to pads” to “Always” is what makes the ruler lock onto a pad’s edge instead of the nearest grid line, which is what a trustworthy 0.98 mm reading depends on.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-distance-between-pads.png" style="width:65.0%" /></p>
+<p>Figure 7.40: The ruler laid across the gap between the matrix’s pad row and the driver’s, reading 0.975 mm. That is the 13.3 mm channel minus the 11.35 mm pad span, split evenly, which the earlier arithmetic rounded to “0.98 mm at each side.” Measuring it here turns that number from something computed into something confirmed.</p>
+<p>With the driver rotated, centred and its three passives beside it, cell 1’s back side is placed (Figure 7.41).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-cell-1.png" style="width:85.0%" /></p>
+<p>Figure 7.41: Cell 1’s back-side parts, tucked under <code>DS1</code>. <code>U1</code> is rotated so that its two rows of pads run parallel to the matrix’s, <code>R1</code> sits at one end of the cell and <code>C1</code> and <code>C2</code> sit at the other, and the net name on each pad confirms which matrix pin it will eventually route to. Nothing here is routed yet; this is placement only.</p>
+<p><strong>Then the parts that exist only once.</strong> These are ordinary placement decisions like the ones you made in Volume 1. Use the ratsnest as your guide. Four of them are settled by considerations outside the board.</p>
+<ul>
+<li><strong><code>A1</code>, the Arduino Nano.</strong> Rotate it 90° so that it lies landscape below the display band, at the left of the board, with its own USB socket facing the board edge. That socket is the programming lead, and a connector that a cable cannot reach is no use to anybody.</li>
+<li><strong><code>J1</code>, the USB-C receptacle.</strong> Put it at the right-hand end of the board, on the top, the way the sketch at the front of the chapter draws it, with its mating face towards the edge and enough room beyond it for the corner mounting hole and for the silkscreen that will label the input. The footprint carries a “PCB Edge” line on <code>Dwgs.User</code> that marks where the receptacle’s opening sits, and that is the reference to judge the position against rather than the body outline. Then put <code>R7</code> and <code>R8</code> just inboard of it.</li>
+<li><strong><code>Q1</code>, <code>R9</code> and <code>R10</code>.</strong> Keep the load switch group close to <code>J1</code> and to <code>SW1</code>, so that the <code>VBUS</code> run from the receptacle to the MOSFET’s source is short and the gate wiring back to the switch is shorter still.</li>
+<li><strong><code>SW1</code>, <code>SW2</code> and <code>SW3</code>.</strong> The slide switch goes at the right, near the power input. The two buttons go below the display, in the space to the right of the Nano, where a thumb can reach them and where a finger pressing one will not obscure the other. That space is not the board’s true centre. <code>A1</code> claims close to half the width at the left, and the <code>J1</code>/<code>SW1</code>/<code>Q1</code> group claims a good third of it at the right, so what remains sits right of centre rather than on it.</li>
+</ul>
+<p>Add four mounting holes as well, with “Place” then “Add Footprint”, choosing <code>MountingHole:MountingHole_3.2mm_M3</code>, the same part Volume 1 used. Put one inside each filleted corner, clear of the display band and of the copper to come. These are board-only parts with no symbol behind them, so the design rules check will list violations against them later. This is expected rather than wrong.</p>
+<p>When everything is down, look at the board as a whole (Figure 7.42). This is when you can choose to drag the bottom edge of the outline if the lower row is cramped, or to nudge parts so that the ratsnest lines shorten and stop crossing each other. Nothing here has to be exact except the four matrices, and those are already locked.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-partial-placement.png" style="width:100.0%" /></p>
+<p>Figure 7.42: Cell 1 and the once-only parts placed, nothing routed yet. The display band runs across the top, with cell 1’s driver and passives on the back beneath <code>DS1</code>; the other three cells still have nothing under their matrices, because that is the next section’s job. The Arduino Nano is placed landscape at the lower left with its programming socket at the edge, and the power input group takes the right-hand edge. Only the four matrices are locked; everything else is still free to move as the ratsnest suggests.</p>
+<p><strong>Last, mark each cell as a channel.</strong> Remember from Chapter 3 that a ‘channel’ is one instance of a circuit block that a board repeats several times over. This board has four of them, and telling KiCad which parts belong to which one is what unlocks the reuse the rest of the layout depends on.</p>
+<p>Before you do anything else, drag each of the other three cells’ driver, resistor and capacitors roughly under their own matrix (Figure 7.43). Rough is sufficient, because KiCad will place them precisely when you invoke the “repeat” tool. The reason to do it now is that the tool you are about to run draws a boundary around each cell’s footprints wherever they currently sit, so a cell still sitting in the cluster the parts arrived in would be given a boundary in the wrong part of the board.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-cells-positioned-approximately.png" style="width:100.0%" /></p>
+<p>Figure 7.43: The other three cells dragged roughly into place, driver, resistor and capacitors sitting approximately under <code>DS2</code>, <code>DS3</code> and <code>DS4</code>. None of this needs to be exact. It only needs each cell’s footprints to already be near the matrix they belong to, rather than still sitting in the cluster the parts arrived in, because the next step will place them precisely.</p>
+<p>KiCad recognises a channel from a hierarchical sheet, from a component class, or from a named group of footprints. This board uses groups, which we created in the schematic, because a group defined there carries across to every footprint that group’s symbols produce. That could have been set up back when you stamped the design block out, which is what leaving “Place as group” ticked (Figure 7.16) and ticking “Group footprints based on symbol group” on import (Figure 7.30) were for. It is just as normal to reach this point and find you did not. KiCad does not mind which order you do this in. You can go back to the schematic now, build the groups there, and bring them into the layout to carry on.</p>
+<p>Check each cell first, rather than assuming the three you stamped out are fine. In the Schematic Editor, click one part of a cell, say <code>U2</code>. If the whole cell highlights as a unit, it is already a group. If only <code>U2</code> is selected, it is not. For any cell that fails the check, select its five symbols, right-click, choose “Grouping” then “Group Items”. That command creates the group but does not ask for a name. To give it a name, right-click the new group, choose “Properties…”, and fill in the Name field there. Repeat until all four cells are named groups on the schematic, and give them four different names so you can tell them apart later.</p>
+<p>Then bring them into the layout. Back in the PCB Editor, open “Tools” then “Update PCB from Schematic…”, or press “F8”, and confirm “Group footprints based on symbol group” is still ticked. Click “Update PCB”. Footprints are linked to their symbols by identifier rather than by position, so this only adds the group membership to footprints already on the board. The “update” function does not move anything you have already placed, as long as “Re-link footprints to schematic symbols based on their reference designators” stays unchecked, which is its default state. Open the Search panel (“View” then “Panels” then “Search”, Groups tab) to confirm all four groups arrived with the names you gave them. I actually left the naming itself until this point rather than doing it on the schematic so that each group’s name corresponds to its position on the board, starting with <code>DS1</code> on the left edge. Double-click a group’s row here to open its properties, and the same Name field the schematic’s dialogue offers is right there, so I can name, or fix, all four without switching editors (Figure 7.44).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-groups-DS.png" style="width:85.0%" /></p>
+<p>Figure 7.44: The Search panel’s Groups tab, with all four cell groups named. <code>Group DS2</code> is selected here, and the matching group highlights on the board behind the panel. Double-clicking any row opens that group’s properties, where the Name field is the same one the schematic’s group properties dialogue offers.</p>
+<p>Now open “Tools”, then “Multi-Channel”, then “Generate Placement Rule Areas…” (Figure 7.45). The dialogue lists every group, component class and sheet it can find, and you tick the four cells. What it creates for each one is a ‘placement rule area’, a fenced-off region that says where a channel sits and which items belong to it. You met rule areas in Chapter 4 as a way of keeping copper out of a region; this is the same object doing a different job. Each generated area covers all the copper layers, which this board needs, because a cell’s matrix is on the front and its driver is on the back.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-generate-multichannel-rule-areas.png" style="width:85.0%" /></p>
+<p>Figure 7.45: Generating one placement rule area per cell. The dialogue lists everything KiCad could treat as a channel, sorted by source, and the “Groups” tab holds the four cell groups this board uses, all four ticked. All four were defined on the schematic and brought across by the last “Update PCB from Schematic”.</p>
+<p><strong>Step 4, route the tracks.</strong> You route one cell here, and KiCad routes the other three.</p>
+<p>Start with cell 1, and route it as though it were the only cell on the board. The sixteen driver-to-matrix connections are the bulk of it, and they are easier than they look, because the matrix is a through-hole part whose pads are reachable from both sides while the driver is a surface-mount part on the back. Most of them therefore stay on <code>B.Cu</code>, short and parallel. The rest cannot, because of where the two devices’ pads land. To reach their own pin they have to cross a path that another connection already occupies, and two tracks cannot cross on the same copper layer. Each of those takes a single via up to <code>F.Cu</code> and finishes its run on the front (Figure 7.46). One via is enough, rather than one up and one back down, because the pad at the far end is a matrix pin, and a through-hole pad is reachable from either side of the board. The <code>Default</code> class routes them at 0.25 mm, and remember the arithmetic from the net class discussion: a row net carries the whole active digit, about 320 mA, and 0.25 mm of 1 oz copper carries about 0.87 A, so the margin is nearly threefold.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-DS1-routed-nopower.png" style="width:85.0%" /></p>
+<p>Figure 7.46: <code>DS1</code>’s sixteen driver-to-matrix connections routed, with the local power still to come. Most of them run the whole way on the back copper. The ones that meet a track already in their way each take a single via up to <code>F.Cu</code> and finish on the front, at a matrix pin that is reachable from that side because it is a through-hole pad.</p>
+<p>Continue with the local power. Run a short <code>GND</code> track from each of the driver’s two ground pins, 4 and 9, to the ground pads of <code>C1</code> and <code>C2</code>, and take <code>+5V</code> from the other side of those capacitors to the driver’s <code>V+</code> pin and to <code>R1</code>. Keep those runs tight. The point of local decoupling is that the capacitor supplies the current burst from as close to the chip as possible.</p>
+<p>Two things about that <code>+5V</code> run are worth settling before you draw it. The first is its width, because the <code>Power</code> class asks for 1.00 mm but 1.00 mm is too wide for the available space. The run has to pass between the driver’s <code>ISET</code> track and one of the row nets, and at full class width it comes within 0.20 mm of the first and 0.25 mm of the second, both inside the class’s own 0.3 mm clearance. Draw it at 0.800 mm and it clears everything. This is what the “Power minimum width” rule from board setup is for. It defines a floor for the class at 0.8 mm rather than pinning it at 1.00 mm, so a run that cannot have the optimum still has an acceptable width to fall back on, and the check still catches anything smaller than the floor.</p>
+<p>The second is that <code>+5V</code> does not need to leave the back copper. It will arrive in this cell from the west and leave for the east, both on <code>B.Cu</code>, so draw it out to the edges of the cell and stop there. <code>GND</code> is the rail that needs to reach the front, so drop two <code>GND</code> vias on the capacitor side of the driver. The ground pour under the display band is going to be cut into strips by the sixteen tracks you have just drawn, and those two vias are what tie this cell’s ground to the front-side pour where the back-side copper cannot get through.</p>
+<p>One thing to get right before you go further is to select the cell’s rule area and enlarge it so that it encloses every track you have just drawn (Figure 7.47). KiCad copies a track to the other channels only when that track is completely inside the reference area. If a run crosses the boundary then the other three cells will not receive it. The target areas resize themselves to match when you run the copy, so this is the only one you have to adjust. On this board, some track segments will fall slightly outside the edges of the rule areas, so the repeat function will not capture them and you will need to finish them by hand.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-DS1-fully-routed.png" style="width:85.0%" /></p>
+<p>Figure 7.47: The reference cell, routed. Nine of the sixteen driver-to-matrix connections run straight across on the back copper; the other seven, seen mid-route in Figure 7.46, each rise through a single via and finish on the front at their matrix pin. The local decoupling runs are kept short, and two vias beside the capacitors carry <code>GND</code> up to the front, which <code>+5V</code> never has to do because it crosses the band on the back. The cell’s rule area, visible at the edges of the frame, has been enlarged to enclose every track, because only fully enclosed routing is copied to the other cells.</p>
+<p>Now let’s complete the copy operation. Select cell 1’s rule area and open “Tools”, then “Multi-Channel”, then “Repeat Layout…” (Figure 7.48). The area you selected becomes the “Reference”, every other placement area becomes a “Target”, and KiCad checks each target against the reference before it copies anything. That check compares parts and connections rather than reference designators, so <code>R1</code> in the reference does not have to become <code>R2</code> in the next cell; it becomes whichever resistor is wired the same way. A target that matches reports “OK” and arrives ready-ticked. A target that does not reports the reason and cannot be selected, and the reason will be a real difference between your cells rather than a complaint about the tool.</p>
+<p>Before you click OK, set <strong>“Anchor footprint” to the matrix</strong>. Left empty, each channel is positioned relative to the centre of its own rule area, and a rule area is a boundary drawn around wherever the parts happened to be sitting, so nothing about it is exact. Name the matrix as the anchor and each channel positions itself against its own matrix instead. Those four are locked at exactly 20.0 mm, so the precision you typed in step 3 is inherited by everything the copy brings with it. Tick “Copy footprint placement”, “Copy routing” and “Include locked items”, leave “Copy other items” unchecked, then click OK. “Include locked items” matters specifically on this board: the reference cell’s matrix, <code>DS1</code>, is locked, and without it ticked the tool would leave it out of what it treats as part of the cell.</p>
+<p>“Copy other items” matters for a reason its name does not prepare you for. Among the things it copies is the reference group’s own name, so ticking it hands every target the name <code>Group DS1</code>, and the four names you set in Figure 7.44 are gone. They are quick enough to type back in, and quicker still not to lose, which is why it is struck through in the figure.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-repeat-multichanel-layout.png" style="width:85.0%" /></p>
+<p>Figure 7.48: Copying the reference cell onto the other three. The anchor footprint (❶) is set to the matrix, so each cell positions itself against its own locked matrix and the exact 20.0 mm pitch survives the copy. The target table (❷) lists one row per cell, and “OK” means the topology check matched that cell’s parts and connections against the reference. “Copy footprint placement”, “Copy routing” and “Include locked items” are ticked below it, before clicking “OK” (❸) to run the copy. “Copy other items” is struck through in red, because that is the one to leave clear: tick it and this board’s other three cells all come back named <code>Group DS1</code>.</p>
+<p>Three cells are now placed and routed, identically to the first, and none of them was drawn manually (Figure 7.49). Look at what did not come across, though. The shared rails, <code>CLK</code>, <code>LOAD</code> and the three cascade links are all still ratsnest lines, and that is the intention. None of those tracks is enclosed by the reference area, because none of them belongs to a cell. They belong to the board, and we’ll work on them next.</p>
+<p>It is also worth knowing that this is repeatable. If you later decide the decoupling in cell 1 should be routed differently, change it there and run “Repeat Layout” again, and the other three are redrawn from the reference as it stands. Nothing was baked in at the moment you clicked OK.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-completed-routing-of-ds1-to-ds4.png" style="width:100.0%" /></p>
+<p>Figure 7.49: All four cells placed and routed, three of them by KiCad. The internal routing of each cell is identical, including the single via that seven of the sixteen connections take to finish on the front, and the matrices have not moved, because each cell was positioned against its own anchor. The lines still showing are the shared rails, the two broadcast signals and the three cascade links, none of which belongs to a cell.</p>
+<p><strong>The shared wiring.</strong> Route the rest in this order, working from the highest current to the lowest.</p>
+<ol type="1">
+<li><strong>The input.</strong> <code>VBUS</code> from <code>J1</code> to <code>Q1</code>’s source, and <code>+5V</code> picked up again at <code>Q1</code>’s drain. Both are in the <code>Power</code> class, so both come out at 1.00 mm without you choosing a width. You pick the net, and the width comes from the class.</li>
+<li><strong><code>+5V</code> out of <code>Q1</code> and round to the band.</strong> Take the 1.00 mm front-copper rail west out of <code>Q1</code>’s drain, along the strip between the bottom of the display band and the row of switches, then turn down past the Nano. Two branches leave it there, one onto the Nano’s own <code>5V</code> pin and one east to the supply side of both button pull-ups. The rail itself carries on the long way round: 43 mm west along the bottom edge of the board, 28 mm north up the left margin, and then straight down through a single via just west of <code>DS1</code>. That via is the only one <code>+5V</code> gets on this board, and everything past it is on the back.</li>
+<li><strong><code>+5V</code> across the display band.</strong> Most of this is already drawn, because each cell got its own <code>+5V</code> when KiCad copied the reference. What is missing is the joins. Add three short 0.800 mm hops on the back, <code>C1</code> to <code>R2</code>, <code>C3</code> to <code>R3</code> and <code>C5</code> to <code>R4</code>, plus the stub from the via into <code>R1</code>, and the four cells become one chain running the full width of the band.</li>
+<li><strong><code>CLK</code> and <code>LOAD</code>.</strong> Both go from the Nano to all four drivers at 0.25 mm, and both are chains rather than stars. They do not, however, travel together, and the driver’s pinout is the reason.</li>
+<li><strong>The cascade.</strong> <code>DIN1</code> from the Nano’s <code>D11</code> to <code>U1</code>, then <code>LINK1</code>, <code>LINK2</code> and <code>LINK3</code> as hops between neighbouring cells. Each of these is a single connection between two adjacent parts, which is what a chain looks like when it is drawn well.</li>
+<li><strong>The buttons.</strong> <code>MODE</code> and <code>SELECT</code> back to <code>D2</code> and <code>D3</code>. The supply side of both pull-ups was picked up in item 2 above, so this is two signal runs and nothing more.</li>
+</ol>
+<p><strong>Shared wiring 1, the input.</strong> This raises the same problem you met inside the reference cell. There it was the neighbouring tracks that left no room for the <code>Power</code> class’s 1.00 mm, and 0.800 mm was enough to settle it. Here it is the footprint itself, and 0.800 mm is not enough. <code>J1</code>’s two <code>VBUS</code> contacts, met when the receptacle was placed, sit on a pitch set by the USB-C mechanical spec rather than by this board, and there is no room to bring a full-width track out of either pad without crowding the <code>GND</code> pad or shield tab beside it. KiCad refuses the track at 1.00 mm outright. The fix is to draw this one short run narrower, at 0.7 mm (Figure 7.50).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-power-track-7mm.png" style="width:85.0%" /></p>
+<p>Figure 7.50: The <code>VBUS</code> track leaving <code>J1</code>, drawn at 0.700 mm. The track width field in the top-left toolbar (boxed) shows the value chosen for this run, well under the Power class’s 1.00 mm default. The arrow points to where the track leaves pad <code>A9</code>: <code>J1</code>’s <code>VBUS</code> pins sit on a pitch too tight for a full-width Power track to clear the neighbouring <code>GND</code> pads, so this one short run has to go narrower than the rest of the class.</p>
+<p>Narrower is not the same as underpowered. Run the same arithmetic Chapter 3 taught you and 0.7 mm of 1 oz copper works out to about 1.8 A, comfortably clear of the 1.3 A that this board draws at its worst case. <code>J1</code> gives you two <code>VBUS</code> pads for exactly this situation, so the current actually splits across two 0.7 mm runs into <code>Q1</code>’s source rather than travelling on one, and both the connector and the AO3401A are rated well past what either run will ever carry. The 1.00 mm class width was never a current requirement. It is headroom, chosen because the board had room for better, and this one corner of the board does not.</p>
+<p>That still leaves the rule. The “Power minimum width” rule floors every Power-class track at 0.8 mm, and nothing in it makes an exception for <code>J1</code>’s pad pitch, so a 0.7 mm <code>VBUS</code> track fails the check as drawn (Figure 7.51). Weakening that floor for the whole class would undo the reason it exists everywhere else on the board, so the fix is a second, narrower rule that names the net directly, <code>A.NetName == 'VBUS'</code>, rather than the class. KiCad resolves two matching rules by taking the last one written, so placing the new “VBUS minimum width (J1 pad-pitch relief)” rule after “Power minimum width” in the Custom Rules editor lets it override the floor for <code>VBUS</code> alone. <code>+5V</code> and <code>GND</code> stay held at 0.8 mm; <code>VBUS</code> drops to 0.7 mm, and only <code>VBUS</code>.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-vbus-custom-drc-rule.png" style="width:85.0%" /></p>
+<p>Figure 7.51: The Custom Rules editor in Board Setup, with the new rule boxed. The original “Power minimum width” rule still floors every Power-class track at 0.8 mm. The new “VBUS minimum width (J1 pad-pitch relief)” rule beneath it matches on the net name directly, <code>A.NetName == 'VBUS'</code>, and because KiCad resolves conflicting rules by taking the last match, this one overrides the general floor for <code>VBUS</code> alone, lowering it to 0.7 mm while <code>+5V</code> and <code>GND</code> stay at 0.8 mm.</p>
+<p>With both rules in place the tracks go down as they should: <code>VBUS</code> in from <code>J1</code> on its two pads, through <code>Q1</code>, and out as <code>+5V</code> toward the rest of the board (Figure 7.52).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-power-tracks-buttons-completed.png" style="width:85.0%" /></p>
+<p>Figure 7.52: <code>VBUS</code> and <code>+5V</code> clear of <code>J1</code> and <code>Q1</code>. Each of <code>J1</code>’s <code>VBUS</code> pads carries its own 0.7 mm run into <code>Q1</code>’s source, <code>GND</code> returns through the shield pads on either side, and <code>+5V</code> leaves <code>Q1</code>’s drain into the rest of the board.</p>
+<p><code>J1</code> causes one more violation, of a different kind. Run the DRC now and two clearance violations come back, both inside the connector itself: <code>VBUS</code> on pad <code>A9</code> against <code>CC2</code> on pad <code>B5</code>, and <code>VBUS</code> on pad <code>B9</code> against <code>CC1</code> on pad <code>A5</code>. The gap in each case is 0.29 mm, and the <code>Power</code> class asks for 0.30 mm. No track is involved, so it is not a routing mistake, and those pads are where the USB-C specification puts them, so there is nothing to move. What you are looking at is what happens when a net class lands on a footprint the class was never sized for. You have set up the net classes so that anything carrying <code>VBUS</code> requires 0.3 mm of space around it, and one of the things carrying <code>VBUS</code> is a pad 0.29 mm from its neighbour.</p>
+<p>There are three ways out and only one of them is right. Loosening the <code>Power</code> class clearance to 0.25 mm would fix it and would also loosen every power track on the board, which is the reason the class exists. Excluding the two violations by hand would silence them until the next time somebody regenerates the report. The third way is a rule that says exactly what you mean, which is that pads inside <code>J1</code> may sit as close to each other as the connector’s own design puts them:</p>
+<pre><code>(rule &quot;J1 internal pad clearance (USB-C pad pitch)&quot;
+    (constraint clearance (min 0.2mm))
+    (condition &quot;A.memberOfFootprint(&#39;J1&#39;) &amp;&amp; B.memberOfFootprint(&#39;J1&#39;)&quot;)
+)</code></pre>
+<p>The expression <code>memberOfFootprint()</code> asks whether an object belongs to a named footprint, and requiring it of both <code>A</code> and <code>B</code> is what keeps this narrow. The relief applies only when both objects are part of <code>J1</code>, so the clearance between <code>J1</code> and anything else on the board is untouched, and so is every other <code>Power</code>-class object. This drops the floor to 0.2 mm, which is the <code>Default</code> class clearance and still well above what any fabricator will ask of you. Type it into the same Custom Rules editor, below the other two, press “Check Rule Syntax”, and the input stage is finally clean (Figure 7.53).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout--j1-custom-rule.png" style="width:85.0%" /></p>
+<p>Figure 7.53: All three of this board’s custom rules in the Custom Rules editor, with the new one boxed. The two above it constrain track width and were written while routing the input; this one constrains clearance, and it is the only one of the three that has nothing to do with anything you drew. Both halves of its condition name the same footprint, which is what confines the relief to the inside of <code>J1</code> and leaves the clearance between <code>J1</code> and the rest of the board at the <code>Power</code> class’s 0.3 mm.</p>
+<p>That is the second time on this board that a rule has been written to describe a physical fact rather than a preference. When the DRC reports something you cannot change, the answer is usually a narrower rule, not a weaker one.</p>
+<p><strong>Shared wiring 2 and 3, the <code>+5V</code> rail.</strong> With the input settled, <code>+5V</code> leaves <code>Q1</code>’s drain and has to reach six places: the four cells, the Nano’s <code>5V</code> pin, and the two button pull-ups (Figure 7.54).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-5V-tracks-completed.png" style="width:100.0%" /></p>
+<p>Figure 7.54: The <code>+5V</code> rail complete, front and back. The wide front-copper run leaves <code>Q1</code> at the right, drops past the Nano where branches take it to the Nano’s own <code>5V</code> pin and to the two button pull-ups, then goes the long way round, along the bottom edge and up the left margin, to a single via just west of <code>DS1</code>. Everything from that via onwards is on the back, where one chain threads through all four cells inside the clear channel between the matrix pin rows.</p>
+<p>Two things about that picture look like the wrong choice until you work them out. The first is the detour. <code>Q1</code> sits at the right-hand end of the board and the rail could have crossed to the left in a straight line, so going round three sides of the board looks like waste. It is about 120 mm of 1.00 mm copper, which is 60 mΩ, so even if the whole 1.3 A travelled the whole length it would cost under 80 mV, and it does not, because the Nano and the pull-ups tap off a quarter of the way along. What the detour protects is the middle of the board. The front copper between the display band and the Nano is the only clear corridor those two parts share, and a 1.00 mm rail laid straight across it would put the widest obstacle on the board in the one place everything else might later need to cross. Sent round the edges instead, the rail runs through space that nothing else needs. As it turns out, neither <code>CLK</code> nor <code>LOAD</code> needed that corridor, but you do not know that yet when you route the power, and that is the point of working from the highest current down. The widest track is drawn first, so give it the space you can most afford to give away.</p>
+<p>The second is the single via. A rail feeding four separate cells looks like it requires four vias, one per cell, and it would if the cells were fed from the front. They are not. The chain sits inside the 13.3 mm channel between the matrix pin rows, under the matrix bodies, on the back copper, with no matrix hole anywhere in its path. That channel is clear on both layers precisely because the project’s footprint puts its pins along the top and bottom edges, which is the reason I chose that footprint over a catalogue one back in “Sourcing the Parts”. Cross the band on the back and one via does the work of four.</p>
+<p>A chain does mean the first leg carries everything. The run from the via into <code>R1</code> and on through cell 1 feeds all four drivers, which is 4 × 320 mA, or 1.28 A, with all four sitting on their active digit at once. Each leg after that carries one cell less, until cell 4 is drawing its own 320 mA down the same 0.800 mm track. Put 0.800 mm through the Track Width calculator on the same basis as before, 10 °C rise and 1 oz copper, and it returns about 2.0 A, so even the busiest leg keeps better than a 1.5× margin. Feeding the chain from one end rather than splitting it in the middle does cost something, roughly 30 mV of extra drop at the far end, and in exchange the power crosses the band in the same direction as the cascade. That is worth 30 mV when you come back to read the board in a year.</p>
+<p><strong>Shared wiring 4, <code>CLK</code> and <code>LOAD</code>.</strong> Both signals go from the Nano to all four drivers, so before drawing either one, decide the shape. There are two ways to give four devices the same signal. A star sends a separate branch to each device from a common point. A daisy chain sends one track that calls at each device along its way. Use the chain, for both.</p>
+<p>The routing argument is that the drivers sit in a row at 20 mm centres, so one track threading past all four is the shortest copper and the simplest route, while four branches would all have to leave the same crowded corner beside the Nano.</p>
+<p>The electrical argument points the same way. A star splits one output into four lines at a single point, which is an impedance step with four unterminated stubs hanging off it. This topology can introduce ringing on a clock edge, degrading the clock signal. Skew is not a reason to prefer the star here, because <code>LOAD</code> latches data that took microseconds to shift in, and the few hundred picoseconds between cell 1 and cell 4 are very small to worry about. Star routing matters most on buses where arrival times must match to within a fraction of a clock period. This is not one of those.</p>
+<p>What the chain does not have to be is symmetrical, and on this board it is not (Figure 7.55). The two signals take opposite sides of the display band and different layers, and the reason is in the driver’s pinout. The MAX7219 brings <code>LOAD</code> out on pin 12, along its south edge, and <code>CLK</code> out on pin 13, along its north edge. Each signal leaves on the side it is already on.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-CLK-LOAD-routed.png" style="width:100.0%" /></p>
+<p>Figure 7.55: <code>CLK</code> and <code>LOAD</code> routed, on opposite sides of the display band. <code>LOAD</code> runs below the band on the back copper without a single via, because the drivers are on the back and the Nano’s header is through-hole, so both ends of every hop are already there. <code>CLK</code> runs above the top matrix pin row on the front, because the back copper north of the drivers is full of the sixteen runs each cell needs, and drops through one via at each driver to reach pin 13.</p>
+<p>The <code>LOAD</code> track is the tidier of the two. Every device it touches is reachable from the back. The four drivers are surface-mount parts on <code>B.Cu</code>, and <code>A1</code>’s header is through-hole. So <code>LOAD</code> runs the whole way on the back and uses <strong>no vias at all</strong>. It also forks rather than running end to end, because the Nano’s <code>LOAD</code> pin sits between <code>U1</code> and <code>U2</code>; the chain goes west to <code>U1</code> and east to the other three from the point where it arrives. A chain fed from the middle is still a chain, and here it saves about 19 mm of doubling back.</p>
+<p>The <code>CLK</code> track could not do the same. Pin 13 is on the drivers’ north edge, and the back copper north of the drivers is where the sixteen driver-to-matrix runs live, so there was no room. The front, though, is empty in the narrow strip above the top row of matrix pins, and that is where <code>CLK</code> goes. Up the left margin from the Nano, then east along that strip, dropping through a via at each driver in turn. It clears the pin row by 0.425 mm the whole way. Four vias against <code>LOAD</code>’s zero is not a worse result. It is what the pinout costs on that side, and paying it on the front is cheaper than trying to find room on the back.</p>
+<p><strong>Shared wiring 5, the cascade.</strong> All four runs are <code>Default</code> class at 0.25 mm, and there is nothing to decide about width or current here. What there is to notice is where each one changes layer, and the driver’s pinout decides that as surely as it decided the shape of <code>CLK</code> and <code>LOAD</code>.</p>
+<p><code>DIN</code> is pin 1 and <code>DOUT</code> is pin 24, which on a rotated MAX7219 puts them at the same end of the package: <code>DIN</code> at the east end of the driver’s south pad row, <code>DOUT</code> directly above it at the east end of the north row, 9.3 mm apart. A link therefore starts at the top of one driver and has to arrive at the bottom of the next, 20 mm east. It leaves <code>DOUT</code> on the back, rises through a via in the seam between two matrices, runs down the front through that seam, heads east under the next matrix in the strip below its bottom pin row, and drops through a second via into that driver’s <code>DIN</code>. Two vias per link, six for the three of them. <code>DIN1</code> needs one, because it starts at the Nano’s through-hole header and can stay on the front until the via beside <code>U1</code>.</p>
+<p>Notice what the three band-crossing signals have between them now. <code>CLK</code> on the front above the top pin row, the cascade on the front below the bottom pin row, and <code>LOAD</code> on the back below the band. Three lanes, and no two signals have to share one. Each signal is where its own pin put it.</p>
+<p>Route <code>DIN1</code> into <code>U1</code>, then route <code>LINK1</code> in full, from <code>U1</code>’s <code>DOUT</code> all the way into <code>U2</code>. Then stop drawing, because the two links left are the same shape as the one you have just drawn.</p>
+<p><strong>Finishing the other cells.</strong> Open “Tools”, then “Multi-Channel”, then “Repeat Layout…” again (Figure 7.56). This copy is routing only, so clear “Copy footprint placement”: the parts are already where the step 4 copy put them, and only the tracks drawn since then need to travel. Leave “Copy routing” and “Include locked items” ticked, and leave “Copy other items” unchecked for the reason step 4 gave.</p>
+<p>It takes two passes rather than one, with the second pass targeting the last three groups. Take <code>Group DS1</code> as the reference to begin with, targeting the other three. That carries across everything cell 1 gained while you were drawing the shared wiring: the <code>CLK</code> via and its stub to pin 13, the <code>LOAD</code> hop, the <code>+5V</code> joins and the link leaving <code>DOUT</code>. What it cannot carry is the traverse that brings a link across underneath a matrix, because cell 1 has no such run. What crosses under <code>DS1</code> is <code>DIN1</code> arriving from the Nano, on a different line and from a different direction. So run the tool a second time with <code>Group DS2</code> as the reference and <code>DS3</code> and <code>DS4</code> as the targets. Cells 2, 3 and 4 are alike in the way cell 1 is not, and this is the pass that gives cells 3 and 4 their link-in.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-repeat-multichane-finish.png" style="width:85.0%" /></p>
+<p>Figure 7.56: The second time through this dialogue, copying routing only. The reference is <code>Group DS1</code> again and all three targets still report “OK”, but “Copy footprint placement” is unchecked, because the parts were placed by the first copy and only the tracks drawn since then need to travel. “Copy other items” is unchecked as well, so that the reference group’s name stays with the reference instead of being handed to all four cells.</p>
+<p>Then inspect what it did, because some of it will be wrong (Figure 7.57). The damage clusters where the rule areas meet, which is where the links cross, and it takes two forms. One is a hop that arrives broken, a track stopping short of the pad it was drawn to reach. The other is a track that is present but damaged, and that one is worth being careful about. A broken track shows up in the “Unrouted” count, while a damaged one can pass every check you run and still be wrong. Read each boundary with your eyes as well as with the DRC.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-repeat-multichane-bug.png" style="width:85.0%" /></p>
+<p>Figure 7.57: Two faults left behind by a repeat copy, both within a millimetre or two of the boundary between two cells’ rule areas, which runs down the middle of the frame. At the top, the link between the two cells arrives broken. At the bottom, another link track is damaged rather than missing, which is the kind that a clean “Unrouted” count will not tell you about. Both are repaired by hand.</p>
+<p>Repair both by hand, and do the repairs after both copies rather than between them. “Repeat Layout” reads the reference as it stands every time it runs, which is what makes it worth using twice, and it also means a repair made inside a target cell is not protected from the next run. If you go back and change the reference again, expect to repair again.</p>
+<h3 id="sec:c07-cell-differences">What the Copy Cannot Make Identical</h3>
+<p>The four cells on the finished board are not perfect copies of one cell. Two of the differences are real and intended, one at each end of the cascade. A third kind of difference is damage, and it turns up wherever two cells meet. Each of the three calls for a different response. One needs nothing at all from you. Another needs a deletion that no check on this board will ask for. The last is the damage Figure 7.57 has already shown you.</p>
+<ol type="1">
+<li><strong>Cell 1 is unlike the others at its input.</strong> <code>U1</code> takes its data from the Nano’s D11 on the net <code>DIN1</code>, while <code>U2</code>, <code>U3</code> and <code>U4</code> take theirs from the previous cell’s <code>DOUT</code>, on <code>LINK1</code>, <code>LINK2</code> and <code>LINK3</code>. That is the difference that made a second “Repeat Layout” pass necessary, seen now from the other side. The run arriving at <code>U1</code> comes from the south-west and crosses under <code>DS1</code> on a line of its own, and no amount of copying will make it resemble the three that follow it. Cell 1 is the reference, so there is nothing to repair here. There is only something not to be alarmed by.</li>
+<li><strong>Cell 4 is unlike the others at its output, and this one you do have to fix.</strong> <code>U4</code>’s <code>DOUT</code> on pin 24 is the end of the chain, so it goes nowhere. The schematic left it bare back in Figure 7.20, and the netlist records it as <code>unconnected-(U4-DOUT-Pad24)</code>. The first copy pass, though, took cell 1 as its reference, and cell 1 has a link leaving <code>DOUT</code>. Every target cell therefore received one, including the last, so <code>U4</code> now carries a short track running out of pin 24 towards a fifth cell that does not exist. Delete it.</li>
+<li><strong>Every boundary between two cells needs reading by eye.</strong> There are three of them, one per link, and each is the kind of place Figure 7.57 came from. Work along the display band from west to east and check each hop twice: once for the break that the “Unrouted” count will show you, and once for the damage that it will not.</li>
+</ol>
+<p>Item 2 is worth a moment on its own, because finding it is the most transferable thing in this section. The “Unrouted” count will not move, since an unrouted count measures connections that are missing and this is copper that is surplus. The DRC will not object either, because a stub of legal width on a legal net at a legal clearance is legal. Both checks are working correctly and both are silent. The only thing that finds this track is you, reading the end of the chain and asking what it is for. Figure 7.57’s damaged link makes the same point from the opposite direction: a fault that breaks something is reported, and a fault that merely adds something is not.</p>
+<p>What you should not do is tidy up the rest. Four cells repaired by hand at three different boundaries do not come out to identical coordinates, and on my board they did not. The ground stitch beside each driver sits a few tenths of a millimetre from where its neighbours’ sit, one cell’s version of it is drawn with one segment fewer than the others, and here and there a drag has left behind a fragment of track a fraction of a millimetre long. None of that costs anything, because all of it is legal copper on the right net, and the surest way to disconnect a track you have just repaired is to drag it again so that it matches its neighbour. Symmetry is worth having while you draw, and it is not worth pursuing once you have made repairs.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Cell</th>
+<th>What is unique to it</th>
+<th>What you do about it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>U1</code></td>
+<td>Fed by <code>DIN1</code> from the Nano rather than by a link from a neighbour</td>
+<td>Nothing to repair. Read its one boundary</td>
+</tr>
+<tr>
+<td><code>U2</code></td>
+<td>Nothing structural. It is the reference for the second pass</td>
+<td>Read its two boundaries</td>
+</tr>
+<tr>
+<td><code>U3</code></td>
+<td>Nothing structural</td>
+<td>Read its two boundaries</td>
+</tr>
+<tr>
+<td><code>U4</code></td>
+<td><code>DOUT</code> on pin 24 ends the chain and connects to nothing</td>
+<td>Delete the link-out stub the copy gave it, then read its boundary</td>
+</tr>
+</tbody>
+</table>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-DIN-LINK-completed.png" style="width:100.0%" /></p>
+<p>Figure 7.58: The cascade complete, with the arrows following the data from the Nano through all four drivers. <code>DIN1</code> leaves the header on the front and crosses to the back through a single via beside <code>U1</code>. Each link after it repeats one shape: up from <code>DOUT</code> at the top of a driver, down the front through the seam between two matrices, east under the next matrix below its bottom pin row, and back down into that driver’s <code>DIN</code>. The buttons are still unrouted here.</p>
+<p><strong>Shared wiring 6, the buttons.</strong> <code>MODE</code> and <code>SELECT</code> go back to the Nano’s <code>D2</code> and <code>D3</code>. The supply side of both pull-ups was picked up while routing the <code>+5V</code> rail, so this is two signal runs and the end of the routing (Figure 7.59).</p>
+<p><code>R5</code> and <code>R6</code> are surface-mount parts on the front, so each signal begins there, running from the pull-up’s signal pad to its switch. <code>SW2</code> and <code>SW3</code> are through-hole, with two pads carrying the signal on pin 1 and two carrying <code>GND</code> on pin 2. The run from the Nano arrives on the back at one of those pin 1 pads, and the pull-up meets it on the front at the same pad. That is where the layer change happens. A pad that goes through the board belongs to both layers, so no via is needed to use it as one. The <code>GND</code> pads on pin 2 are left alone; the pour will collect them.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-buttons.png" style="width:100.0%" /></p>
+<p>Figure 7.59: <code>MODE</code> and <code>SELECT</code> routed, and the board is down to its ground connections. Each signal runs on the front from its pull-up to the switch, and on the back from that same switch pad west to the Nano, changing layer inside a through-hole pad rather than at a via. The <code>+5V</code> rail crosses the same corner of the board on the front without either signal having to give way to it.</p>
+<p>Keep going until the “Unrouted” count in the status line at the bottom left holds steady at the <code>GND</code> connections you are deliberately leaving for the pour (Figure 7.60).</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-GND-zone.png" style="width:100.0%" /></p>
+<p>Figure 7.60: The board with every net routed but one. The wide <code>Power</code>-class rail leaves <code>J1</code> through <code>Q1</code> at the right, drops past the Nano, and goes the long way round the bottom edge and up the left margin to its single via west of <code>DS1</code>. <code>CLK</code> runs above the display band and <code>LOAD</code> below it, and the three cascade links hop from cell to cell between them. Those rails are visibly wider than everything around them because of a class you defined before the first symbol was placed, not because you chose a width while routing. The thin lines still showing are <code>GND</code>, and they are what the pour is for. The rectangle just inside the board outline is the zone boundary from the next step, already drawn here.</p>
+<p><strong>Step 5, add copper fills.</strong> Pour <code>GND</code> on both copper layers. Two reasons apply here, and both come from the power budget. The first is that this board returns up to 1.3 A to its source, and a pour is the widest conductor a two-layer board can offer. The second is that the four drivers sit on the back, each drawing a 320 mA burst several thousand times a second, and each of them needs the shortest possible path to ground.</p>
+<p>Draw one copper zone for the GND. A single zone object fills on as many copper layers as you tick, so take the “Add Filled Zone” tool from the right-hand toolbar, or press “Ctrl+Shift+Z”, and click once inside the board outline. The Copper Zone Properties dialogue opens on that first click, before you have drawn anything else, and that is where you tick both <code>F.Cu</code> and <code>B.Cu</code> in the layers list at the left and set “Net name” to <code>GND</code> (Figure 7.61). Accept it, place the remaining corners a millimetre or so inside the board edge, and double-click to close the outline. Each layer fills independently, and both carry the same net.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-GND-copper-zone-properties.png" style="width:85.0%" /></p>
+<p>Figure 7.61: The Copper Zone Properties dialogue as this board’s ground pour is set up. The layers list at the left is a column of tick boxes rather than a single choice, and both <code>F.Cu</code> and <code>B.Cu</code> are ticked, so one outline produces both fills. “Net name” is <code>GND</code>. Of the settings below, three decide the shape of what you are about to see: the clearance, the minimum width, and “Remove islands”, which is set to “Always”.</p>
+<p>Three of those settings deserve a moment before you fill, because between them they decide what the pour will look like:</p>
+<ol type="1">
+<li><strong>Clearance, 0.2 mm.</strong> This is the gap the fill keeps from copper on other nets. It is not the last word, though: <code>GND</code> is in the <code>Power</code> class, which asks for 0.3 mm, and where a zone setting and a class setting disagree KiCad takes the larger. The fill will keep 0.3 mm whatever this field says.</li>
+<li><strong>Minimum width, 0.25 mm.</strong> Any neck of copper the fill would have drawn thinner than this is dropped instead of drawn. This is the setting that decides whether the fill reaches between two tracks or stops short of the gap.</li>
+<li><strong>Remove islands, “Always”.</strong> After filling, any area of the zone that reaches no pad on the zone’s net is deleted. Not flagged, not left in place for you to judge: deleted.</li>
+</ol>
+<p>Below them, “Pad connections” is left at “Thermal reliefs” with a 0.5 mm gap and 0.5 mm spokes, which is the hand-soldering choice Volume 1 argued for, and which is why every ground pad on this board joins its pour through four short spokes rather than being swallowed by it.</p>
+<p>Now press “B” and look at the result rather than assuming it. A pour is the one piece of copper on the board that you do not draw, which makes it the one whose shape you have not decided in advance.</p>
+<p>The first fill on this board will look incomplete (Figure 7.62). Across the whole display band, on both layers, most of the copper is simply not there. The three settings above are the whole explanation. The sixteen driver-to-matrix runs in each cell, crossed by the <code>+5V</code> chain, cut the band into slivers; the minimum width dropped the thinnest of them before they were ever drawn; and of the ones that were drawn, the ones that reached no ground pad were removed as islands. What comes back on the back copper inside the band is seven small scraps. Nothing anywhere reports this. Island removal is not a violation, so it appears in no check and no count. The missing copper is an indicator that what the fill drew there reached no ground pad, so it was removed.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-gnd-zone-islands.png" style="width:100.0%" /></p>
+<p>Figure 7.62: The first fill, with the box marking what to look at. Outside it the pour fills as expected: round the Nano, the buttons and the connector on the front, and across the back wherever the routing leaves it room. Inside it, running the full width of the display band, the copper is gone on both layers. Nothing removed it in error. The sixteen tracks each cell needs, crossed by the <code>+5V</code> chain, left slivers that reached no ground pad, and “Remove islands: Always” deleted them.</p>
+<p>The front is split as well, and less visibly. The main front plane has a sizeable region sitting under the middle of the board, cut off from it. Two smaller front regions come out separated too, and finding those is the reason to read the whole board rather than only its busy third. One around the buttons and <code>Q1</code>, and one around <code>J1</code>. Neither of those two is an island in KiCad’s sense, so island removal leaves both alone and no report mentions either. Both are connected. Each is connected by exactly one through-hole pad, <code>SW1</code>’s ground pin for the first and <code>J1</code>’s shield tabs for the second, and a region of copper held to the rest of the ground system by a single pad passes every check this board can run while depending on that one pad for its connection to ground.</p>
+<p>There are two things to do about all of this. The first is to move whatever is cutting the copper apart (Figure 7.63). The pour goes where the routing lets it go, so the routing is what has to change. I re-drew <code>DIN1</code> and the three <code>LINK</code> runs by hand, and nudged the tracks and vias around them to make the room those new paths needed. With this adjustment, both layers gain ground copper, and the cut-off region under the middle of the board stops being a region at all, because it joins the main plane. Inside the band, the three front pieces grow noticeably, and the back’s seven scraps become ten larger fragments. The board gained all of that by moving twenty-odd tracks, not by adding a single one.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-reworked-and-complete.png" style="width:100.0%" /></p>
+<p>Figure 7.63: The routing after the rework, with the zone fills hidden so that the tracks can be read. Compare the cascade here with Figure 7.58: <code>DIN1</code> and the three <code>LINK</code> runs take different paths now, and the tracks and vias beside them have been nudged aside to make room. The small circles scattered through the display band are the new ground stitching vias. Figure 7.58 is not wrong, it is earlier: it shows the cascade as first routed, and this is what the pour asked for in return.</p>
+<p>Refill the fill again after that and it is still in pieces. The back-side pour is in eleven separate pieces, because the sixteen tracks each cell needs and the <code>+5V</code> chain crossing the width of the band have to run somewhere. Each driver’s two ground pins land on one piece and that same cell’s two decoupling capacitors land on a different one, so the return path from a capacitor to the chip it is decoupling leaves the back copper, crosses to the front and comes back. This is what the two ground vias per cell in Figure 7.47 are actually for, and it is why we’ll have to use stitching vias next.</p>
+<p>The second is to stitch what survives, placing the vias where the fill needs them. This board went from 8 ground vias to 34. Two of the new ones sit outside the band, one in the button and <code>Q1</code> region and one beside <code>J1</code>, and those two retire the single-pad dependencies. The rest go inside the band, seven to nine per cell, until every surviving piece of pour on either layer has its own tie to the other side. Drop each one on bare pour with the free-via tool and it picks up <code>GND</code> from the copper beneath it without your typing the net, which is the behaviour Chapter 4’s via stitching section describes.</p>
+<p>Press “B” afterwards and read the pour again, and expect it to look exactly as it did before, because a stitching via changes nothing about the shape of the copper it sits in. The two front regions outside the band are still two regions, still separate from the front plane. What has changed is where each one goes next. Instead of leaving through one pad, each now drops straight into the back plane, which is the piece of copper that carries the current anyway. Bonding a region to the other layer is what stitching does. Stitching ties layers together, and routing decides the shape of the copper on each one.</p>
+<p>KiCad does not refill a zone by itself, so press “B” after every change, before you check anything or export anything. Press it once more now, and the copper is finished. Read the two layers separately when you do, one at a time in the appearance panel rather than both stacked (Figures 7.64 and 7.65). Stacked, this board looks like a solid sheet of ground with some tracks on it. Taken a layer at a time, it looks like what it is.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-pour-top.png" style="width:100.0%" /></p>
+<p>Figure 7.64: The finished pour on the front copper, with the back hidden. Everywhere outside the display band it is one plane, and the wide <code>Power</code>-class rail crossing it stands out for the reason it always has: a class you set before the first symbol was placed. Two smaller regions in the lower right are separate pieces rather than part of that plane, one around the buttons and <code>Q1</code> and one around <code>J1</code>, and the gaps that separate them are narrow enough that you will not find them by looking. That is the whole problem with a fill you have only glanced at. Inside the band, the front copper is in three pieces, sitting across the seams between the matrices, which is where the sixteen tracks per cell leave room for it.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-pour-bottom.png" style="width:100.0%" /></p>
+<p>Figure 7.65: The same board, back copper only. This is the layer that carries the return current, and everywhere outside the display band it is a single unbroken plane. Inside the band, the sixteen driver-to-matrix runs in each cell and the <code>+5V</code> chain crossing them leave ten fragments, and each cell’s driver sits on a different fragment from its own decoupling capacitors. Compare this with the same band in Figure 7.62, where the first fill left seven much smaller scraps, and the difference is what re-routing <code>DIN</code> and the links bought.</p>
+<p><strong>Step 6, the design rules check.</strong> Run the DRC from the “Inspect” menu with “Refill all zones before performing DRC” ticked, and read what comes back rather than counting it, exactly as you did with the ERC. Three things on this board come up.</p>
+<p>The first is that four matrices placed at exactly 20.0 mm put four courtyards side by side with nothing between them, and a courtyard overlap is a violation. The project’s footprint insets its courtyard to 19.9 mm for precisely this reason, which leaves 0.1 mm of space between neighbours, so the check raises no violation here. A catalogue footprint drawing a full-body courtyard would report three overlaps here, and you would have to decide whether to edit the footprint or widen the gaps between the matrices. That is the result of choosing this footprint.</p>
+<p>The second is the four mounting holes. Four parts with no symbol behind them ought to be four complaints, and the “Schematic Parity” tab reports seven. Four of them are “Extra footprint”, one per hole, which is the expected one. The board holds a footprint the schematic doesn’t know. The other three are “Duplicate footprints”, and they are a second-order effect of the first. A mounting hole is placed straight onto the board rather than pulled through from a symbol, so nothing ever gave it a reference designator, and all four still read <code>REF**</code>. KiCad compares designators, finds the same one four times over, and reports three collisions. So a warning about duplicates is really a report of four parts with no designator at all. The same pair of messages turns up together on every board that carries board-only parts. Read each of the seven, satisfy yourself that it is a hole you placed, and leave it or exclude it as you prefer.</p>
+<p>The third is a check on your own work, and it is the only one you have to break something to see. Pick a stretch of <code>+5V</code> somewhere convenient, select it, and set its width to 0.25 mm in the Properties panel (Figure 7.66). Any stretch will do; the one in the figure is a 3.3 mm run on the back copper between <code>Q1</code> and the first cell.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-5V-thinned.png" style="width:85.0%" /></p>
+<p>Figure 7.66: Breaking the board on purpose. The Properties panel edits the selected track directly, and setting “Width” to 0.25 mm leaves the thinned stretch visibly narrower than the <code>+5V</code> running either side of it. Nothing objects at the moment you type it, which is the point: the board editor will let you draw an underweight power track all day, and only the DRC will report it.</p>
+<p>Now run the DRC again (Figure 7.67). The custom rule you typed during board setup fires, and the report names it, so you are not left to work out which constraint objected. Put the width back and the violation goes away. Doing this once turns that rule from something you typed into something you have seen work, and it is far cheaper to learn it here than on a board where the rule is the only thing standing between you and an underweight power track.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-5V-thinned-drc-error.png" style="width:100.0%" /></p>
+<p>Figure 7.67: The DRC reporting an error. The error reports a track width problem, the rule that caught it is named in the message as <code>Power minimum width</code>, and the two numbers are the constraint and the offence, 0.8000 mm required against 0.2500 mm found. The line beneath identifies the track itself, <code>+5V</code> on <code>B.Cu</code>, 3.3000 mm long. That is what a custom rule buys you over a global constraint: the report tells you which of your own rules objected, rather than reporting a bare minimum-width failure you then have to trace back to a setting.</p>
+<p>Fix, refill, re-run, and repeat until the report is clean (Figure 7.68). On a board with this many nets that loop takes a few passes, and every pass is cheaper than the first prototype.</p>
+<p>Be clear about what “clean” means here. In this project, “clean” means zero violations, zero unconnected items, and seven warnings you have read and can account for.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-routed-drc-clean.png" style="width:85.0%" /></p>
+<p>Figure 7.68: The check that ends the layout. “Violations” and “Unconnected Items” both read zero, which is the pair that decides whether the board can be made. The seven entries under “Schematic Parity” are the mounting holes, four reported as extra footprints and three as duplicate designators, and they are shown here as they arrive rather than excluded. Notice that there is no mention relating to the four courtyards placed along the display band, which is the custom footprint’s inset courtyard doing its job without raising a violation.</p>
+<p><strong>Step 7, add text and silkscreen.</strong> Most of your silkscreen arrived with the footprints, as reference designators, and on a board of thirty-two parts they will be larger than you want. Restyle them in one pass with “Edit” then “Edit Text and Graphic Properties”, scoping the change to reference designators and setting a single size for all of them. This board uses 1 mm high with 0.15 mm strokes, which is comfortably above the 0.762 mm at 0.125 mm floor that arrived with the fabricator’s constraints during board setup, and small enough that thirty-two of them fit without overlapping.</p>
+<p>The matrices need nothing beyond that. The footprint carries no silkscreen body outline at all, and that is deliberate, for the same reason as the inset courtyard. Four body outlines butted against each other would overlap, and silkscreen printed over a neighbour’s silkscreen is a violation on most fabricators’ rules. What it does carry is the two marks that matter. Its own reference designator sits clear of the body, so that a 20 mm part does not print its label underneath itself, and a filled dot marks pin 1. So <code>DS1</code> to <code>DS4</code> label themselves above the display band, and each one tells an assembler which way round it goes. That is the fifth time in this chapter that choosing the part carefully has made the work easier, after the free seam between cells, the <code>*ROW*</code> pattern, the clear channel for <code>+5V</code>, and the courtyard that raises no violation.</p>
+<p>What does need your attention is the parts that came from nowhere. The four mounting holes and the three logos were placed straight onto the board rather than pulled through from a symbol, so none of them was ever given a designator, and all seven print <code>REF**</code> on the silkscreen. Open each one’s properties and untick “Show” on the reference field. Be clear about what that does and does not fix. It takes the text off the layer that gets printed, but the part still has no designator, so the seven “Schematic Parity” entries you read in step 6 remain exactly as they were. You are tidying the artwork, not addressing the DRC violations.</p>
+<p>Finish with the labels a human needs to use the board (Figure 7.69). Give the board its name and version. Put <code>MODE</code> and <code>SELECT</code> under their buttons, and <code>ON</code> and <code>OFF</code> either side of the slide switch, so that its position means something. Beside <code>J1</code>, print what the board expects of its supply, <code>POWER</code> and <code>5V 1.5A MIN</code>, so that the requirement travels with the hardware rather than living only in the schematic’s text notes. Then label the module and the socket at the far edge, <code>Arduino Nano</code> under <code>A1</code> and <code>DATA</code> beside its USB port.</p>
+<p>This board has two USB sockets, and only one of them feeds it with power. Place the text <code>POWER</code> at one end and <code>DATA</code> at the other in the front silkscreen.</p>
+<p>The driver designators need no work either, because <code>U1</code> to <code>U4</code> came through onto the back silkscreen with their footprints, along with the decoupling capacitors. Check they are legible rather than moving them.</p>
+<p>Logos go on last, and they are footprints rather than text. KiCad ships the Open Source Hardware mark and its own logo in the <code>Symbol</code> library, so you place them exactly as you placed the mounting holes. A logo of your own is made from a bitmap with the Image Converter and saved into a project library, which is where this board’s Tech Explorations mark comes from. All three are graphics on a silkscreen layer, which is why they cost nothing to fabricate, and why they arrive carrying a <code>REF**</code> of their own.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-silkscreen.png" style="width:100.0%" /></p>
+<p>Figure 7.69: The finished silkscreen. <code>DS1</code> to <code>DS4</code> sit above the display band because the footprint puts them there, not because you placed them, and the small dot at the lower left of each matrix marks pin 1. <code>POWER</code> and <code>5V 1.5A MIN</code> at the right label <code>J1</code>; <code>DATA</code> at the left labels the Nano’s own socket; between them they answer the one question an assembler is most likely to get wrong.</p>
+<p><strong>Step 8, view in 3D and generate the Gerbers.</strong> Open the 3D Viewer from the “View” menu, and the first thing to look at is the display band. Four separate parts should read as one screen, and if they do, the placement work at the start of step 3 did its job (Figure 7.70).</p>
+<p>The second thing you will notice, the first time you do this, is that the Arduino Nano is not there. Nothing you did caused that, and it is worth a few minutes of your attention, because it is a situation you will meet again. The stock <code>Module:Arduino_Nano</code> footprint does carry a 3D model reference, pointing at <code>Module.3dshapes/Arduino_Nano_WithMountingHoles.step</code>. KiCad’s 3D model library does not ship that file. So the footprint holds a path to a model that does not exist, the viewer finds nothing to draw, and nothing anywhere reports a problem.</p>
+<p>A missing model and a broken path look identical from the outside, and there is exactly one place that tells them apart. Open <code>A1</code>’s Footprint Properties and go to the “3D Models” tab. A footprint with no model at all shows an empty list. This one shows a path in the list and an empty preview beside it, and that combination is what a dangling reference looks like.</p>
+<p>The repair is in the project files, and there are two routes to it. The finished project takes the first. Keep the stock footprint and enter the model path yourself, on the “3D Models” tab you are already looking at, pointing it at a VRML model of the Nano built from Arduino’s own open-source KiCad project. Alongside the path, the board sets the offset and rotation that stand the model up and turn its USB socket towards the <code>DATA</code> label. A second route is <code>klp5e-ch07:Arduino_Nano</code>, a copy of the stock footprint that carries the same model reference inside the footprint itself, so that changing <code>A1</code>’s footprint is all you have to do. Note that the two do not currently agree on the transform, so the library route puts the Nano flat on the board and turned around; if you take it, expect to adjust the rotation on the “3D Models” tab afterwards.</p>
+<p>One trade-off comes with that fix. VRML models are for display only, so exporting this board to STEP will not include the Nano’s body. That is acceptable here, because the mechanical question this board actually poses is whether anything collides under the display band, and the Nano is nowhere near it. On a board where the Nano’s height decided whether a lid closed, you would want a STEP model instead.</p>
+<p>Since <code>A1</code> is the only part on this board that asks anything of you, it is worth seeing where the other thirty-one get their models from. Stock footprints arrive with theirs already attached, and the location follows a pattern rather than a lookup. The model library is the footprint’s own library name with <code>.3dshapes</code> on the end, sitting under <code>${KICAD10_3DMODEL_DIR}</code>, and the file inside carries the footprint’s own name with a <code>.step</code> extension. So the resistors, whose footprints come from <code>Resistor_SMD</code>, take their model from <code>Resistor_SMD.3dshapes</code>, from a file named after the footprint. The table below is the whole board, keyed on the parts rather than repeating the footprint names from step 6.</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 35%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th>Parts</th>
+<th>3D model library</th>
+<th>Model file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>U1</code>–<code>U4</code></td>
+<td><code>Package_SO.3dshapes</code></td>
+<td><code>SOIC-24W_7.5x15.4mm_P1.27mm.step</code></td>
+</tr>
+<tr>
+<td><code>R1</code>–<code>R10</code></td>
+<td><code>Resistor_SMD.3dshapes</code></td>
+<td><code>R_0603_1608Metric.step</code></td>
+</tr>
+<tr>
+<td><code>C1</code>, <code>C3</code>, <code>C5</code>, <code>C7</code></td>
+<td><code>Capacitor_SMD.3dshapes</code></td>
+<td><code>C_0603_1608Metric.step</code></td>
+</tr>
+<tr>
+<td><code>C2</code>, <code>C4</code>, <code>C6</code>, <code>C8</code></td>
+<td><code>Capacitor_SMD.3dshapes</code></td>
+<td><code>C_0805_2012Metric.step</code></td>
+</tr>
+<tr>
+<td><code>Q1</code></td>
+<td><code>Package_TO_SOT_SMD.3dshapes</code></td>
+<td><code>SOT-23.step</code></td>
+</tr>
+<tr>
+<td><code>J1</code></td>
+<td><code>Connector_USB.3dshapes</code></td>
+<td><code>USB_C_Receptacle_GCT_USB4125-xx-x-0190_6P_TopMnt_Horizontal.step</code></td>
+</tr>
+<tr>
+<td><code>SW1</code></td>
+<td><code>Button_Switch_THT.3dshapes</code></td>
+<td><code>SW_CK_JS202011AQN_DPDT_Angled.step</code></td>
+</tr>
+<tr>
+<td><code>SW2</code>, <code>SW3</code></td>
+<td><code>Button_Switch_THT.3dshapes</code></td>
+<td><code>SW_PUSH_6mm.step</code></td>
+</tr>
+<tr>
+<td><code>DS1</code>–<code>DS4</code></td>
+<td><code>${KIPRJMOD}/Libraries/3D</code></td>
+<td><code>TA08-81GWA.step</code></td>
+</tr>
+<tr>
+<td><code>A1</code></td>
+<td><code>${KIPRJMOD}/Libraries/3D</code></td>
+<td><code>Arduino_Nano_v3.wrl</code></td>
+</tr>
+<tr>
+<td>Mounting holes, logos</td>
+<td>None</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p><code>DS1</code> to <code>DS4</code> use a manufacturer’s STEP model that was authored for a different footprint’s orientation, so the book’s footprint turns it −90° about the X axis on the “3D Models” tab to stand it upright. <code>A1</code> is the dangling reference above, and its <code>.wrl</code> extension is the VRML trade-off you just read about. The mounting holes and the logos have no model because there is nothing to draw: a hole is an absence, and a logo is ink.</p>
+<p>With every model in place, look at the board from both sides. The front is the one you have been building toward (Figure 7.70), but the back is the one worth studying (Figure 7.71), because that is where the drivers are and where a placement mistake would still be hiding.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-3D-front.png" style="width:85.0%" /></p>
+<p>Figure 7.70: The board from the front, with the Nano’s model repaired. The four matrices read as one continuous 32 × 8 display, which is what the exact 20.0 mm pitch was for, and the Nano now sits raised on its headers with its microcontroller, USB socket, reset button and pin rows all present. Every connector is reachable from outside the board, every label can be read, and nothing collides with anything. The “Appearance” panel on the right is where you decide what the render is allowed to show you.</p>
+
+<p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-3D-back.png" style="width:85.0%" /></p>
+<p>Figure 7.71: The same board from the back, which is the half of it that does the work. All four <code>MAX7219</code> drivers and all eight decoupling capacitors live here, tucked under their own matrices, and this is the view that confirms they sit clear of the four rows of through-hole matrix pins coming through from the front. Note what the render does to the back silkscreen: <code>C1</code> to <code>C8</code> are readable because an 0603 is small, while <code>U1</code> to <code>U4</code> are half-covered by the driver bodies sitting on top of them. That is not a fault to go and fix. A reference designator is placed to be read on the bare board, which is when anyone needs it, and a populated view hiding some of them is only the 3D viewer telling you the truth about assembly.</p>
+<p>Both of those views came out of the “Appearance” panel down the right-hand side, which is what turns the viewer from a picture into an instrument. The upper list switches individual layers on and off. Board body, front and back copper, both silkscreens, mask, paste and the user layers. Below it sits a second group that filters by kind of model rather than by layer, covering through-hole models, SMD models, virtual models, models missing from the position file, models marked “do not populate”, and the bounding boxes. Values, references and footprint text have their own switches too. Each of those is a different question you can ask the board. Turn the board body off and you can see what sits underneath the display band. Show through-hole models only and you can check that every part a human has to plug into or press is reachable from outside. Show bounding boxes and you get a rough answer on height before you have a real mechanical model at all.</p>
+<p>Finally, plot the Gerbers and the drill file from the “File” then “Plot” dialogue, exactly as you did in Volume 1’s Chapter 8. Two settings in the drill dialogue are easy to overlook and are the ones a fabricator actually cares about. The first is “PTH and NPTH in single file”, which you tick. The second is “Zeros”, which you set to “Decimal format”. KiCad’s default suppresses the leading zeros in each coordinate, and a quote page that cannot read your drill file will tell you the file is invalid without telling you why.</p>
+<p>Take a moment over what that folder now holds. You have laid out a thirty-two part, two-layer board carrying 256 LEDs, and of its four identical cells you placed one and routed one. The other three came from a tool. That is the difference this chapter set out to show you, and it is the same difference whether a board repeats itself four times or forty.</p>
+<h2 id="sec:c07-k10-features">The KiCad 10 Features This Board Puts to Work</h2>
+<p>The repetition in this board is what makes it a showcase for KiCad 10’s reuse and precision tools, so this is the project where I introduce them properly. Here they are gathered in one place, now that you have used all four:</p>
+<ul>
+<li><strong>Design blocks</strong> let you capture one cell’s schematic and drop the whole thing back in as a unit, which is what the schematic half of this chapter was built around. KiCad 10 extends the idea to the board as well, so that a block can carry its layout placement and routing along with its circuit. This board did not need that second form, because its four cells were already on the sheet by the time the layout began, and a board design block is at its best when you lay out one cell before the copies exist. Chapter 10’s recipe walks through it on a board built that way round.</li>
+<li><strong>Multi-channel design</strong> treats the four cells as repeated channels of the same circuit, which is how you placed and routed three of them without drawing a track. It is also how a later change to one cell is pushed to the others rather than edited four times, since “Repeat Layout” reads the reference as it currently stands every time you run it.</li>
+<li><strong>Precision positioning</strong> puts each matrix at an exact offset from a corner you chose, rather than at the nearest point some grid allows, which is the only reason the four panels read as one display.</li>
+<li>The <strong>3D viewer</strong> let you confirm the array looked right, and that nothing collided, before you committed to ordering it. It also showed you a footprint holding a path to a 3D model that does not exist, which is a fault worth being able to recognise.</li>
+</ul>
+<p>The last three all belong to the layout half of the chapter, because they are all answers to questions that only come up once the parts are physical.</p>
+<h2 id="sec:c07-next">What You’ll Carry Into the Capstone</h2>
+<p>By the end of this project you will have taken a busy, repetitive board from schematic to 3D preview, and you will have done it without hand-drawing a single duplicated cell. That held on both sides of the workflow. On the sheet, one design block gave you four wired cells; on the board, one routed cell and a correctly chosen anchor gave you four laid-out ones, with the exact 20.0 mm pitch carried through the copy rather than approximated by it. You will also have met the trap that repetition sets. A design block reproduces its labels verbatim, so the links between cells have to be named after the stamping rather than before it, and a tidy horizontal wire from one cell’s <code>DOUT</code> to the next cell’s <code>DIN</code> shorts the whole chain without the ERC saying a word. The only thing that catches that is reading the netlist, which is why this chapter would not let you leave the schematic without it. Meeting that on a friendly board, where you can reason your way to the cause, is worth a great deal more than meeting it for the first time on a board you are worried about.</p>
+<p>That is the layout half of Volume 2’s promise. The other half is authoring the parts that no library has for you, and that is what the capstone is for. Let’s take everything you have just practised about placement, routing and reuse into the next chapter, where you will design an original motor-driver board around a chip you draw yourself.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>A Pomodoro Timer is a time management device or tool based on the Pomodoro Technique, a method developed by Francesco Cirillo in the late 1980s. It breaks work into focused intervals (traditionally 25 minutes, called a “Pomodoro”) followed by a short 5-minute break. After completing four Pomodoros, a longer break (typically 15–30 minutes) is taken. The timer helps improve productivity by encouraging sustained focus and regular rest.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><strong>Prepreg</strong> (short for “pre-impregnated”) is glass cloth pre-coated with partially cured resin, used as the bonding layer between the copper layers of a multi-layer board. Under heat and pressure the resin flows and cures, gluing the stack together and setting the spacing between layers. A two-layer board has no prepreg, since its single core already provides both the insulation and the bond.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><strong>Dielectric constant</strong> (also written as relative permittivity, or Dk, or Er) is a measure of how strongly an insulating material stores electric charge compared with a vacuum. On a PCB it decides how much capacitance sits between a track and the copper near it, and therefore both the impedance of the track and the speed at which a signal travels along it. Standard FR4 sits around 4.2. It is one of the two high-speed design values in this stackup, and Volume 4 works with both of them in detail.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><strong>Loss tangent</strong> (also written as dissipation factor, or Df, or tan δ) is a measure of how much of the energy passing through an insulating material is turned into heat rather than carried onwards. The higher the figure, the more a signal is attenuated as it travels, and the effect grows with frequency. Standard FR4 sits around 0.02, which is fine at the speeds in this book and poor at the speeds Volume 4 deals with, where lower-loss laminates are worth their extra cost.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 
 </div>
 <script>
