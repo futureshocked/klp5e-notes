@@ -1,0 +1,5 @@
+/*
+  X-Robots-Tag: noindex, nofollow
+  Content-Security-Policy: frame-ancestors https://*.techexplorations.com https://techexplorations.com
+  Referrer-Policy: no-referrer
+  ! Access-Control-Allow-Origin
