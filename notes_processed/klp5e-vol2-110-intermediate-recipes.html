@@ -298,6 +298,8 @@
     </li>
     <li><a href="#sec:c10-calculator-tools">The Calculator Tools</a>
     </li>
+    <li><a href="#sec:c10-report-a-bug">Reporting a KiCad Bug</a>
+    </li>
     <li><a href="#sec:c10-conclusion">Recipes conclusion</a>
     </li>
   </ul>
@@ -713,8 +715,20 @@ This recipe is awaiting its screenshots and will appear in a later update.
 <div class="draft-pending">
 This recipe is awaiting its screenshots and will appear in a later update.
 </div>
+<h2 id="sec:c10-report-a-bug">Reporting a KiCad Bug</h2>
+<p>Every other recipe in this drawer tells you how to make KiCad do something. This one is for the day it does something it should not, and you decide to say so. That day arrives sooner than you would expect. KiCad is a large program under fast development, and the capstone project in Chapter 9 turned up one bug worth filing and one behaviour that turned out not to be a bug at all, which is a distinction this recipe will also help you draw. The tracker is at <a href="https://gitlab.com/kicad/code/kicad/-/issues" class="uri">https://gitlab.com/kicad/code/kicad/-/issues</a>, and filing there is free and open to anyone.</p>
+<p>Understand first where your effort is best spent, because it is not where most people put it. A developer reading your report does not need it written well. They need to make the fault happen on their own machine. A fault they can reproduce is a fault they can fix, and one they cannot reproduce is usually closed for want of information no matter how carefully you described it. So put your time into the reproduction and let the prose be plain.</p>
+<ol type="1">
+<li><strong>Search the tracker first.</strong> If somebody has already filed it, add what you know to their report instead of opening a second one. Duplicates split the evidence across two pages and make both of them weaker. The bug in Chapter 9 had been reported twice before, and both attempts were closed for want of information, so the third report opened by naming them and saying what it was adding.</li>
+<li><strong>Find the case where the fault does not fire.</strong> This is the most valuable thing you can hand a developer, and it is the step most reports skip. A fault that always happens tells them only that something is wrong. A boundary tells them where the fix belongs. In the Chapter 9 case, selecting exactly the block’s own group behaved correctly, while selecting that same group plus any one loose object triggered the fault. Stated that way, the report is no longer “this is broken” but “the code already recognises one of these two cases and not the other”, which is nearly a diagnosis.</li>
+<li><strong>Reduce it to steps somebody can run on a board of their own.</strong> Not on your board, which they do not have. Strip the reproduction down until every step is one they can follow from a new project, and count them. Three or four numbered steps ending in an observation is the shape you want.</li>
+<li><strong>Paste the version block.</strong> It is under “Help”, then “About KiCad”, then “Copy Version Info”, and it records your build, your operating system and your graphics backend in the form the developers expect. Guessing at a version number in prose is worth much less.</li>
+<li><strong>Attach a screenshot rather than a project, and look inside the project before you attach one.</strong> A screenshot shows the symptom without dragging your whole design into a public issue. Where the project really is needed, check what travels inside it first. The board in Chapter 9 embeds Texas Instruments’ datasheet, which is not mine to redistribute.</li>
+</ol>
+<p>Then say what you expected as well as what happened. The two are not always as obvious to a reader as they are to you, and where they differ is the whole of the report.</p>
+<p>One last thing, and it is the reason this recipe sits in a book about designing boards. Reading a fault closely enough to file it is the same work as reading a fault closely enough to understand it, and most of the time you find that KiCad was right and you were wrong. That happened in Chapter 9 too: a board that kept splitting a group in two looked like a second bug for a fortnight, and turned out to be the honest consequence of the order in which the two halves of a design block had been captured. Either way you end up knowing the tool better, and one of the two outcomes also improves it for everybody else.</p>
 <h2 id="sec:c10-conclusion">Recipes conclusion</h2>
-<p>That is the drawer of intermediate recipes, and with it the teaching of Volume 2 is complete. You can now author the parts no library has for you, set up a board that respects the current it carries, reuse your work instead of repeating it, and express several builds from a single project. What remains is to put all of it to work: to build the two boards these chapters have been pointing at, take them to a factory, and hold the results in your hand. Let’s go and build.</p>
+<p>That is the drawer of intermediate recipes, and with it the design teaching of Volume 2 is complete. You can now author the parts no library has for you, set up a board that respects the current it carries, reuse your work instead of repeating it, and express several builds from a single project. What remains is to put all of it to work: to build the two boards these chapters have been pointing at, take them to a factory, and hold the results in your hand. Chapter 11 is where that happens. Let’s go and build.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
