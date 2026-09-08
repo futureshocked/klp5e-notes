@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚧 Project (Extension): Four-Motor Driver with Two DRV8833s — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<title>Project (Extension): Four-Motor Driver with Two DRV8833s — KiCad Like a Pro, 5th Edition — Volume 2</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -258,10 +258,845 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
-<h1 class="note-title">🚧 Project (Extension): Four-Motor Driver with Two DRV8833s</h1>
-<div class="draft-pending">
-This chapter is still being written and will appear in a future update.
-</div>
+<h1 class="note-title">Project (Extension): Four-Motor Driver with Two DRV8833s</h1>
+<p>This chapter takes the board you finished in Chapter 8 and adds a second DRV8833. The new board will be able to drive a small four-wheeled robot with independent control of each wheel. Almost none of the work you are about to do is new drawing. The driver stage already exists, wired and placed and routed and proven clean, so the job here is to capture it once and stamp it out again (Figure 9.1).</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a href="#sec:c09-start">Start from the board of Chapter 8</a>
+    </li>
+    <li><a href="#sec:c09-learn">Learning objectives of this extension</a>
+    </li>
+    <li><a href="#sec:c09-scope">The four-motor board</a>
+    </li>
+    <li><a href="#sec:c09-design-block">Capturing the driver stage as a design block</a>
+    </li>
+    <li><a href="#sec:c09-second-stage">Placing the second stage</a>
+    </li>
+    <li><a href="#sec:c09-power">Sharing power</a>
+    </li>
+    <li><a href="#sec:c09-control">The control header</a>
+    </li>
+    <li><a href="#sec:c09-layout">Layout: Two thermal fields on one board</a>
+    </li>
+    <li><a href="#sec:c09-variant">One project, two boards</a>
+    </li>
+    <li><a href="#sec:c09-next">What Comes Next</a>
+    </li>
+  </ul>
+</details>
+
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09_block-diagram_v10.png" /></p>
+<p>Figure 9.1: The four-motor board has two identical stages that share everything else. It copies and builds on Figure 8.2. The dashed brackets mark the unit this chapter captures and reuses. It contains the eight parts Chapter 8 grouped together for this purpose. All other components are not duplicated, regardless of how many motors the board has.</p>
+<h2 id="sec:c09-start">Start from the board of Chapter 8</h2>
+<p>Before anything else, do not start a new project. Instead, make a copy of the motor-driver project you finished in Chapter 8, open the copy, and work in that. In this chapter, you will extend the capstone board, not rebuild it.</p>
+<p>The main learning objective in this chapter is reuse. You already have a working driver stage. It contains a DRV8833 with its three bypass capacitors, its sense-resistor option, and its motor terminals. What you are about to do is capture that stage as a reusable object and stamp out a second one, exactly as you stamped out three more matrix cells in Chapter 7.</p>
+<p>There is an additional benefit in following this process. Once the second stage exists, you can mark it ‘do not populate’ so that the same project produces the two-motor board again. If, later, you want to add the second stage, the board already has the footprints to receive the parts. One project, two boards, one bill of materials for each. That is the design-variant idea from Chapter 5, applied to a whole circuit block.</p>
+<h2 id="sec:c09-learn">Learning objectives of this extension</h2>
+<p>This is an extension and not a new project, so most of the board is Chapter 8’s, built once and then reused. Three things here are new:</p>
+<ol type="1">
+<li><strong>Design blocks that carry copper.</strong> Chapter 7 captured a circuit and stamped it out three more times. The block you save here holds the circuit and the layout that implements it, so the second stage arrives placed and routed instead of only wired. Capturing that second half is the one command in this chapter you have not seen before.</li>
+<li><strong>Component classes.</strong> A component class is a name you attach to a group of parts so that you can refer to the whole group by that one name. Chapter 3, Board Setup, introduced them on this board in its section on component classes and said the two-motor version could do without them. You need one here for the last section. A class that names the eight parts of the second stage lets you mark all eight do-not-populate in a single step, which is what turns the four-motor board back into a two-motor one, while keeping the ability to add the second stage open.</li>
+<li><strong>A design variant applied to a whole block.</strong> Chapter 5 varied a pair of resistors. Here the override covers a complete captured stage, and one project produces both the four-motor board and Chapter 8’s two-motor board.</li>
+</ol>
+<p>Of course, reuse is not risk-free. The part, the footprint and the custom rules all propagate through the copy, which is why you must take care to set them up properly. Despite the fact that the first stage is properly setup, there are still two things we will need to fix: the <code>Power</code> class width, which was originally set for a single chip’s 3 A (and now facing 6 A), and the breakout rule’s scope. That rule is Chapter 8’s “U1 fine-pitch breakout”, which relaxes track width and clearance so that the narrow escapes from the fine-pitch package pass the design rules check. Its scope is a single named rule area drawn around <code>U1</code>, so it stops covering the second chip when that chip is added to the board.</p>
+
+<h2 id="sec:c09-scope">The four-motor board</h2>
+<p>The extension converts the capstone project board into a four-motor driver built from two DRV8833PWP chips. This board is sufficient for a small four-wheeled robot with independent control of each wheel. The architecture is simple so you can focus on the build:</p>
+<ul>
+<li><strong>Two identical driver stages.</strong> Each is one DRV8833PWP with its own local decoupling (10 µF on VM, 2.2 µF on VINT, 0.01 µF on VCP), motor terminals, and pair of sense resistors. Decoupling stays per-chip and close to its chip.</li>
+<li><strong>One shared motor supply.</strong> A single VM input feeds both stages through one bulk capacitor near the connector, with each chip’s own 10 µF ceramic doing the local high-frequency work. The VM rail now carries both chips’ motor current. In Chapter 8 we sized the Power class for 3 A, but in this extension, having to supply four bridges, the maximum current is 6 A. Widening the VM rail will be the first job of this chapter’s board setup.</li>
+<li><strong>Eight logic inputs, one enable, one fault.</strong> Four motors need eight direction inputs. To keep the MCU pin count low, the two nSLEEP pins tie together as a single board enable, and the two nFAULT pins, being open-drain, wire together onto one shared pull-up, so a fault on either chip pulls the common line low.</li>
+<li><strong>One ground.</strong> A common ground pour, with both GND pins and both exposed pads tied to it, each over its own field of thermal vias.</li>
+</ul>
+<p>Stage one keeps every name Chapter 8 gave it and drives motors A and B. Stage two continues with the naming pattern so that <code>U2</code> drives motors C and D through <code>J5</code> and <code>J6</code>, its sense resistors are <code>R6</code> and <code>R7</code>, and its logic nets are <code>CIN1</code>, <code>CIN2</code>, <code>DIN1</code> and <code>DIN2</code>. Remember that a design block reproduces its labels verbatim, so every one of those names can only be changed after the stamping. The section on <a href="#sec:c09-second-stage">placing the second stage</a> is mostly about which names change.</p>
+<h2 id="sec:c09-design-block">Capturing the driver stage as a design block</h2>
+<p>You met design blocks in Chapter 7, where one cell of the LED matrix was drawn, saved into a library, and then stamped out three more times. We will follow the same process here.</p>
+<p>We will capture the driver stage exactly as Chapter 8 left it. The driver was placed to typed coordinates, routed in copper of three different widths, and proven by a design rules check and no outstanding work. That is the more common situation in real work, because the circuit you want to reuse is nearly always one that somebody has already taken as far as a board.</p>
+<p>A design block can be saved in two forms. Saved from the schematic alone, it holds the circuit and nothing else, so every copy you stamp arrives wired but unplaced. Saved from the schematic and from the board, it holds the circuit together with the copper that implements it, so the second stage arrives placed and routed. This chapter uses the second form.</p>
+<p>Eight parts are included in the block:</p>
+<ul>
+<li><code>U1</code>, the DRV8833.</li>
+<li><code>C2</code>, <code>C3</code> and <code>C4</code>, the three bypass capacitors, each sitting over the supply pin it serves.</li>
+<li><code>R2</code> and <code>R3</code>, the two sense resistors.</li>
+<li><code>J2</code> and <code>J3</code>, the two motor terminals.</li>
+</ul>
+<p>Everything else on the board stays outside. To decide which parts should be part of the block, ask whether a second chip would need one of its own. A second DRV8833 needs its own decoupling, its own sense resistors and its own terminals, so those go in. But it does not need a second supply connector, reverse-polarity MOSFET, bulk capacitor, power indicator or control header, which is why <code>J1</code>, <code>Q1</code>, <code>C1</code>, <code>R4</code>, <code>D1</code>, <code>R5</code> and <code>J4</code> all stay where they are. The four mounting holes stay out for the same reason: they belong to the board rather than to a stage.</p>
+<p><code>R1</code> needs more thinking, because it is a resistor sitting on a net that belongs to the stage. It is the <code>nFAULT</code> pull-up, and Chapter 8 put it beside the control header rather than beside the chip on purpose. <code>nFAULT</code> is an open-drain output, which can pull its line down but never drive it up, so two chips are able to share one line and one resistor between them. If you copy <code>R1</code> into the block, then the four-motor board gets two pull-ups on one net, which halves the resistance and achieves nothing else. Chapter 8 kept it outside from the first placement so that this section would not have to take it back out.</p>
+<p><strong>Make the library before you save anything.</strong> A design block lives in a library, similarly to how a symbol or a footprint are included in libraries. Open the panel with “View”, then “Panels”, then “Design Blocks”, right-click anywhere in its library tree and choose “New Library…”. I called mine <code>klp5e-ch09-blocks</code> and added it to the project library table, which keeps this chapter’s files together with the project you copied at the start.</p>
+<p>For this block, you could consider adding the new library in the global projects table. Chapter 7’s block was one cell of one particular matrix board, useful nowhere else. But the one we are working on here is a complete DRV8833 stage, and if you ever build another board around this chip, the block is what you will want to reuse. If that is your situation, put it in a global library instead and nothing else in the section changes. Remember what Chapter 8 said about <code>${KIPRJMOD}</code> when it asked you to copy the project: a library kept with the project travels with it, but a global one does not.</p>
+<p>A design block library is a folder rather than a file, and its name carries the suffix <code>.kicad_blocks</code>. Inside it, each block is a folder of its own holding a <code>.kicad_sch</code> file and, once you have done the second half of this section, there will also be a <code>.kicad_pcb</code> file beside it. There is nothing proprietary in either of them. If you want to see what you have captured, open the folder and read them.</p>
+<p>Go ahead to capture the schematic half. Drag a selection box around the eight parts, taking in the wires, the labels and the ground symbols with them. Chapter 8’s placement was arranged to make this drag possible. The stage was drawn as one cluster on the sheet with clear space around it, and everything that exists only once was put out on the left, so that a single rectangle catches all of what should be in and none of what should not.</p>
+<p>Check the edges of that rectangle before you continue. The ground symbols on <code>R2</code>, <code>R3</code> and on <code>U1</code>’s pins 13 and 17 are inside the stage and belong in the block. <code>R1</code> and <code>J4</code> sit further off to the left. With your mouse, draw a box to enclose those items.</p>
+<p>Then right-click <code>klp5e-ch09-blocks</code> in the panel and choose “Save Selection as Design Block…”. Three fields open with it:</p>
+<ul>
+<li><strong>Name</strong>: <code>DRV8833-Stage</code>.</li>
+<li><strong>Keywords</strong>: something you will search for later, such as <code>DRV8833 h-bridge motor stage</code>.</li>
+<li><strong>Description</strong>: this is the field to spend a minute on, because it is where you record the limitation. Mine reads “One DRV8833PWP with its VM, VINT and VCP decoupling, two 0.20 Ω sense resistors and two 2-pin screw terminals. Labels are stage A’s; rename the copy after placing it.”</li>
+</ul>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-new.png" /></p>
+<p>Figure 9.2: Saving the schematic half. The selection box (1) takes in the eight parts of the stage together with their wires, their labels and their ground symbols. Right-clicking the <code>klp5e-ch09-blocks</code> library (2) opens the menu that holds the command, and “Save Selection as Design Block…” (3) is the one to use. Look at the entry directly above it while you are there. “Save Current Sheet as Design Block…” captures the whole drawing, which on this sheet would take the supply block, the header and <code>R1</code> along with the stage, and it is an easy click to make by accident.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-library.png" /></p>
+<p>Figure 9.3: The block in the library, with its description. The second sentence, “Labels are stage A’s; rename the copy after placing it”, reminding you to rename the original labels as needed. The preview at the foot of the panel is the circuit only, because we have not captured the layout yet. On the sheet behind it, the stage has acquired an outline carrying the block’s name.</p>
+<p>When saving a block, KiCad groups the selected objects and fills in the new group’s “Library link” field so that it points back at the block, in the form <code>klp5e-ch09-blocks:DRV8833-Stage</code>. The stage you have just captured is therefore a linked group on the sheet, without any further work: a group that carries a pointer back to the block it came from. That link is what makes several of the operations in the next section possible.</p>
+<p>Now capture the layout half, into the same block. Switch to the PCB Editor and open the Design Blocks panel there, which is the same panel under the same menu. Select the stage on the board. The eight footprints, every track that runs between them, any via those tracks use, and the four silkscreen labels at the motor terminals. Then right-click <code>DRV8833-Stage</code> in the panel and choose <strong>“Update Design Block from Selection”</strong>.</p>
+<p>Do not reach for “Save Selection as Design Block…” on this side. That command makes a new block, and what you would end up with is two entries in the library, one holding a circuit with no copper and one holding copper with no circuit. The layout has to go into the block that already holds the schematic, and “Update Design Block from Selection” is the command that puts it there.</p>
+<p>Let the schematic editor pick the parts for you. This is my preferred way of making sure I have selected every part that belongs to the block, and only those. Dragging a box around eight footprints on a busy board is difficult. There is a better way, that makes use of KiCad’s cross-probing feature<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Select the eight symbols on the schematic, and their footprints come up selected on the board beside it. The parts are then chosen for you, correctly, with no box drawn at all. What is left is to add the tracks, the vias and the labels by hand, and those you can pick off one at a time (Figure 9.4).</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-capture-layout.png" /></p>
+<p>Figure 9.4: Capturing the layout half, using cross-probing. Selecting the eight symbols on the schematic sheet (1) brings up the same eight footprints on the board (2), which is a reliable way to ensure you haven’t missed anything. The tracks, the vias and the silkscreen labels are added to that selection in the PCB editor. Then the block is right-clicked in the Design Blocks panel (3) and “Update Design Block from Selection” (4) writes the layout into the block that already holds the circuit. The description in the panel reads the same on this side as it did on the schematic side, because there is one block here and not two.</p>
+<p>Be mindful of the following:</p>
+<ol type="1">
+<li><strong>Leave the board’s pours out, and include the chip’s own zone.</strong> There are two ground zones on this board, but only one should be included in the block. The two <code>GND_1</code> pours are filled from a net that reaches every corner of the design, so they belong to the board but not the block. However, <code>U1-GND-pads_1</code> belongs in the block. This is the small, high-priority zone sitting over <code>U1</code>’s exposed pad, giving it a solid connection instead of thermal spokes. A second chip needs its own solid connection over its own exposed pad. If you leave this zone out, you will have to draw a new 6.1 by 4.0 mm rectangle by hand, in the same place.</li>
+<li><strong>The thermal vias come automatically.</strong> The twelve vias under <code>U1</code>’s exposed pad are part of the footprint you drew in Chapter 2, rather than board objects sitting on top of it, so they travel with the footprint and there is nothing to select.</li>
+<li><strong>Take the <code>U1_breakout</code> rule area with you.</strong> The second chip needs the same region for the same reason the first one does, so include it in the selection.</li>
+</ol>
+<p>That third item comes across, but not intact. Open the block’s <code>.kicad_pcb</code> after the update and <code>U1_breakout</code> is in there as a rule area with its keepout settings unchanged, so the shape you drew in Chapter 8 arrives with the second stage and does not need to be redrawn. The name is the part that does not survive. KiCad makes area names unique as it pastes them, so the second stage’s copy arrives as <code>U1_breakout_1</code>, and the condition <code>A.intersectsArea('U1_breakout')</code> in your <code>.kicad_dru</code> then covers one chip out of the two. The section on <a href="#sec:c09-layout">laying out two thermal fields</a> shows what that costs on the board, and renames both areas to fix it.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-layout-detail.png" /></p>
+<p>Figure 9.5: What the selection holds. Eight footprints, the tracks and vias between them, the hatched <code>U1_breakout</code> rule area around the chip, and the four silkscreen labels at the motor terminals. The twelve thermal vias under the exposed pad are not selected because they are already part of U1.</p>
+<p>Nothing reaches the library until you click “Update Design Block from Selection”, so take as many passes over the board as you need to get the selection right. Holding “Shift” while you click or drag adds to the selection instead of starting a new one, so the cross-probed footprints, then the tracks, the vias, the four silkscreen labels and the two areas all accumulate into one selection that stays live while you work. Click the command once, when that selection is complete. It replaces the block’s layout half with whatever is selected at the moment you click, so a run made part-way through writes nothing that the final one would not write anyway, and on the version I built this board with, running it more than once also triggered a bug. The aside below explains it.</p>
+<blockquote>
+<p><strong>A bug I found here, reported, and saw fixed.</strong> “Update Design Block from Selection” writes the layout into the library, and it also groups whatever is selected, linking that new group to the block. On 10.0.5, running it again on a selection that already contained the first run’s group wrapped that group inside a new one instead of extending it. Repeat it and the groups nest, each carrying the same name; the board draws an outline for each, and the library stores the whole nest inside the block, so every stage you later stamp from it inherits the nest. Nothing anywhere reports this, because none of it is electrically wrong.</p>
+<p>Selecting the linked group on its own always worked correctly. Only a selection larger than the group triggered the fault, which is exactly what you get if you run the command, add a few more objects and run it again. I filed it against 10.0.5 as issue <a href="https://gitlab.com/kicad/code/kicad/-/issues/25368">#25368</a>, it was confirmed the same day, and the fix went into a nightly build a few days later, so it will have reached a stable release by the time you read this or will do soon. Check the issue to see where it stands in your version. Chapter 10, Intermediate Recipes, uses this one as the worked example in its section on reporting a KiCad bug, if you would like to see what went into the report.</p>
+<p><strong>How to undo a nest made on an older version.</strong> A nest does not unmake itself when you upgrade, and nothing is at risk in the fixing. Select the outermost group, choose “Group”, then “Ungroup”, and repeat until nothing on the stage is grouped any more; the objects themselves are untouched throughout, because a group holds references rather than copies. Then select the whole stage once and update the block a single time. Ungroup all the way down before you update, because updating from a selection that still contains a group writes that group into the library along with everything else.</p>
+</blockquote>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-library-full.png" /></p>
+<p>Figure 9.6: The block holds both halves now. The preview at the foot of the panel shows the captured layout rather than the circuit, because the panel previews whichever half belongs to the editor you are standing in. Open the same block from the schematic editor and Figure 9.3’s preview comes back.</p>
+
+<p>As you know, a design block’s two halves are saved separately. But KiCad has no way to compare them. If you capture the schematic, change something on the board, and then capture the layout, you will have a block whose circuit and whose copper describe two different stages. It will place without complaint, but KiCad will not tell you that there is a discrepancy until you discover it on your own.</p>
+<p>So capture both halves in one sitting, from a board whose design rules check is clean and whose schematic you have not modified since. That is an example of the kind of discipline you need to develop. It is also why you should capture from a finished board instead of one under development.</p>
+<p>Both halves are now grouped, and linked. Saving the schematic selection made the eight symbols a linked group on the sheet. “Update Design Block from Selection” has just done the same on the board, putting the eight footprints, the tracks between them, their vias, the four silkscreen labels, the <code>U1-GND-pads_1</code> zone and the <code>U1_breakout</code> rule area into a group of their own, with a “Library link” field reading <code>klp5e-ch09-blocks:DRV8833-Stage</code>. There is nothing left to group by hand.</p>
+<p>The link will keep the library current. If you improve the stage later, on the sheet or on the board, right-click its group and choose “Save to Linked Design Block”. That writes the improved stage into the library over the version you have just saved. Without the link, every improvement would mean another trip through “Update Design Block from Selection”, with the selection drawn correctly again each time.</p>
+<p>One caveat about which group you save from, which matters later in this chapter. This works from stage one’s board group only until the section on <a href="#sec:c09-second-stage">placing the second stage</a> tidies that group up. After that, the copy is the instance to save from, because its group is the one holding both the footprints and the copper.</p>
+<p>The block is in the library and it holds both halves. Let’s use it.</p>
+<h2 id="sec:c09-second-stage">Placing the second stage</h2>
+<p>Placing the block is quick. Then, we’ll take a bit of time to turn that block into the second stage.</p>
+<p><strong>Place it on the sheet.</strong> Find <code>DRV8833-Stage</code> in the Design Blocks panel, and set four checkboxes below the preview before you place anything. They are given here in the order the panel prints them (Figure 9.7).</p>
+<ul>
+<li><strong>“Place repeated copies”</strong>, clear. If ticked, KiCad will give you another copy as soon as you have put the last one down, and goes on doing it until you press “Esc”. That is the right setting for a board that wants multiples of a block. In this example, we only want one copy, aside from the one already on the sheet.</li>
+<li><strong>“Place as group”</strong>, ticked. A saved layout can only be applied to a design block that is a group on the schematic and a group on the board. Therefore, an ungrouped copy would give you the circuit and leave the copper behind.</li>
+<li><strong>“Place as sheet”</strong>, clear, so that the copy you are about to make goes straight onto the sheet you are looking at. There is a real alternative behind this one, and the two paragraphs after the next figure explain what it does.</li>
+<li><strong>“Keep annotations”</strong>, clear. If you tick this box, the copy arrives carrying <code>U1</code>, <code>C2</code>, <code>C3</code>, <code>C4</code>, <code>R2</code>, <code>R3</code>, <code>J2</code> and <code>J3</code>, every one of which already belongs to the first stage. Clearing it strips those designators instead, and on the version I built this board with the eight parts arrive carrying question marks: <code>U?</code>, three <code>C?</code>, two <code>R?</code> and two <code>J?</code>. You give them numbers of their own in a few minutes, once both groups are named.</li>
+</ul>
+<p>Then double-click the block, or right-click it and choose “Place Design Block”, and click once on a clear part of the sheet.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-second-stage.png" /></p>
+<p>Figure 9.7: The block, and the four checkboxes that decide what arrives. <code>DRV8833-Stage</code> is selected in <code>klp5e-ch09-blocks</code> (1), and the preview below it is the schematic half. The four placement checkboxes (2) are set as the text describes, with only “Place as group” ticked. The arrow (3) marks where this copy went, which was a clear patch of sheet below the first stage. It does not stay there. The sheet is rearranged in the next few minutes, which is why the two stages sit side by side in Figure 9.8. In this step, we simply want to copy the block in a relatively empty space in the sheet.</p>
+<p><strong>What is “Place as sheet”?</strong> If you tick this option, the block copy will go into a hierarchical sheet of its own instead of onto the current one. This can be useful under the right conditions, but you need to understand the consequences. If you give the second stage a sheet of its own, you will need to make necessary adjustments to the net labels and utilise hierarchical sheet labels to allow connections between the nets across the two sheets.</p>
+<p>Why not do that here? Because it increases the workload without any particular benefits. A new sheet allows us to retain the existing block labels, but it adds work to the four that must be shared, as each of those then needs a hierarchical label inside the sheet and a matching sheet pin outside it. On this stage the twelve are simple text edits and the four would be new drawing, so placing the copy inline costs less. If you had a different project with the proportions in reverse, on a board that repeats one block three, four, or more times, then the sheet is the better option. Chapter 10’s multi-channel recipe works that case through.</p>
+<p>Before doing anything else, let’s tidy up. The Chapter 8 sheet was arranged for one stage, so there was a lot of free space in the sheet. With the two stages, we need to be more efficient with how we allocate the space in a single sheet.</p>
+<p>I decided to arrange the two stages side by side across the top of the sheet, and run everything that exists once along the bottom. The supply input and its protection, the bulk capacitor, the indicator, the control header, the fault pull-up and the four mounting holes. No connection changes.</p>
+<p>Both stages are groups now, but both are called <code>DRV8833-Stage</code>. That is the block’s name rather than the instance’s, and with two instances on the sheet using the same name is problematic. Select each group in turn, press “E” or right-click and choose “Properties…”, and set the Name field: <code>DRV8833-Stage-1</code> for the original and <code>DRV8833-Stage-2</code> for the copy.</p>
+<p>The “Library link” field sits directly below the name in the same dialogue, and it is not the field you are editing. Leave it alone and both groups go on pointing at <code>klp5e-ch09-blocks:DRV8833-Stage</code>, so “Apply Design Block Layout” and everything else that depends on that link keeps working. Renaming a group renames the instance, not the block it came from.</p>
+<p>The names give you a way to verify which stage you are working on. The Groups tab of the Search panel then lists the two by name with their positions, which is a quick way to confirm you have two groups instead of one group and a loose collection of parts.</p>
+<p>That dialogue has just shown you two of the three ways this chapter names a set of parts. They are easy to confuse, so here they are separated once:</p>
+<ol type="1">
+<li>The <strong>library link</strong> says which block a stage came from. It is what makes “Apply Design Block Layout” and “Save to Linked Design Block” work, and it reads the same on both stages, because both stages came from the same block.</li>
+<li>The <strong>group name</strong> tells the two instances apart, for you and for the Search panel. No design rule reads it.</li>
+<li>A <strong>component class</strong> is how you address a stage in a design rule or a variant. There is not one on this board yet. The section on <a href="#sec:c09-layout">laying out two thermal fields</a> gives stage two’s eight parts a class of their own, and the section on <a href="#sec:c09-variant">one project, two boards</a> is where it pays for itself.</li>
+</ol>
+<p><strong>Continue to annotate the parts of the second stage.</strong> On the version I built this board with, clearing “Keep annotations” left the eight new symbols carrying question marks rather than numbers. The aside below explains why, and how to tell whether your copy of KiCad does the same. Either way, this is the designator each of the eight should end up with:</p>
+<table>
+<thead>
+<tr>
+<th>Stage one</th>
+<th>Stage two</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>U1</code></td>
+<td><code>U2</code></td>
+<td>DRV8833PWP</td>
+</tr>
+<tr>
+<td><code>C2</code></td>
+<td><code>C5</code></td>
+<td>10 µF, <code>VM</code> bypass</td>
+</tr>
+<tr>
+<td><code>C3</code></td>
+<td><code>C6</code></td>
+<td>0.01 µF, <code>VCP</code> to <code>VM</code></td>
+</tr>
+<tr>
+<td><code>C4</code></td>
+<td><code>C7</code></td>
+<td>2.2 µF, <code>VINT</code> to ground</td>
+</tr>
+<tr>
+<td><code>R2</code></td>
+<td><code>R6</code></td>
+<td>0.20 Ω, motor C sense</td>
+</tr>
+<tr>
+<td><code>R3</code></td>
+<td><code>R7</code></td>
+<td>0.20 Ω, motor D sense</td>
+</tr>
+<tr>
+<td><code>J2</code></td>
+<td><code>J5</code></td>
+<td>motor C terminal</td>
+</tr>
+<tr>
+<td><code>J3</code></td>
+<td><code>J6</code></td>
+<td>motor D terminal</td>
+</tr>
+</tbody>
+</table>
+<p>You could select the eight and let the Annotate tool fill them in, but it numbers by position, and this board’s numbering is not positional, so you would be correcting its choices afterwards. Chapter 8 made the same point when it asked you to rename a handful of designators by hand, <code>J1</code> to <code>J4</code> among them. Set them manually in the Symbol Fields Table or on the sheet, whichever you find quicker; I did mine by hand so that they matched the table exactly.</p>
+<blockquote>
+<p><strong>KiCad’s manual says it should have numbered them, but it did not.</strong> The manual’s description of “Keep annotations” says that clearing the box makes KiCad reannotate the block as it inserts it, following your annotation settings. Two things stop that here.</p>
+<p>The first is that automatic annotation has to be switched on for anything to be assigned at all. That is the “Automatically annotate symbols” setting in Preferences, then “Schematic Editor”, then “Editing Options”, with a matching toggle button on the left toolbar. With it off, the eight arrive as question marks which you will then have to edit manually.</p>
+<p>The second applies even with it on. The reannotation does not happen when the block is placed as a group, which is how this chapter places it. Place the same block ungrouped and the numbers appear. That is issue <a href="https://gitlab.com/kicad/code/kicad/-/issues/22620">#22620, “Symbols are not automatically annotated when placing design block as group”</a>, reported against a 9.99 development build and still open when I checked it on 2 September 2026. Open that link and see where it stands in your version, because if it has been fixed by the time you read this, and you have automatic annotation switched on, your eight parts will arrive numbered rather than blank.</p>
+<p>The step above works either way. KiCad numbers by position, but this board’s numbering is not positional, so whether you are typing eight designators into blank fields or correcting eight that KiCad chose, the table is what you are matching them against.</p>
+</blockquote>
+
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-second-stage-placed.png" /></p>
+<p>Figure 9.8: Two stages on one sheet. The second stage is beside the first, and the parts that exist once have moved to the bottom of the sheet: <code>J1</code> and <code>Q1</code> with the bulk capacitor and the indicator, the header <code>J4</code> with its <code>nFAULT</code> pull-up <code>R1</code>, and the four mounting holes. Each stage carries its group outline with its own name, and the Groups tab of the Search panel lists the two of them. Also look at stage two’s labels: <code>AOUT1</code>, <code>AIN1</code>, <code>AISEN</code> and the rest, reading word for word the same as stage one’s. Twelve labels in stage two name a net that already belongs to the other chip.</p>
+<p>A design block reproduces the labels it captured. Placing the block copied all sixteen of stage one’s net labels onto the sheet, names and all. KiCad merges any two labels that share a name into one net, so twelve of those sixteen now tie a pin on <code>U2</code> to the matching pin on <code>U1</code>, and your second stage is wired in parallel with the first.</p>
+<p><code>AOUT1</code> is the simplest case. It sits on <code>U1</code> pin 2 in stage one and on <code>U2</code> pin 2 in the copy, so one net named <code>AOUT1</code> joins the two chips’ half-bridge outputs directly together. The other three bridge outputs are shorted in the same way, both sense returns are shorted, and all four direction inputs are ganged, so a command meant for motor A drives motor C as well.</p>
+<p>The last two duplicates are <code>VINT</code> and <code>VCP</code>, which read like supply rails but are not. <code>VINT</code> is the output of the chip’s own internal regulator, brought to a pin so that you can place a 2.2 µF capacitor on it, and <code>VCP</code> is its charge pump<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, brought out for the same kind of reason. Each belongs to one chip. Sharing <code>VINT</code> puts two regulator outputs in parallel and sharing <code>VCP</code> puts two charge pumps in parallel, and the datasheet allows neither.</p>
+<p>Run the electrical rules check on this sheet and it reports five errors. Twelve labels are wrong. Here is a summary of what it caught and missed:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Duplicated label</th>
+<th>Pin type</th>
+<th>ERC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AOUT1</code>, <code>AOUT2</code>, <code>BOUT1</code>, <code>BOUT2</code></td>
+<td>output</td>
+<td><strong>error</strong>: two outputs on one net</td>
+</tr>
+<tr>
+<td><code>VINT</code></td>
+<td>power output</td>
+<td><strong>error</strong>: two power outputs on one net</td>
+</tr>
+<tr>
+<td><code>AIN1</code>, <code>AIN2</code>, <code>BIN1</code>, <code>BIN2</code></td>
+<td>input</td>
+<td>silent</td>
+</tr>
+<tr>
+<td><code>AISEN</code>, <code>BISEN</code>, <code>VCP</code></td>
+<td>passive</td>
+<td>silent</td>
+</tr>
+</tbody>
+</table>
+<p>Two outputs on one net is an illegal combination, so the four bridge outputs are reported. Two inputs on one net is legal, because that is how a single clock signal reaches two chips, so the four direction inputs are not reported. Two passive pins raise no conflict, so <code>AISEN</code>, <code>BISEN</code> and <code>VCP</code> are silent as well. <code>VINT</code> and <code>VCP</code> differ in their type: Chapter 2 made pin 14 a power output and pin 11 passive, and that alone makes the duplicated <code>VINT</code> an error and the duplicated <code>VCP</code> silent. Nothing in the rules check can tell that <code>AIN1</code> on this board is meant to command one motor and not two.</p>
+<p>Rename the four bridge outputs and <code>VINT</code>, and the five errors clear. The sheet then passes with seven of the twelve duplicated labels untouched. Both sense lines are still shorted, all four direction inputs are still ganged, and each of those seven nets still ties the two chips together. Chapters 7 and 8 made the same point. Remember that a clean ERC is not proof that the schematic is correct.</p>
+<p>Before you rename anything, answer this question: which of stage two’s names identify a net that both stages share? The answer is not obvious. It is these four:</p>
+<ul>
+<li><strong><code>GND</code>.</strong> This board should have only one ground return. Both chips’ ground pins and exposed pads land on it. This one is not a label but the ground symbol from the power library.</li>
+<li><strong><code>VM</code>.</strong> One supply should feed both stages, which is the architecture the section on <a href="#sec:c09-scope">the four-motor board</a> set out. The label is correct, but the copper behind it is not, and the next section will address this.</li>
+<li><strong><code>nSLEEP</code>.</strong> Both chips enable together, so that the controller only needs one pin for this signal. If you want the two stages to be able to sleep independently, rename the copy <code>nSLEEP2</code> along with everything else and take one more pin on the header.</li>
+<li><strong><code>nFAULT</code>.</strong> Both chips report on one line. This is a property of the part rather than a choice. The pin is open-drain, so it can pull the line down only. If you tie both pins to one node under a single pull-up, the line will mean that “at least one of these chips has a fault”. This requires no extra components, and it guarantees that the two outputs cannot fight each other.</li>
+</ul>
+<p>The labels in the table below have to be unique, and the second stage’s letters continue where the first stage’s stopped, so motors A and B are joined by motors C and D:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Stage one</th>
+<th>Stage two</th>
+<th>Why it cannot be shared</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AOUT1</code></td>
+<td><code>COUT1</code></td>
+<td>one bridge output, one motor terminal</td>
+</tr>
+<tr>
+<td><code>AOUT2</code></td>
+<td><code>COUT2</code></td>
+<td>as above</td>
+</tr>
+<tr>
+<td><code>BOUT1</code></td>
+<td><code>DOUT1</code></td>
+<td>as above</td>
+</tr>
+<tr>
+<td><code>BOUT2</code></td>
+<td><code>DOUT2</code></td>
+<td>as above</td>
+</tr>
+<tr>
+<td><code>AISEN</code></td>
+<td><code>CISEN</code></td>
+<td>each bridge needs its own resistor in its own return path</td>
+</tr>
+<tr>
+<td><code>BISEN</code></td>
+<td><code>DISEN</code></td>
+<td>as above</td>
+</tr>
+<tr>
+<td><code>AIN1</code></td>
+<td><code>CIN1</code></td>
+<td>four motors need four independent pairs of commands</td>
+</tr>
+<tr>
+<td><code>AIN2</code></td>
+<td><code>CIN2</code></td>
+<td>as above</td>
+</tr>
+<tr>
+<td><code>BIN1</code></td>
+<td><code>DIN1</code></td>
+<td>as above</td>
+</tr>
+<tr>
+<td><code>BIN2</code></td>
+<td><code>DIN2</code></td>
+<td>as above</td>
+</tr>
+<tr>
+<td><code>VCP</code></td>
+<td><code>VCP2</code></td>
+<td>each chip drives its own charge pump</td>
+</tr>
+<tr>
+<td><code>VINT</code></td>
+<td><code>VINT2</code></td>
+<td>each chip drives its own internal regulator</td>
+</tr>
+</tbody>
+</table>
+<p>The Net Classes page does not need any changes. Chapter 8 wrote its patterns as <code>*VM*</code>, <code>*GND</code>, <code>*OUT*</code> and <code>*ISEN</code>, rather than as lists of net names. <code>COUT1</code> contains “OUT”, so <code>*OUT*</code> matches it. <code>DISEN</code> ends in “ISEN”, so <code>*ISEN</code> matches it. All twelve new names are caught by the same patterns that caught their stage-one counterparts. This is the advantage of thinking about net names in patterns instead of fixed expressions.</p>
+<p>Back in Chapter 8, we gave the <code>Power</code> class a heavy violet wire and <code>Sense</code> its own colour at a weight between the two, so the editor redraws a correctly renamed <code>COUT1</code> heavy and violet. If you mistype it as <code>C0UT1</code>, with a zero in place of the letter O, then the same wire will come back thin and green because no pattern matches it any more. This acts as an additional test that helps you find incorrect nets early in the design process.</p>
+<p>Do the renaming by hand. Double-click a label, type the new name, press Enter, and work down the table in the order it is printed so that you can tick each row off as you go. You can also use the Properties’ pane on the left side of the schematic editor. The “name” property is the only property of a net label, and you can edit it directly in the pane (no need to double-click on the label to open its properties window). In Figure 9.9 you can see the final result of this work.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-block-second-stage-nets-fixed.png" /></p>
+<p>Figure 9.9: Stage two after the renaming. Twelve labels changed. <code>COUT1</code>, <code>COUT2</code>, <code>DOUT1</code> and <code>DOUT2</code> come back heavy and violet, because <code>*OUT*</code> catches them exactly as it caught <code>AOUT1</code>; <code>CISEN</code> and <code>DISEN</code> come back in the <code>Sense</code> class’s colour because <code>*ISEN</code> catches them. <code>VM</code>, <code>nSLEEP</code>, <code>nFAULT</code> and the ground symbols are untouched. And <code>U2</code>’s pin names still read <code>AOUT1</code> and <code>AIN1</code>, which is correct, and is the subject of the paragraph below.</p>
+<p>In the same figure above, look at <code>U2</code>’s pin names and they still read <code>AOUT1</code>, <code>AIN1</code>, <code>AISEN</code> and <code>BOUT2</code>, with <code>COUT1</code> and <code>CIN1</code> on the wires just outside them. These are correct, and renaming labels never touches those names. A pin name belongs to the symbol and describes the chip, which has an A bridge and a B bridge no matter which board it is soldered to. A label belongs to the sheet and names a net. So the second chip’s A bridge drives motor C, and both halves of that sentence are printed in the figure, one inside the package outline and one outside it.</p>
+<p>Now check the work. Run the electrical rules check on the sheet. The five errors from the last section are gone, and eight new items have taken their place.</p>
+<p>All eight are about the four nets the renaming has just created, which are <code>CIN1</code>, <code>CIN2</code>, <code>DIN1</code> and <code>DIN2</code>. Each of the four runs from its label to a single pin and stops there, and that pin is one of <code>U2</code>’s four direction inputs. The pin is still named <code>AIN1</code> inside the symbol, but now has <code>CIN1</code> on the wire outside it, and the same goes for the other three. What each net is missing is its other end. It should carry on to a pin on the control header, but <code>J4</code> is still the eight-pin part Chapter 8 fitted, and all eight of those pins already carry something else.</p>
+<p>A net with only one pin on it draws two complaints, which is why four nets produce eight items. The warning, “label connected to only one pin”, is the complaint from the label’s end. The error, “input pin not driven by any output pins”, is the same complaint from the pin’s end.</p>
+<p>That is a report on how far the work has got, not a fault per se. The control-header section is where all eight clear at once, because the four nets get their other end there.</p>
+<p>Everything that the ERC reports is about whether the sheet is legal. But none of it is about whether the twelve renames were made on the correct twelve labels. The aside below settles that question, and it is optional: nothing later in the chapter depends on having run it, so you can stay in the editor and keep drawing.</p>
+<blockquote>
+<p><strong>Optional: prove the twelve renames with the netlist.</strong> Chapter 8 settled the same kind of question with a netlist rather than with a rules check, and this project carries the same script, taught about the second chip. It is here for the times you want the answer in writing rather than by eye.</p>
+<p>Export the netlist with “File”, then “Export”, then “Netlist…”, leaving the format on the KiCad tab, and run the checker over the file:</p>
+<pre><code>python3 tools/checknet.py net.net --nets --u2-pins --classes</code></pre>
+<pre><code>  --   J4 is Chapter 8&#39;s 8-pin header, so the four C and D inputs have nowhere to go yet
+  OK   31 named nets + 1 auto-named, 32 in all, and every J4 pin carries the signal the table gives it
+  OK   all 17 U2 pins wired exactly once, pad included
+  OK   *VM* / *GND / *OUT* / *ISEN resolved all 32 nets, the twelve new ones included</code></pre>
+<p>Look at the net count on the second line first. Every label you rename should add one net to the total. If the total is lower than that, a label you meant to rename still carries its old name, so the net it should have created has merged with an existing one. The third line is a check nothing else in the process makes, because <code>U2</code>’s exposed pad can sit on no net at all and every drawing of the board will still look right. The first line is the script working out which of this chapter’s two sheets you handed it, which is how the same command works again in the section on <a href="#sec:c09-control">the control header</a>.</p>
+<p>Run it with no options and it prints every net and the pins on it, one net per line.</p>
+</blockquote>
+
+<p>Then bring the schematic changes to the board. Go to “Tools”, then “Update PCB from Schematic”, or “F8”. Two of the options in that dialogue decide what you get, and they sit next to each other (Figure 9.10).</p>
+<ul>
+<li><strong>“Group footprints based on symbol group”</strong>, ticked. This option carries the second stage’s group across, and the eight new footprints then arrive as a group with a library link pointing back at <code>DRV8833-Stage</code>.</li>
+<li><strong>“Apply design block layouts to new groups”</strong>, ticked. With this option, any group arriving with a library link has its block’s saved layout applied as it lands, so the eight footprints are rearranged into the stage’s own geometry.</li>
+</ul>
+<p>Click “Update PCB”, and see the second routed driver stage placed in the editor.</p>
+<blockquote>
+<p><strong>The same job in two steps.</strong> Leave “Apply design block layouts to new groups” clear, and the eight footprints land in a loose cluster beside the board, tied to everything else by the ratsnest and carrying no copper of their own. The ratsnest, which you last met in Chapter 7, is the set of thin lines marking every connection the schematic asks for that the board has not yet made. Select that group, right-click it, and choose “Apply Design Block Layout”, and you arrive at the same place. It is worth taking this route once, the first time you place a block you did not capture yourself, because it lets you see what arrives before it is rearranged.</p>
+</blockquote>
+<p>One more option in that dialogue is <strong>“Re-link footprints to schematic symbols based on their reference designators”</strong>. Normally KiCad matches a symbol to its footprint by the uuid they share, but this option tells it to match by reference designator instead. On this board it does not change anything, because the eight new designators already agree with the table above. But, on a board where designators have been reassigned since the footprints were placed, it is the option that decides whether <code>C5</code>’s footprint follows <code>C5</code>’s symbol or the part it used to be.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-update-pcb-from-schematic-blocks.png" /></p>
+<p>Figure 9.10: Using the <strong>“Update PCB from Schematic”</strong> tool to bring in the second stage. Two options are important here: <strong>“Group footprints based on symbol group”</strong> and <strong>“Apply design block layouts to new groups”</strong> sit together at (1). The second only works when the first is on, because it acts on groups. The “Changes to Be Applied” pane reads as an ordinary import. Click “Update PCB” at (2).</p>
+<p>Move the whole group as one unit to roughly where the second stage is going to sit (Figure 9.11). Roughly is enough for now.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-new-block-placed.png" /></p>
+<p>Figure 9.11: The second stage, placed and routed, next to the original board. Every track inside the group was drawn by the copy. Three things are not finished in the new group. The group is beside the board rather than on it, and the outline behind it is still Chapter 8’s. The silkscreen under <code>J5</code> and <code>J6</code> still reads <code>AOUT1</code>, <code>AOUT2</code>, <code>BOUT2</code> and <code>BOUT1</code>, while the pads beneath those words are on <code>COUT1</code>, <code>COUT2</code>, <code>DOUT2</code> and <code>DOUT1</code>. And the control lines run off the right-hand edge of the stage and stop.</p>
+<p>Let’s continue with the silkscreen. The four labels under the output terminals came across because they were part of the original capture, but they belong to stage one. Change them for stage two. Set them to <code>COUT1</code>, <code>COUT2</code>, <code>DOUT2</code> and <code>DOUT1</code>.</p>
+<p>There are four items to review and fix.</p>
+<ul>
+<li><strong>The ground pours.</strong> They were left out of the capture because they belong to the board. Stage two’s ground pads and its exposed pad have no copper under them yet, and they get it when you refill the pours with both stages down.</li>
+<li><strong>The connections that leave the stage.</strong> <code>VM</code> into <code>U2</code>, and the four new direction inputs, are ratsnest lines we will route soon.</li>
+<li><strong>VM track width.</strong> <code>VM</code>’s track inside the new stage is 1.50 mm wide, because 1.50 mm is what was captured. In the original board, this width was correct for the 3 A that the chip’s two bridges needed. But this board feeds four bridges, so we will need to recalculate this width.</li>
+<li><strong>Copper tracks going nowhere.</strong> <code>AIN1</code>, <code>AIN2</code>, <code>BIN1</code>, <code>BIN2</code>, <code>nSLEEP</code> and <code>nFAULT</code> all ran from <code>U1</code> across to <code>J4</code> on the Chapter 8 board. When we added the second stage, the tracks for those nets aimed at a header that is not there, and end in mid-air. The design rules check reports the dangling ends and their vias as warnings. Clean them up before you route the real ones.</li>
+</ul>
+<p>You will find three groups on the board, even though the sheet has two. Open the Groups tab of the Search panel and stage two is listed once, stage one twice. One entry holds its eight footprints, the other holds its copper, its zones and its silkscreen labels. Nothing is broken and nothing electrical depends on it.</p>
+<p>The explanation is that the two groups were made by different operations, one working from the sheet to the board, the other from the board to the library. Stage two’s was made from its sheet group by the update you have just run, so the two are one object. Stage one’s was made on the board by “Update Design Block from Selection”, before its sheet group existed, so the sheet has never heard of it. The update has therefore just made the board group the sheet was asking for, and moved stage one’s footprints into it. Copper is never moved by that operation, so the rest of stage one stayed where it was.</p>
+<p>Leave it alone until the last “Update PCB from Schematic” in this chapter has run, because they all do the same thing. Then select the group holding stage one’s copper, right-click, and choose “Grouping”, then “Ungroup Items”. The copper itself is untouched, because a group holds references rather than copies, and the board is left with one group per stage.</p>
+<p>The board is now too small for its purpose. Look at Figure 9.11 again. The second stage cannot fit within the original board outline, so we will have to draw a larger one. For the new outline, keep the following in mind:</p>
+<ul>
+<li>The four mounting holes are positioned against the edges and not against the parts, so we will move them accordingly.</li>
+<li>The grid origin stays on the page while the corner moves out from under it, and every position typed on this board is measured from that origin.</li>
+<li>Where four sets of motor terminals meet the edge is a wiring question, not a copper one, and it should be considered while the outline is still a sketch.</li>
+</ul>
+<p>Re-drawing the board outline is the first item in our layout to-do list.</p>
+<p>You can see my re-drawn outline in Figure 9.12. The new outline is 83.79 by 48 mm, which keeps Chapter 8’s height exactly and adds width to accommodate the new stage. Its corners are filleted at 2 mm. Two of the four mounting holes moved out with the right-hand edge. And all motor terminals are now aligned along the bottom edge of the board. The power supply terminal is in its original position at the top, and the signals will eventually be routed on the right.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-edge-cuts-intermediate.png" /></p>
+<p>Figure 9.12: The outline redrawn, with the work still outstanding marked on it. The board is 83.79 by 48 mm with 2 mm corners. Both stages are on it, the four motor terminals share one edge, and the two mounting holes on the right have moved out with that edge. At (1) the routing between the stages is unfinished, and some of the copper there still runs to where the header used to be. At (2) <code>J4</code> is still the eight-pin part.</p>
+<p><code>J4</code> is still the original header from Chapter 8. The extended board will need twelve pins. Let’s replace the <code>J4</code> header:</p>
+<ol type="1">
+<li>In the schematic editor, change the <code>J4</code> symbol with “Change Symbol…”, (do not delete it, because doing so it takes its wires and its attached labels with it).</li>
+<li>Set the footprint to <code>Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical</code>. The symbol is <code>Conn_02x06_Odd_Even</code> and you will find it in <code>Connector_Generic</code>.</li>
+<li>Go to the layout editor, and run “Update PCB from Schematic” again. This will swap the footprint on the board rather than adding a second one beside it.</li>
+<li>Position the new header against the right-hand side of the second stage, where there is ample space.</li>
+</ol>
+<p>You can see the result in Figure 9.13. This placement is not yet final, but it is very close.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-j4-swapped.png" /></p>
+<p>Figure 9.13: The board after placing the new <code>J4</code> header. <code>J4</code> is the 2 x 6 <code>Conn_02x06_Odd_Even</code>, with <code>R1</code> still beside it. Every other part on the board is exactly where Figure 9.12 left it.</p>
+<p>The second stage is on the sheet and on the board. Next, let’s work on the shared power.</p>
+<h2 id="sec:c09-power">Sharing power</h2>
+<p>The second stage duplicated the driver half of the board. The power half was not duplicated. One supply input, one bulk capacitor, one reverse-polarity MOSFET and one power indicator feed both stages, and they now carry twice the current they did in Chapter 8.</p>
+<p>This section does two things:</p>
+<ol type="1">
+<li>It explains why some parts are shared and others are repeated.</li>
+<li>It checks the shared parts, and the board setup that describes them, against 6 A instead of 3 A.</li>
+</ol>
+<p>You might be wondering why the bulk capacitor is shared while the ceramics are not. When a bridge switches<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, the current it draws changes within nanoseconds. That demand has to be met from very close by, because every millimetre of track between the chip and a more distant source carries inductance which is what resists a fast change in current. The loop that matters runs out of the chip’s <code>VM</code> pin, through the capacitor, and back to the chip’s ground. What sets the inductance of that loop is its physical size.</p>
+<p>The requirement on <code>C2</code> is therefore geometric instead of electrical. It has to sit at <code>U1</code>’s pin, which is where Chapter 8 measured it at 2.90 mm. A second chip 25 mm away sits at the far end of a much larger loop, which is too far. Every chip needs one of its own, which is why the section on <a href="#sec:c09-design-block">capturing the driver stage as a design block</a> put all three ceramics inside the block.</p>
+<p><code>C1</code> handles a slower change. As a motor starts, stalls or reverses, the average current drawn from the supply changes over milliseconds, and the supply itself sits at the far end of the wire you have screwed into <code>J1</code>. The resistance and the inductance of that wire are common to both stages, because both stages are downstream of the same terminal block, and one capacitor at that point maintains the rail voltage for both of them.</p>
+<p>Putting a second electrolytic beside the second chip would place two capacitors in parallel across one node. Two capacitors in parallel behave as one larger capacitor. This arrangement would not shorten the loop, since the fast loop is already covered by the ceramics and the slow one is shared. The only thing the second capacitor would change is how much capacitance and how much ripple-current rating sit at that one point. That is a question of size, not of arrangement, so <code>C1</code> stays a single capacitor and the doubled current is met by what that one capacitor is rated for, which is what the list below works through.</p>
+<p>So, as you can see, the test to help with making these decisions is which loop the part sits in. A part in a loop that belongs to one chip has to be repeated. A part in a loop that both chips share does not.</p>
+<p>Focus on the three shared parts. The doubled current reaches these parts differently, so take them one at a time.</p>
+<ul>
+<li><strong><code>J1</code>, the supply input.</strong> The Phoenix <code>MKDS 1,5/2-5,08</code> is rated at 17.5 A, so 6 A is well within it. The wire you screw into it is the more likely limit.</li>
+<li><strong><code>Q1</code>, the reverse-polarity MOSFET.</strong> The power a resistance dissipates rises with the square of the current, so doubling the current has quadrupled the heat in this part. It is still nowhere near what the part is built for: the Vishay datasheet rates the <code>SUD45P03-09</code> at 45 A continuous, and at 32 A when the gate has only 4.5 V to work with, so 6 A leaves a fivefold margin even in the worse of those two cases. Heat is the only question left, and the arithmetic is below the list.</li>
+<li><strong><code>C1</code>, the bulk capacitor.</strong> This is the only one of the three where the doubling approaches a published limit. The <code>EEU-FR1E101</code> is rated for 455 mA of ripple current<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, and ripple current is what doubles when twice as much switching load is put on one capacitor. The DRV8833 datasheet does not settle this value for you. Its Section 9.1 lists what feeds into it, which is the peak current, the inductance of your supply leads, the ripple you will accept and whether the motor is braked, and then says that system-level testing is what decides. So measure this one on a real board instead of calculating it, and fit the 105 °C low-ESR part.</li>
+</ul>
+<p><code>Q1</code> is the one to work through, because the answer depends on something outside the part. This circuit drives the gate from the supply itself, so your supply voltage decides which row of the <code>SUD45P03-09</code> datasheet applies, and a lower supply gives a higher on-resistance. The DRV8833’s Recommended Operating Conditions table caps <code>VM</code> at 10.8 V, and its Absolute Maximum Ratings table stops at 11.8 V, so 10.8 V is the most this board may be run at and it is the first row below. The second row is a 5 V supply, which is the other common case.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Supply</th>
+<th>Datasheet gate-drive row</th>
+<th>On-resistance</th>
+<th>Dissipation at 3 A</th>
+<th>Dissipation at 6 A</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td>(datasheet)</td>
+<td>(<code>I²R</code>)</td>
+<td>(<code>I²R</code>)</td>
+</tr>
+<tr>
+<td>10.8 V</td>
+<td>10 V</td>
+<td>0.0087 Ω</td>
+<td>0.078 W</td>
+<td>0.313 W</td>
+</tr>
+<tr>
+<td>5 V</td>
+<td>4.5 V</td>
+<td>0.0150 Ω</td>
+<td>0.135 W</td>
+<td>0.540 W</td>
+</tr>
+</tbody>
+</table>
+<p>At 10.8 V, 0.313 W in a package rated at 60 °C/W corresponds to a rise of about 19 °C, which is comfortable. When you scale up this board, remember that as the current doubles, the heat quadruples.</p>
+<p><code>Q1</code> would be just as comfortable at 12 V, or at 24 V, and the DRV8833 would not. <code>Q1</code> drops about 50 mV at 6 A, so whatever you screw into <code>J1</code> is what arrives at both chips’ <code>VM</code> pins, and 12 V there is past the absolute maximum the datasheet allows. A protection device’s rating is not the board’s rating, and on this board the chips are what set the ceiling.</p>
+<p>The <code>Power</code> class track width of 1.50 mm needs revision. Chapter 8 sized the <code>Power</code> class by using the “Track Width” tab of Calculator Tools. There, we found that 3 A on 1 oz external copper at a 10 °C rise requires at least 1.39 mm, and rounded that up to 1.50 mm. We will redo this calculation for the 6 A.</p>
+<p>Enter 6 A on the same three settings and the “External Layer Tracks” panel comes back with 3.62 mm (Figure 9.14). You can also reverse the calculation. Leave the class at 1.50 mm, push 6 A through it, and the same standard puts the copper at roughly a 42 °C rise instead of the 10 °C the class was sized around. It would not fail but it would run hot.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-calculator.png" /></p>
+<p>Figure 9.14: The “Track Width” tab. Current is entered as 6 A, temperature rise stays at Chapter 8’s 10 °C, and copper thickness stays at 1 oz. The External Layer Tracks panel comes back with 3.61828 mm.</p>
+<p>Round 3.62 mm up to 3.80 mm. Then, reverse-check the rounding the same way: 3.80 mm at 6 A comes back at a 9.2 °C rise, just inside the 10 °C the class is built around, so the rounding is acceptable.</p>
+<p>As we did in Chapter 8, here too we will size the class for its worst case. The <code>Power</code> class holds <code>*VM*</code>, <code>*GND</code> and <code>*OUT*</code>, and its worst case is <code>VM</code>. The eight bridge outputs will now default to 3.80 mm of copper when each of them carries at most 1.5 A and needs 0.53 mm.</p>
+<p>Trace the supply from the terminal block. <code>VM_IN</code> arrives at <code>J1</code>, passes through <code>Q1</code> and becomes <code>VM</code> at the bulk capacitor. Up to that point all the current for both chips (up to 6 A) flows in one piece of copper. Past the point where the rail divides, one branch runs to <code>U1</code> and the other to <code>U2</code>, and each of those branches feeds one chip’s two bridges, which is 3 A. Chapter 8’s 1.50 mm is still the right width there.</p>
+<p>A net class cannot describe that, because a class gives one width to a whole net and <code>VM</code> is a single net running from the terminal block to both chips. So the trunk is drawn at 3.80 mm and the branches are necked down to 1.50 mm past the split.</p>
+<p>That is why 1.50 mm stays on the “Pre-defined Sizes” list instead of being replaced by 3.80 mm. This list now reads 0.25, 0.30, 0.80, 1.50 and 3.80 mm. All these widths have a use on the board.</p>
+<p>The custom rule also needs an update. Chapter 8’s board setup carries this rule:</p>
+<pre><code>(rule &quot;Power minimum width&quot;
+    (constraint track_width (min 0.8mm) (opt 1.5mm) (max 2.2mm))
+    (condition &quot;A.hasNetclass(&#39;Power&#39;)&quot;)
+)</code></pre>
+<p>The 2.20 mm ceiling is the main problem in this rule, because the new board requires a minimum of 3.80 mm for the power rail. The other two numbers give no trouble. The 0.80 mm floor is the first neck-down on the way into the chip, and it is still correct. The 1.50 mm optimum is Chapter 8’s class width. Move the optimum to 3.80 mm and the ceiling to 4.50 mm, which leaves the same 0.70 mm of headroom Chapter 8 allowed itself, and the rule becomes correct for this board:</p>
+<pre><code>(rule &quot;Power minimum width&quot;
+    (constraint track_width (min 0.8mm) (opt 3.8mm) (max 4.5mm))
+    (condition &quot;A.hasNetclass(&#39;Power&#39;)&quot;)
+)</code></pre>
+<p>The floor remains unchanged.</p>
+<p>Make that edit in a text editor rather than in the graphical Design Rule Editor, which discards every comment in the file whenever a rule is created or changed in it. Reading the rules through Board Setup’s “Custom Rules” page is safe, on OK as well as on Cancel. It is the editing that destroys the comments, not the looking. Figures 9.15 and 9.16 show the updated Netclasses table and Pre-define Sizes lists.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-net-classes-power-edited.png" /></p>
+<p>Figure 9.15: The Net Classes page, edited. The Power row now reads 3.8 mm for track width, with the rest of the values not changed. Below, the four assignment patterns <code>*VM*</code>, <code>*GND</code>, <code>*OUT*</code> and <code>*ISEN</code> are unedited.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-pre-defined-sizes.png" /></p>
+<p>Figure 9.16: The size list beside it. 3.80 mm is now on it. The 3.80 mm width is used for the shared trunk and 1.50 mm for the branches past the split.</p>
+<p>Let’s continue with a review of the via sizes. In Chapter 8, Project (Capstone): DRV8833 Dual H-Bridge Motor Driver, we worked this out on the “Via Size” tab in its section on sizing the Power net class. One 0.40 mm hole plated to 25 microns carries 2.31 A at the same 10 °C rise, which is less than the 1.50 mm track feeding it. The answer there was to put two in parallel wherever a power net changes layer. Multiply that 2.31 A by the number of barrels and the two cases on this board separate:</p>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>Current it carries</th>
+<th>Vias in parallel</th>
+<th>Capacity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shared trunk</td>
+<td>6 A</td>
+<td>3</td>
+<td>6.93 A</td>
+</tr>
+<tr>
+<td>Branch to each chip</td>
+<td>3 A</td>
+<td>2</td>
+<td>4.62 A</td>
+</tr>
+</tbody>
+</table>
+<p>The branches therefore stay as Chapter 8 left them, and only the trunk needs a third barrel. Put only two there and that crossing becomes the narrowest part of the supply, carrying 4.62 A where the trunk needs 6 A.</p>
+<p>Better still, keep the trunk on one layer so it never has to cross at all. It is a short run from <code>J1</code> to the point where the rail divides, and the section on <a href="#sec:c09-layout">laying out two thermal fields</a> arranges the parts around it.</p>
+<p>The same turns out to be true of the branches. That section keeps the entire rail on the top layer, from <code>J1</code> through the trunk and out to both chips, so this board ends up placing no via on <code>VM</code> at all. But it is still worth working out the via count, so that if your own layout has to take the rail to the back layer, you know how many barrels you will need.</p>
+<p>The shared supply is now specified for the board of this chapter. Let’s continue with the new header.</p>
+<h2 id="sec:c09-control">The control header</h2>
+<p>The board still carries Chapter 8’s connector, an eight-pin <code>J4</code> sized for a single DRV8833. Four motors need more signals than that part can bring out, and <code>U2</code>’s four direction inputs, <code>CIN1</code>, <code>CIN2</code>, <code>DIN1</code> and <code>DIN2</code>, are still nets that have to be routed to the header’s pins.</p>
+<p>This section replaces that connector, in four steps:</p>
+<ol type="1">
+<li>Work out how many signals the four-motor board has to bring out, which settles the pin count.</li>
+<li>Choose a part that carries them, and decide which signal sits on which pin.</li>
+<li>Swap <code>J4</code> on the schematic without losing the labels and the ground symbol already drawn around it, then redraw the wiring.</li>
+<li>Prove the result with the electrical rules check and the netlist.</li>
+</ol>
+<p>The fourth step finishes the schematic. After that, we’ll do the routing.</p>
+<p>Count the pins before you choose the part. Chapter 8’s <code>J4</code> brings eight signals to the edge of the board. Those signals are <code>VLOGIC</code>, <code>GND</code>, then <code>nSLEEP</code> and <code>nFAULT</code>, then the four direction inputs <code>AIN1</code>, <code>AIN2</code>, <code>BIN1</code> and <code>BIN2</code>. The four motors need an additional eight direction inputs. The <code>nSLEEP</code> and <code>nFAULT</code> are shared. Therefore, the new header must provide twelve pins.</p>
+<p>Twelve pins in a single row measure 31.48 mm, which is too long for the board. The same twelve in two rows of six measure 16.24 mm, which is shorter than the eight-pin part Chapter 8 fitted. So the header gains four pins and takes up less of the board edge than it did.</p>
+<p>The length of the header is not the only reason for this choice. A double-row 2.54 mm header is what a keyed ribbon socket plugs into, which provides a convenient and tidy way to connect the board to a controller. So <code>J4</code> becomes <code>Conn_02x06_Odd_Even</code> on the footprint <code>PinHeader_2x06_P2.54mm_Vertical</code>. The library that contains this footprint is <code>Connector_Generic</code>.</p>
+<p>KiCad’s three 2x6 symbols hold the same twelve pins in the same two columns and differ only in the numbering. <code>Conn_02x06_Odd_Even</code> numbers them the way a ribbon header is numbered, with pins 1 and 2 side by side on the first row, 3 and 4 on the second, and so on down to 11 and 12 on the sixth. <code>Conn_02x06_Counter_Clockwise</code> and <code>Conn_02x06_Top_Bottom</code> number the same pads differently, so either would put pin 1 where a ribbon cable does not expect to find it. Take the odd/even symbol, or fit any other twelve-pin connector you prefer and carry the assignments below across to it.</p>
+<p>The symbol has settled the geometry, which is twelve pins arriving as six numbered pairs. Which signal goes on which pair is still open, and it is a decision you make. I arranged the pin to signal pairs as per the table below.</p>
+<table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Odd pin</th>
+<th>Signal</th>
+<th>Even pin</th>
+<th>Signal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1</td>
+<td><code>GND</code></td>
+<td>2</td>
+<td><code>VLOGIC</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>3</td>
+<td><code>nSLEEP</code></td>
+<td>4</td>
+<td><code>nFAULT</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>5</td>
+<td><code>CIN1</code></td>
+<td>6</td>
+<td><code>CIN2</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>7</td>
+<td><code>DIN1</code></td>
+<td>8</td>
+<td><code>DIN2</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>9</td>
+<td><code>AIN1</code></td>
+<td>10</td>
+<td><code>AIN2</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>11</td>
+<td><code>BIN1</code></td>
+<td>12</td>
+<td><code>BIN2</code></td>
+</tr>
+</tbody>
+</table>
+<p>I settled for the arrangement in the table based on the idea that a row holds a pair of signals that belongs together, and the rows are stacked in blocks. <code>J4</code> sits against the right-hand board edge with pin 1 at the bottom, so the connector reads from the top down as motors A and B, then motors C and D, then the two shared control lines with the logic supply and its return at the foot (Figure 9.17). Each chip’s four inputs leave the header as one block instead of interleaving with the other chip’s. In doing so, I also departed from the way the pins were arranged in the Chapter 8 project.</p>
+<p>Other arrangements are just as good, and yours may well differ. What matters is that the order follows a pattern that makes sense to you, whether that is the chips, the motors, or the direction the wiring arrives from, rather than from the sequence the labels happened to come to mind in. It is worth checking again once the tracks are drawn, while modifications are still easy.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-change-symbol-j4-5.png" /></p>
+<p>Figure 9.17: <code>J4</code> on the finished board, shown ahead of where this chapter has got to. It sits against the right-hand edge, rotated so that pin 1 is at the bottom, and the six rows stack upward in the order the table lists them. Every pad carries a silkscreen name as well as a number, pin 1 is square where the other eleven are round, and <code>R1</code> sits between the only two pads it touches.</p>
+<p>Do not delete the connector to place a new one. Deleting it takes its wires with it, and with them the seven labels and the ground symbol on the other ends of those wires. Use “Change Symbol…” instead. It is reachable two ways. Right-click <code>J4</code> and pick it off the menu, or double-click <code>J4</code> to open its Properties dialogue and click the button on the right side (Figure 9.18). Remember the second one, because it puts the command next to the fields you are about to have to check.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-change-symbol-j4-1.png" /></p>
+<p>Figure 9.18: Double-click <code>J4</code> to open its Properties dialogue, then click “Change Symbol…” on the right-hand side.</p>
+<p>The Change Symbol dialogue looks complicated, but we only need to make a couple of changes (Figure 9.19).</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-change-symbol-j4-2.png" /></p>
+<p>Figure 9.19: Pick “Change selected symbol(s)” at (1), so the swap touches <code>J4</code> only. The button at (2) opens the symbol chooser, where you search for <code>Connector_Generic:Conn_02x06_Odd_Even</code> (I have already done that in this screenshot) into the field at (3). Then click “Change” at (4).</p>
+<p>Two things need fixing right after the change (Figure 9.20). The generic connector symbols carry an empty <code>Footprint</code> field, so set it to <code>PinHeader_2x06_P2.54mm_Vertical</code>. And <code>MPN</code>, <code>Manufacturer</code> and <code>Supplier</code> still hold the eight-pin part Chapter 8 put there, which is a bill of materials error (not an electrical one).</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-change-symbol-j4-3.png" /></p>
+<p>Figure 9.20: The swap done. The boxed pair at the top is <code>Value</code>, now reading <code>Conn_02x06</code>, and <code>Footprint</code>, typed in by hand because the swap emptied it. The boxed line at the foot names the library as well as the symbol. Below them, <code>MPN</code>, <code>Manufacturer</code> and <code>Supplier</code> still describe the Würth eight-pin part.</p>
+<p>Now it is time to draw the wires. Look at the sheet behind the dialogue in Figure 9.20. Chapter 8’s seven labels and its ground symbol are exactly where they were, but none of them reaches a pin. Nothing has gone wrong. A 1x8 puts eight pins in one column at 2.54 mm apart, a 2x6 puts twelve in two columns over six rows, and the body between the columns is wider, so every pin end on the new part is at a position the old part had nothing at.</p>
+<p>“Change Symbol…” moves the symbol and leaves the wiring where the drawing put it. By changing the symbol, you keep the seven labels, spelled correctly, and the ground symbol, which is the work you do not want to do twice. What you lose is eight short wires, which are quick to redraw.</p>
+<p>One thing that does not change is the footprint’s anchor, which sits at pin 1 rather than at the centre of the part. That is the trap Chapter 8 warned about when this connector was first placed, and a second row does nothing to move it. Run “Update PCB from Schematic” once the fields are right and the board swaps the footprint in place rather than adding a second one beside it, but the part that arrives is anchored where the old one was anchored, and a connector that looked centred on its edge as one row of eight is not centred as two rows of six. Re-place it against the edge and check it there rather than on the sheet.</p>
+<p>Continue with the wiring. All twelve signals already exist as nets on this sheet. <code>AIN1</code> runs from <code>U1</code>’s direction input to its label, <code>CIN1</code> from <code>U2</code>’s, and so on down the table. I prefer to do the wiring using net labels, and thus avoid drawing wires across the sheet. Draw a short wire off a header pin, put a net label on its free end (or you can attach it directly to the pin, as this is a matter of style), and type the name the table gives that pin.</p>
+<p><code>nFAULT</code> lands on a net that the two chips already drive. This is correct because of the kind of pin they drive it with. The aside below says how it works, since this is a property of the DRV8833, not relating to KiCad.</p>
+<blockquote>
+<p><strong>Why two chips can share one fault line.</strong> <code>nFAULT</code> is an open-drain output. This means that behind the pin sits a single transistor to the chip’s internal ground so that the pin can pull its line low or let go of it, but never drive it high. <code>R1</code>, the 10 kΩ resistor up to <code>VLOGIC</code>, is what puts the line high once both chips have let go. Two such pins on one node therefore cannot contradict each other, and the line ends up reporting “at least one of these chips has a fault”. The left half of Figure 9.21 depicts this arrangement.</p>
+<p>The right half shows the same wiring applied to the bridge outputs, and those pins behave differently, because they are push-pull rather than open-drain. A push-pull output has two transistors behind the pin instead of one, an upper transistor to the supply and a lower one to ground, which the chip switches on one at a time and never together. The upper one “pushes” the line up to the supply and the lower one “pulls” it down to ground, which is where the name comes from, and it is how a bridge output swings a motor terminal either way. The consequence that matters here is that such a pin can drive its line high as well as low, where the open-drain pin above could only pull it down. Tie two of them to one node and one chip can drive the line high while the other drives it low, with nothing but the two transistors’ own resistance limiting the current that then runs from <code>VM</code> to ground straight through the pair. That is what the duplicated <code>AOUT1</code>, <code>AOUT2</code>, <code>BOUT1</code> and <code>BOUT2</code> labels created in the section on <a href="#sec:c09-second-stage">placing the second stage</a>, and it is why renaming them was not optional.</p>
+<p>The weakness of this arrangement is that the line reports a fault without indicating which chip raised it. On a four-wheeled robot that is usually enough information to stop the robot. But if your application requires more granularity so that it can detect which chip has raised the fault, then separate the two lines and use a second controller pin. <code>R1</code> stays a single 10 kΩ part either way, and that is why the section on <a href="#sec:c09-design-block">capturing the driver stage as a design block</a> kept it outside the block.</p>
+</blockquote>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09_wired-or_v10.png" /></p>
+<p>Figure 9.21: Why two <code>nFAULT</code> pins can share a line, and two bridge outputs cannot. On the left, pin 8 of both chips is open-drain, a transistor that can pull the line down or let go of it, so one <code>R1</code> holds the line high for both and either chip pulling takes it low. On the right, the same wiring on two push-pull outputs. One chip’s high-side device is on, the other’s low-side is on, and the current runs straight from <code>VM</code> to ground through the two of them. The difference is inside the package.</p>
+<p>Draw the twelve wires, put the eleven labels on their pins and <code>R1</code> back across the gap, and the header is finished. It is also the last of the schematic work in this chapter (Figure 9.22).</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-design-change-symbol-j4-4.png" /></p>
+<p>Figure 9.22: The finished header.</p>
+<p>Run the electrical rules check first. The report should come back empty (Figure 9.23).</p>
+<p>As I have mentioned repeatedly, an empty report does not mean there are no faults, only that KiCad’s ERC did not find any rule violations.</p>
+<blockquote>
+<p><strong>Optional: prove the pin map with the netlist.</strong> Export the netlist again and run exactly the same command as before. The script will count <code>J4</code>’s twelve pins, and switch to this section’s pin map on its own.</p>
+<pre><code>python3 tools/checknet.py net.net --nets --u2-pins --classes</code></pre>
+<pre><code>  --   J4 is the 2 x 6, so the twelve-row pin map is the one checked
+  OK   31 named nets + 1 auto-named, 32 in all, and every J4 pin carries the signal the table gives it
+  OK   all 17 U2 pins wired exactly once, pad included
+  OK   *VM* / *GND / *OUT* / *ISEN resolved all 32 nets, the twelve new ones included</code></pre>
+<p>The count is still thirty-two, because the header gained pins but did not create new nets.</p>
+</blockquote>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-erc-zero-violations.png" /></p>
+<p>Figure 9.23: The report, empty. Violations reads zero, with Errors and Warnings both ticked and both at 0. The four items under “Ignored Tests” are the checks this project excludes on purpose.</p>
+<p>The schematic is finished. What remains is to draw the remaining copper on the board.</p>
+
+<h2 id="sec:c09-layout">Layout: Two thermal fields on one board</h2>
+<p>The board in Figure 9.13 is the right size, both stages are on it, and the header is the part this chapter needs. What is left is to draw the copper tracks, and some work in the silkscreen.</p>
+<p>The grid origin no longer sits on the corner it belongs on. The corner moved when the outline was redrawn and the origin stayed where it was. Every coordinate on this board is measured from that point, so put it back before you draw anything: “Place”, then “Grid Origin”, and type in the bottom-left corner of the new outline, at 120.03, 79.99.</p>
+<p>Start by cleaning up unconnected copper. Several tracks at both ends of this board finish in mid-air. These incomplete tracks are not worth keeping. Delete them before you draw anything new, so that the ratsnest can guide their redrawing (Figure 9.24).</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-track-cleanup.png" /></p>
+<p>Figure 9.24: I have cleaned up the incomplete tracks. The short tracks and vias at the inner edge of each chip are the start of the control routing.</p>
+<p>Continue with the rule area. The section on <a href="#sec:c09-design-block">capturing the driver stage as a design block</a> said the copy would arrive under a new name, which you can see in the copy’s Properties. The fine-pitch breakout region came across with the block and it came across as <code>U1_breakout_1</code>, because KiCad makes area names unique as it pastes them. The <code>.kicad_dru</code> file still reads <code>A.intersectsArea('U1_breakout')</code>, so the relaxation that lets a power net reach a 0.45 mm pad on a 0.65 mm pitch applies only to the first chip. On my board that one fact filled the report with clearance and track-width violations, every one of them inside <code>U2</code>.</p>
+<p>That paste-time renaming makes it look as though every area must carry a name of its own, but it does not. Two rule areas may share one name, and <code>intersectsArea()</code> matches both of them, so the fix is to bring both regions under a single name rather than to add a second name to the rule. I gave both the name <code>driver_breakout</code>, and changed the one condition to match:</p>
+<pre><code>(rule &quot;Driver fine-pitch breakout&quot;
+    (constraint track_width (min 0.2mm))
+    (constraint clearance (min 0.15mm))
+    (condition &quot;A.intersectsArea(&#39;driver_breakout&#39;)&quot;)
+)</code></pre>
+<p>This was an easy fix, and of course it is preferable to the alternative. Widening the condition to <code>A.intersectsArea('U1_breakout') || A.intersectsArea('U2_breakout')</code> works just as well today, but each time you add another stage you have to remember to update the custom rule.</p>
+<p>The paste renamed the exposed-pad zone as well. That zone, the small solid one Chapter 8 put over <code>U1</code>’s exposed pad, is part of the block, so the paste laid a copy of it over <code>U2</code> and called the copy <code>U1-GND-pads_2</code>, one number up from the <code>U1-GND-pads_1</code> already on the board. The <code>U1</code> in both names comes from the block and not from the chip each zone covers, so <code>U1-GND-pads_2</code> is <code>U2</code>’s zone. Leave both names as they are. No custom rule scopes to either zone by name, and the two settings that do the work, a solid pad connection and a priority above the <code>GND</code> pour, are stored in the zone itself and travelled with the copy. Figure 9.25 shows the two renamed rule areas and <code>U1-GND-pads_2</code> in the one screenshot.</p>
+<p>As usual, make that edit in a text editor. Figure 9.26 is the file read back afterwards with its comments intact, which is the check to make before you trust that the edit landed the way you meant it to.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-rule-areas-same-name.png" /></p>
+<p>Figure 9.25: Two areas sharing one name, with the Zones tab open. The tab lists every zone and rule area with its name, its position and its size, which makes it the fastest way to read a zone name. The two boxed rows are the breakout regions, one per chip, both now reading <code>driver_breakout</code>. <code>intersectsArea()</code> matches both. The last row, <code>U1-GND-pads_2</code>, is the exposed-pad zone the paragraph above says to leave alone.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-drc-rule.png" /></p>
+<p>Figure 9.26: The rule after the edit. The lower box holds the change itself, one condition now naming <code>driver_breakout</code> where it named <code>U1_breakout</code> before. The upper box holds the comment block that records why, which is what reading the file back with its comments intact looks like. The status line below confirms that the file still parses.</p>
+<p>Route the shared rail first, and change its width where the current changes. The section on <a href="#sec:c09-power">sharing power</a> did the arithmetic and left the drawing to this section. The trunk runs from <code>J1</code> through <code>Q1</code> to the point beside the bulk capacitor <code>C1</code> where it divides, all the current for both chips is in that copper, and it is drawn at 3.80 mm. Figure 9.27 is the finished rail. One net ends up carrying four different widths.</p>
+<table>
+<thead>
+<tr>
+<th>Segment</th>
+<th>Width</th>
+<th>Current it carries</th>
+<th>In Figure 9.27</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>J1</code> to <code>Q1</code>’s tab, the shared trunk</td>
+<td>3.80 mm</td>
+<td>6 A</td>
+<td>(1)</td>
+</tr>
+<tr>
+<td>Across <code>Q1</code>’s source pad</td>
+<td>1.50 mm</td>
+<td>6 A</td>
+<td>not marked</td>
+</tr>
+<tr>
+<td><code>Q1</code> on to the split, the trunk again</td>
+<td>3.80 mm</td>
+<td>6 A</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>Branch to <code>U1</code></td>
+<td>1.50 mm</td>
+<td>3 A</td>
+<td>(3)</td>
+</tr>
+<tr>
+<td>Branch to <code>U2</code></td>
+<td>1.50 mm</td>
+<td>3 A</td>
+<td>(4)</td>
+</tr>
+<tr>
+<td>Branch to <code>R5</code>, the indicator</td>
+<td>1.50 mm</td>
+<td>a few mA</td>
+<td>(5)</td>
+</tr>
+<tr>
+<td>Last hop onto each chip</td>
+<td>0.80 then 0.30 mm</td>
+<td>3 A</td>
+<td>not marked</td>
+</tr>
+</tbody>
+</table>
+<p>The neck across <code>Q1</code> is there because a 3.80 mm track cannot land on a pad narrower than itself. The rail drops to 1.50 mm for the short distance it takes to clear that pad, then widens again at once. A neck that short does not degrade the track’s thermal properties materially.</p>
+<p>Where the rail divides you have to select the appropriate track width and draw deliberately instead of leaving it to the router. The branches should leave from <code>C1</code>. On my board they leave about two millimetres short of <code>C1</code>’s pad, which is close enough to make no difference here. Draw yours onto the pad.</p>
+<p>Three branches leave that point. Two of them feed one chip’s two bridges each. The third runs up and across to <code>R5</code>, the series resistor for the power indicator, and it is 1.50 mm only because <code>R5</code> sits on <code>VM</code>, and <code>VM</code> is in the <code>Power</code> class. A few milliamps do not need that much copper, but re-drawing it at 0.25 mm would gain nothing, so leave it.</p>
+<p>The last hop onto each chip necks twice to reach a pad on a 0.65 mm pitch, which the DRC will not complain about because of the rule area you renamed earlier.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-power-rail.png" /></p>
+<p>Figure 9.27: One rail, four widths, and three branches off one point. The trunk is the wide copper at (1) and (2), running from <code>J1</code> across <code>Q1</code>’s tab and on past its source pad, and it is drawn wide enough that you can see which track on this board is the shared one without measuring anything. The three branches at (3), (4) and (5) go down and left to <code>U1</code>, out and right to <code>U2</code>, and up and across to <code>R5</code> for the indicator. Where the trunk and <code>U1</code>’s branch meet is the point at which the rail divides, which is why the copper there is one continuous piece.</p>
+<p>Continue with the control lines. Eight direction inputs, one enable and one fault line all run to <code>J4</code>, and we have already ordered its six rows so that each chip’s four inputs leave the connector as one block. Routing them is what tells you whether that ordering was right.</p>
+<p>That section invited you to check the order once the tracks were drawn, so now is the time to make any changes to the header tracks if you have good reasons to do so.</p>
+<p><code>nSLEEP</code> and <code>nFAULT</code> are the two that reach both chips. <code>nFAULT</code> also has to reach <code>R1</code>, which sits between the only two pads it touches, and <code>VLOGIC</code> runs from pin 2 of the header to the other end of that resistor. In Figure 9.28 you can see the completed tracks.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-close-view-of-finished-routing.png" /></p>
+<p>Figure 9.28: Every net drawn.</p>
+<p>Both thermal via fields and their exposed-pad zones copied across, but the pin 13 connection override did not. Each chip sits over its own field of twelve plated vias, drawn into the footprint in Chapter 2, and each has its own small high-priority zone over its exposed pad so that the connection is solid copper rather than using thermal spokes. Both came across with the block.</p>
+<p>The pin 13 override is the exception. Chapter 8 set a pad-level override on <code>U1</code> pin 13, the logic ground pin, because it sits mid-row with <code>VM</code> and <code>VINT</code> 0.20 mm away on either side, so the pour can only reach it from one end and gives it a single thermal spoke where the board-wide floor asks for a minimum of two. The design block carries that override, but <code>U2</code> on my board did not have it. Open Pad Properties on pin 13 of both chips, look under “Connections”, and set <code>U2</code>’s to “Solid” so that the two stages match.</p>
+<p>Give the eight parts of stage two one name. That name is a component class, one of the three new techniques promised in the section on <a href="#sec:c09-learn">learning objectives</a>, and once all eight parts share it you can act on them in one step instead of eight times over.</p>
+<p>Add a <code>Component Class</code> field reading <code>Stage-2</code> to <code>U2</code>, <code>C5</code>, <code>C6</code>, <code>C7</code>, <code>R6</code>, <code>R7</code>, <code>J5</code> and <code>J6</code> on the sheet. You can also do it from the board, in Board Setup under “Component Classes”, with a rule that matches those references, and the two routes are not equivalent. A class set on the sheet is written into the board file against each footprint and stays there until the sheet changes. By contrast, a class set by a rule is recomputed every time the board is, and is not stored.</p>
+<p>Take the first route (the sheet), and remember to use “Update PCB from Schematic” in the layout editor to bring the component classes to the PCB.</p>
+<p>The Board Setup window contains a Component Classes page, but you will not find the component class you just created there. That page lists only the assignment rules the board makes for itself, so a class that arrived from the sheet leaves it empty. Select <code>U2</code> instead and read <code>Component Class</code> in the Properties panel (Figure 9.29).</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-component-class-stage-2.png" /></p>
+<p>Figure 9.29: <code>U2</code> on the board, with <code>Component Class</code> reading <code>Stage-2</code>. It sits under Footprint Properties rather than among the Fields above it, and it is greyed out, because the board is carrying a copy of something that belongs to the symbol. To change it you edit the sheet and update the board again.</p>
+<p>In case you are curious about what can you do with the component class name, here are three examples. The third is the one this board is built around, and I’ll explain how to do it in the section on <a href="#sec:c09-variant">one project, two boards</a>.</p>
+<ol type="1">
+<li><strong>Aim a design rule at the stage.</strong> Give a custom rule the condition <code>A.hasComponentClass('Stage-2')</code>, and it matches those specific eight parts, so a clearance or a width constraint follows the stage rather than a list of reference designators you have to keep current. This board’s rules do not need it, because the thermal fields are settled by zone priority, the via fields by the footprint, and the breakout relaxation by the area you renamed earlier, but any of those three could have been written this way instead.</li>
+<li><strong>Ask a part what it belongs to.</strong> Select any footprint on the board and the Properties panel names its class, which is what you have just done with <code>U2</code>. This board is small enough that you can tell the two stages apart by looking, but on one carrying a dozen functional blocks the class turns “what is this capacitor for?” into something you read off the part rather than trace back through the sheet. Chapter 3’s Figure 3.9 showed the same trick from the other end, picking out every part in a class at once.</li>
+<li><strong>Treat the eight footprints as one group.</strong> Wherever KiCad lists the parts of a design, in the Symbol Fields Table and in the bill of materials that the same dialogue exports, the class is a column you can group on. The eight collapse to a single line, and anything you do to that line you have done to all eight. Grouping is the route to acting on a whole stage at once.</li>
+</ol>
+<p>Let’s continue with the pour, and understand why the copy arrived with no copper in it. Refill every zone with “B” and save.</p>
+<p>The exposed-pad zone under <code>U2</code> arrived from the block empty. Open the block’s own <code>.kicad_pcb</code> and the fill is there on <code>U1-GND-pads</code>, so nothing was left out of the capture. A zone stores its outline and its settings, and KiCad computes the copper inside it on the next fill rather than carrying a computed fill from one board to another. A placed zone is therefore always empty until you refill.</p>
+<p>Run the rules check before the refill, and it will report a long list of unconnected ground pads, together with the pour’s own stitching vias, flagged as dangling because there is nothing yet for them to land in. When you refill, all of those go.</p>
+<p>Now the design rules check, which comes last. This is the first point at which the board is finished enough for the report to mean anything. Run it with all severities enabled.</p>
+<p>The report should come back clean.</p>
+<p>Mine came back with one warning that you are unlikely to see (Figure 9.30): the board’s copy of the Tech Explorations logo no longer matches the copy in <code>peter_footprints</code>, because Chapter 8 set fabrication attributes on the board’s instance without writing them back to the library.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-drc-almost-clear.png" /></p>
+<p>Figure 9.30: “Unconnected Items” and “Schematic Parity” at zero say every net is finished and the board matches the sheet, leaving the logo as the single violation.</p>
+
+<p>In Figure 9.31, the 3D Viewer renders what the fabricator’s outputs describe.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-layout-3d.png" /></p>
+<p>Figure 9.31: The board as it will arrive, which is the fastest way to see whether a layout is buildable rather than merely legal.</p>
+<p>Everything on the board is now drawn, poured and checked.</p>
+<h2 id="sec:c09-variant">One project, two boards</h2>
+<p>The board as it stands describes one product, which is drawn for four motors. In this section I’ll show you how to extract the second product, without changing anything on the board itself. The mechanism is design variants, which Chapter 5, Bill of Materials, In Depth, taught in its section on design variants and DNP. With design variants, one base design stays the single definitive version, with named sets of overrides laid on top of it. Chapter 5’s capstone used a field override, because its sense resistors could not be left off. This board uses the other kind, a fitting override, which we will apply to a stage.</p>
+<p>Let’s consider why do-not-populate is the right override here. Stage two’s eight parts leave as a unit, and every connection they carried leaves with them. Stage one keeps its own complete current paths, and the shared nets need no change. <code>VM</code> and <code>GND</code> feed one chip exactly as they fed two. <code>nSLEEP</code> wakes the board with one chip listening instead of two, and <code>nFAULT</code> still reports, because one open-drain pin under one pull-up is still a working fault line. The four direction inputs for motors C and D end on pads with nothing fitted to them, and a net that reaches an empty pad is simply a net that stops there.</p>
+<p>Those eight parts are the ones named by the <code>Stage-2</code> class, which the section on <a href="#sec:c09-layout">laying out two thermal fields</a> created.</p>
+<p>Create a new design variant. Open the variant selector in the schematic editor’s toolbar, choose “Add New Design Variant”, and name it <code>two-motor</code>. Then open the Symbol Fields Table and select <code>two-motor</code> in the variant list down its left side, so that what follows lands in the variant and not in the base design. Check that selection before you tick anything.</p>
+<p>Now, use the component class. In the field list down the left side, tick “Group By” against <code>Component Class</code> and against nothing else. The sheet collapses into two rows, and the lower one is stage two: eight symbols, class <code>Stage-2</code>. Tick the “DNP” box on that single row and then expand it, and all eight members are flagged from the one click (Figure 9.32). The table highlights every cell that click changed.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-group-by-component-class.png" style="width:85.0%" /></p>
+<p>Figure 9.32: One tick applied to eight parts. <code>Component Class</code> is the only field with “Group By” set (1), so the whole sheet collapses to two rows. <code>two-motor</code> is the highlighted entry in the variants list (2), which is what to check before touching anything, because under <code>&lt; Default &gt;</code> the same table would be editing the base design. Ticking the DNP box on the group row (4) flagged all eight members of <code>Stage-2</code> in one operation, and the row expanded at (3) shows them carrying it. Those DNP cells are drawn as a highlighted band because they are what this edit changed, and the band verifies that only what is in the band will be affected. The upper row contains everything else, and its DNP box is partially ticked because a few of its members, <code>D1</code> among them, have carried the flag since Chapter 8.</p>
+<p>Then run “Update PCB from Schematic”, because variant data lives in the schematic and travels forward to the board, never the reverse. Over in the PCB editor the same name now appears in its own selector, and choosing it draws stage two’s eight footprints with an X on the board and on its fabrication layers. That X is KiCad’s mark for a part that is in the design but not in this build.</p>
+<p>The DNP flag you just raised changes what the assembler reads. The eight parts drop out of that build’s bill of materials, or stay in it flagged as DNP if you choose to keep them listed. They leave the pick-and-place position file, and they are drawn with an X through them on the sheet and on the board’s fabrication layers. It leaves alone everything else the fabricator reads. The copper, the pours, the board outline and the drill file are exactly as they were, because a variant does not change the board, only what gets fitted onto it.</p>
+<p>Design variants and component classes are at their most useful together, and this is what they give us here: two products off the same panel. You order one fabrication, and the two-motor build comes out of it as the four-motor build minus eight parts at assembly.</p>
+<p>What they do not give you is a different bare board. The unpopulated stage is still in the fabrication outputs. The pads, the holes and the <code>COUT</code> and <code>DOUT</code> silkscreen labels remain, and so does the routed copper that fed the second chip, on a board where nothing will be soldered to it. That leftover copper is also an upgrade path, because the two-motor board keeps a place for the second stage, and fitting it later is a quick assembly job.</p>
+<p>The risk sits in the schematic rather than on the board. A wrong tick in the fields table does not change the copper, so the flags go out with the files you send for fabrication and assembly. In this case, the outcome is an incorrect bill of materials.</p>
+<p>Always read the bill before you send it to the manufacture, and don’t trust it blindly. Put <code>${VARIANT}</code> into the export path, as in <code>bom_${VARIANT}.csv</code>, and export once per variant from the dialogue you have just been working in. That gives each build its own bill, and reading the two side by side is the fastest check that the variant marks what you meant and nothing else.</p>
+<p>Start with the file name, which is a check in itself. <code>${VARIANT}</code> resolves to an empty string under <code>&lt; Default &gt;</code>, so a file that lands as <code>bom_.csv</code> tells you the do-not-populate flags went into the base design rather than into <code>two-motor</code>. Nothing in the fields table will have said a word about it.</p>
+<p>A correct file name does not buy you a correct bill, though. Figure 9.33 is the <code>two-motor</code> export with the right name on it and the wrong contents inside it.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-bom-dnp-component-class.png" style="width:85.0%" /></p>
+<p>Figure 9.33: The two-motor bill, correctly named and quietly wrong. <code>bom_two-motor.csv</code> in the title bar is the first check passing, because <code>${VARIANT}</code> resolved to something, so the flags did go into the variant. <code>DNP</code> and <code>Component Class</code> have come through as columns of their own, which is also what you want. Now read row 15, and then read row 8.</p>
+<p>Row 15 reads <code>U1,U2</code>, quantity 2, flagged <code>DNP</code>: both driver chips on one line, when only one of them leaves this build. Row 8 reads <code>J1,J2,J3,J5,J6</code>, quantity 5, flagged the same way, and among those five are the terminals for motors A and B and the connector the motor supply arrives on. The export groups by value and footprint, and on a board built by copying a stage every part in stage two has an identical twin in stage one. Each pair merges into one line, and the merged line takes the DNP flag from whichever member carried it. If you build to this bill, you will get a board with no drivers, or motor terminals and no way to power it.</p>
+<p>The fix is to give the export a grouping that can tell the twins apart. Add <code>Component Class</code>, or <code>DNP</code> itself, to the fields it groups on, or turn the grouping off altogether, and settle on whatever your manufacturer needs before you export. Grouped that way, the <code>two-motor</code> bill is short by exactly the eight parts of stage two. Then read the file that comes out, and check that the only parts flagged are the ones you meant to drop. The bill of materials is the output least likely to be checked against the board, and the one an assembler acts on directly.</p>
+<p>There is one more thing that came across with the copy incomplete. Chapter 8’s <code>without-sense</code> variant survived into this project. The problem is that a variant’s overrides are owned by the symbol instances they were written on, and <code>R6</code> and <code>R7</code> (which belong to the U2 group) did not exist when we wrote them in Chapter 8. If we don’t address this issue, selecting <code>without-sense</code> on this board gives stage one its jumpers (the zero ohm resistors) and leaves stage two its 0.20 Ω resistors. The result is a four-motor board with current limiting on two of its motors and not on the other two. Even worse, the bill of materials will read as if every part had been ordered correctly. That makes it the third thing the copy did not carry cleanly, beside the <code>Power</code> class width and the breakout rule’s scope. The repair is the same in all three cases: review at what came across, and finish what did not.</p>
+<p>Open the table under <code>without-sense</code> and extend the override to <code>R6</code> and <code>R7</code>, carrying over the value and the part number Chapter 8’s override already uses. Use <code>0R</code>, and the Vishay <code>CRCW12060000Z0EA</code>.</p>
+<p>Count the builds the project describes now. <code>&lt; Default &gt;</code> is the four-motor board with current limiting. <code>without-sense</code> is the same board with links in place of sense resistors. <code>two-motor</code> is the board Chapter 8 built. There is also a fourth build, two motors without limiting. All of those share one copper and one fabrication order.</p>
+
+
+
+<h2 id="sec:c09-next">What Comes Next</h2>
+<p>In this chapter you reused a circuit instead of redrawing one. You captured the proven driver stage as a design block that carried its layout with it, stamped out a second stage that arrived placed and routed, and then finished the work the copy could not do: renaming the twelve duplicated labels and proving them on the netlist rather than on a rules check that saw only five, widening the <code>Power</code> class from 3 A to 6 A, re-scoping the fine-pitch breakout rule so that it covered both chips, and marking the new stage do-not-populate inside a design variant so that one fabrication order yields both the four-motor board and Chapter 8’s two-motor board. Every setting that came across was correct on the board it was written for, which is the habit to carry forward: after any copy, test what arrived against the board it is now on.</p>
+<p>Two chapters remain. Chapter 10 is this volume’s recipe drawer, a set of short, self-contained techniques for boards that are crowded or meant to be reused, several of which treat properly what this chapter used in passing. Chapter 11 then closes the volume by assembling the board, either with a stencil and reflow or with an iron, and explains why the four-motor version makes that choice for you. Save your project, and let’s open the drawer.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p><strong>Cross-probing</strong> is the correspondence KiCad keeps between its editors: a symbol on the schematic sheet and its footprint on the board describe the same component, and selecting either one makes KiCad reveal and select the other in the editor beside it. The link exists because both editors share the same component references and nets, and it works in both directions, board back to schematic included.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A charge pump is a small circuit that produces a voltage higher than the supply it is given, using a capacitor rather than an inductor. It charges the capacitor from the supply, then reconnects it so that it sits on top of the supply and adds to it. The DRV8833 needs one because the transistors on the high side of each half-bridge are N-channel devices. An N-channel transistor only turns fully on when its gate is driven above its source. The source of a high-side transistor sits at the motor output, so switching it on hard calls for a rail above <code>VM</code>, and the charge pump is what makes that rail. Pin 11 is the pump’s own node rather than a supply you can draw from, which is why the 0.01 µF capacitor on it returns to <code>VM</code> and not to ground.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>‘Bridge switching’ is the moment one of the H-bridges inside the DRV8833 changes state. Each bridge is four power transistors in two half-bridges, with the motor connected between them, and changing state means some of those transistors turn off while others turn on, rerouting the motor current or interrupting it altogether. That happens whenever a direction input changes, and repeatedly while the chip chops the current to hold it at the limit. The transistors make each transition in nanoseconds, and the current the bridge draws from <code>VM</code> changes just as abruptly. That step in demand is what the sentence is describing.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Ripple current is the alternating component of a capacitor’s current, stated as an RMS value. A capacitor sitting on a supply rail seems to carry nothing, but every time a bridge switches it supplies a burst of current, and between bursts it refills from the supply, so a continual back-and-forth current runs through it. That alternating current passes through the capacitor’s own internal resistance, its equivalent series resistance or ESR, and dissipates heat inside the can as <code>I²R</code>. A maximum ripple current is therefore a thermal rating: how much of this current the part can carry without heating itself past what it is rated for. Electrolytic capacitors are the most sensitive to it, which is why the datasheet states the number, and why it is the number the doubling approaches.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 
 </div>
 <script>
