@@ -247,6 +247,19 @@
   }
   .note-term-index .note-toc-sub li { margin-bottom: 0; }
 
+  /* ---- In-page jump targets (TOC rows, A-Z terms, footnote markers). These
+     carry data-jump instead of href="#id": an href would resolve against the
+     note's own URL and publish the notes host in the status bar and on the
+     clipboard, which is the exposure coding_plans/notes-content-protection.md
+     exists to close. Without an href they lose the link cursor and the focus
+     ring, so both are restored here. ---- */
+  .note-jump { cursor: pointer; }
+  .note-jump:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
@@ -264,34 +277,34 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c06-manufacturability">Manufacturability Analysis</a>
+    <li><a class="note-jump" data-jump="sec:c06-manufacturability" role="link" tabindex="0">Manufacturability Analysis</a>
     </li>
-    <li><a href="#sec:c06-gerber-viewer">Gerber Viewer and Analysis</a>
+    <li><a class="note-jump" data-jump="sec:c06-gerber-viewer" role="link" tabindex="0">Gerber Viewer and Analysis</a>
     </li>
-    <li><a href="#sec:c06-dfm-tools">A Closer Look at the DFM Tools</a>
+    <li><a class="note-jump" data-jump="sec:c06-dfm-tools" role="link" tabindex="0">A Closer Look at the DFM Tools</a>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c06-hqdfm-plugin">The Plugin</a></li>
+        <li><a class="note-jump" data-jump="sec:c06-hqdfm-plugin" role="link" tabindex="0">The Plugin</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c06-hqdfm-online">The Online Viewer</a></li>
+        <li><a class="note-jump" data-jump="sec:c06-hqdfm-online" role="link" tabindex="0">The Online Viewer</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c06-hqdfm-desktop">The Desktop Application</a></li>
+        <li><a class="note-jump" data-jump="sec:c06-hqdfm-desktop" role="link" tabindex="0">The Desktop Application</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c06-dfm-order">Running Them in Order</a></li>
+        <li><a class="note-jump" data-jump="sec:c06-dfm-order" role="link" tabindex="0">Running Them in Order</a></li>
       </ul>
     </li>
-    <li><a href="#sec:c06-panelization">Panelisation Concepts</a>
+    <li><a class="note-jump" data-jump="sec:c06-panelization" role="link" tabindex="0">Panelisation Concepts</a>
     </li>
-    <li><a href="#sec:c06-paste-stencil">Paste and Stencil</a>
+    <li><a class="note-jump" data-jump="sec:c06-paste-stencil" role="link" tabindex="0">Paste and Stencil</a>
     </li>
-    <li><a href="#sec:c06-dfm-rules">DFM Rules</a>
+    <li><a class="note-jump" data-jump="sec:c06-dfm-rules" role="link" tabindex="0">DFM Rules</a>
     </li>
   </ul>
 </details>
 
-<p>A design that is electrically correct can still be difficult or even not possible to make. There may be a track that is too thin for the factory’s etching<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, a hole too small for its drills, or a thermal pad that floods with solder and tilts the chip at reflow. Knowing a few things about PCB manufacturing is useful here, though you surely do not need to be an expert. In this chapter you will learn how to check a board against the limits your fabricator publishes, how to export the manufacturing files and inspect them before you send them, and how to record those limits inside the project so that KiCad enforces them for you. You will also learn about panelisation<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and solder-paste stencils<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, the two areas where your design choices determine how efficiently the board can be built. The chapter works through all of it on the capstone, because its exposed thermal pad makes the most important of these checks impossible to ignore.</p>
+<p>A design that is electrically correct can still be difficult or even not possible to make. There may be a track that is too thin for the factory’s etching<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a>, a hole too small for its drills, or a thermal pad that floods with solder and tilts the chip at reflow. Knowing a few things about PCB manufacturing is useful here, though you surely do not need to be an expert. In this chapter you will learn how to check a board against the limits your fabricator publishes, how to export the manufacturing files and inspect them before you send them, and how to record those limits inside the project so that KiCad enforces them for you. You will also learn about panelisation<a data-jump="fn2" tabindex="0" class="footnote-ref note-jump" id="fnref2" role="doc-noteref"><sup>2</sup></a> and solder-paste stencils<a data-jump="fn3" tabindex="0" class="footnote-ref note-jump" id="fnref3" role="doc-noteref"><sup>3</sup></a>, the two areas where your design choices determine how efficiently the board can be built. The chapter works through all of it on the capstone, because its exposed thermal pad makes the most important of these checks impossible to ignore.</p>
 <p>The checking part of that work is a short sequence of checks, and they are not interchangeable. Each check can reveal a larger set of potential issues to fix or improve compared to the one before it, and each requires a little more effort to run (Figure 6.1). The order is what makes the sequence worth having. A problem caught in the first check is fixed in the editor you already have open, while the same problem caught in the last one sends you back through the re-route, the re-plot and the re-upload before you can check it again. We work down that sequence first, then turn to the shaping half.</p>
 
 <p><img src="/assets/klp5e-vol2/ch06/ch06_dfm-sequence_v10.png" style="width:100.0%" /></p>
@@ -306,9 +319,9 @@
 <li><strong>Silkscreen clearance.</strong> The minimum gap between one silkscreen item and the next. Two pieces of silkscreen printed into each other are less readable than either would be on its own.</li>
 </ul>
 <p>Fill these in from the capability page your chosen manufacturer publishes, or import them in one step if the fabricator supplies a capability file, then run the design rules check (DRC). KiCad flags anything on the board that falls outside what the factory can build. That is your first and most reliable manufacturability analysis, stage 1 of the sequence in Figure 6.1. It makes use of the same DRC you already run, with your fabricator’s real limits in it.</p>
-<p>The board in this book is built to NextPCB’s published minimums, so those numbers are already in the project. They arrived in one step, by importing NextPCB’s “Simple” capability file, and here they are in full, so that you do not have to go back for them: a 0.127 mm track, a 0.09 mm annular ring, a 0.48 mm via on a 0.15 mm drill, 0.25 mm from hole to hole, and silkscreen text no smaller than 0.762 mm at 0.125 mm thick. Figure 3.3 shows the “Constraints” page holding exactly those values. NextPCB publishes those limits under the headings “Design Rules” and “PCB Manufacturing” capabilities, at <a href="https://www.nextpcb.com/pcb-manufacturing-assembly">nextpcb.com</a>. Every fabricator has an equivalent page, so find your own manufacturer’s before you set a board up, because these limits vary between factories and between the service levels a single factory offers. In other words, you should not use the numbers you see in this page because your manufacturer may have different minimums.</p>
+<p>The board in this book is built to NextPCB’s published minimums, so those numbers are already in the project. They arrived in one step, by importing NextPCB’s “Simple” capability file, and here they are in full, so that you do not have to go back for them: a 0.127 mm track, a 0.09 mm annular ring, a 0.48 mm via on a 0.15 mm drill, 0.25 mm from hole to hole, and silkscreen text no smaller than 0.762 mm at 0.125 mm thick. Figure 3.3 shows the “Constraints” page holding exactly those values. NextPCB publishes those limits under the headings “Design Rules” and “PCB Manufacturing” capabilities, at <a href="https://www.nextpcb.com/pcb-manufacturing-assembly" target="_blank" rel="noopener noreferrer">nextpcb.com</a>. Every fabricator has an equivalent page, so find your own manufacturer’s before you set a board up, because these limits vary between factories and between the service levels a single factory offers. In other words, you should not use the numbers you see in this page because your manufacturer may have different minimums.</p>
 <p>Two related limits sit on a different page of the same dialogue, “Solder Mask/Paste”, rather than with the constraints above. They are the solder mask and solder-paste expansions, which decide how far those openings grow or shrink relative to the pad underneath. The paste one turns out to matter a great deal on this board, so that page has been left until the section on paste and stencils later in this chapter, where you can see it in Figure 6.13 alongside the reason it matters.</p>
-<p>The order in which you run the DFM checks matters. Do the KiCad native check first. With your fabricator’s numbers in it, KiCad catches the great majority of manufacturability problems and gives you the opportunity to fix them quickly within your project. Only then is it worth asking for an external opinion via the external DFM tools. Some manufacturers publish their own free analysis tool that inspects your design and reports problems against that specific factory’s process. NextPCB offers one called HQDFM. Keep in mind that HQDFM is not one program but three: a plugin that runs inside KiCad, a browser tool at <a href="https://www.nextpcb.com/dfm">nextpcb.com</a>, and an application you install on Windows. Those are stages 2, 4 and 5 in Figure 6.1. They grow more capable in that order, and they also grow more troublesome to run in that same order (especially if, like me, you do not run Windows natively on your computer), which is why you work along them starting with the one that takes least effort to run rather than the one that finds the most problems.</p>
+<p>The order in which you run the DFM checks matters. Do the KiCad native check first. With your fabricator’s numbers in it, KiCad catches the great majority of manufacturability problems and gives you the opportunity to fix them quickly within your project. Only then is it worth asking for an external opinion via the external DFM tools. Some manufacturers publish their own free analysis tool that inspects your design and reports problems against that specific factory’s process. NextPCB offers one called HQDFM. Keep in mind that HQDFM is not one program but three: a plugin that runs inside KiCad, a browser tool at <a href="https://www.nextpcb.com/dfm" target="_blank" rel="noopener noreferrer">nextpcb.com</a>, and an application you install on Windows. Those are stages 2, 4 and 5 in Figure 6.1. They grow more capable in that order, and they also grow more troublesome to run in that same order (especially if, like me, you do not run Windows natively on your computer), which is why you work along them starting with the one that takes least effort to run rather than the one that finds the most problems.</p>
 <p>Run all three DFM tools, in the same order, even when the one before came back clean, because the Windows application can find issues that the other two cannot. But you should resist the temptation to skip straight to the Windows application, because most problems can be found by the first two, and catching them there will reduce the total amount of time spent on the DFM workflow significantly. Treat every one of these tools as a source of clues of the validity (or not) of your design, not as a substitute for getting the design right in KiCad. The section “A Closer Look at the DFM Tools” takes each of them in turn, once you have the exported files that two of them need.</p>
 <h2 id="sec:c06-gerber-viewer">Gerber Viewer and Analysis</h2>
 <p>When the design passes the two checks that run inside KiCad, KiCad’s own DRC and the HQDFM plugin, you turn it into the files a factory actually reads. Those are stages 1 and 2 in Figure 6.1, and they are the last two that need nothing exported. Everything after them works on the Gerber files you are about to plot. As you may remember from Volume 1, KiCad plots one Gerber file per layer from “File”, “Fabrication Outputs”, “Gerbers”. Alongside the Gerbers you generate a drill file, which lists every hole and its size, from “File”, “Fabrication Outputs”, “Drill Files”. Ask KiCad to write a Gerber job file too, the small companion file with a <code>.gbrjob</code> extension, because it bundles the stackup and finish information that helps the factory set your board up correctly.</p>
@@ -353,7 +366,7 @@
 <p>Now compare that report against what the plugin reported in this chapter. This will help you understand the capabilities of the two tools. The plugin looked at holes on SMD pads and reported no errors. The online check looked at the same thing, and called it “Abnormal”. There are two failures under “Drill On Pad”, alongside fourteen under “SMD Pad Spacing” and one under the solder mask analysis. It is the same board checked by the two tools at the same time, but the online DFM tool check performed a deeper check, and returned a list of problems the first tool did not see. This is precisely why a clean result is not a reason to stop.</p>
 <p>One more thing the report does, which the plugin does not, is that it comments on the board as a whole rather than only on its features. On the capstone it notes that the board is small enough to make surface-mount assembly awkward, and suggests either adding a process edge or putting more copies in the panel. I return to that suggestion in the section on panelisation later in this chapter, which is where both of those terms are explained.</p>
 <h3 id="sec:c06-hqdfm-desktop">The Desktop Application</h3>
-<p>The third form is a program you download and install. It is the most capable of the three by a clear margin. It is available on Windows only, and it requires a download and an installation before you can use it, so it is an additional overhead. If you don’t use Windows on your computer, you should consider a virtualisation application like VMware, to allow you to run Windows as a guest operating system, and then the HQDFM application on it (this is my route). Download it from <a href="https://www.nextpcb.com/dfm">nextpcb.com</a>.</p>
+<p>The third form is a program you download and install. It is the most capable of the three by a clear margin. It is available on Windows only, and it requires a download and an installation before you can use it, so it is an additional overhead. If you don’t use Windows on your computer, you should consider a virtualisation application like VMware, to allow you to run Windows as a guest operating system, and then the HQDFM application on it (this is my route). Download it from <a href="https://www.nextpcb.com/dfm" target="_blank" rel="noopener noreferrer">nextpcb.com</a>.</p>
 <p>Because I work on Linux, my own routine has settled into two passes. I run the plugin first, inside KiCad, and fix whatever it finds while the board is still in front of me. Then I go straight to the desktop checker, which I keep in a Windows virtual machine for exactly this purpose. The first pass is cheap and clears out most of the list. The second pass is the one I trust to be complete.</p>
 <p>What you give it is the same set of files you plotted earlier. The application opens a full computer-aided manufacturing (CAM) viewer with the analysis built into it (Figure 6.7). The layer list down the left (❶) holds every file the tool read out of your export, each with a visibility box and a colour swatch, so that you can isolate a single layer here exactly as you did in KiCad’s own viewer. The analysis fills the panel on the right (❷), and the canvas between them (❸) is where any result you click gets highlighted. Down in the bottom right the tool prices the board and offers to order it, which is worth knowing about in advance so that it does not take you by surprise. This is a fabricator’s application, and it is built to end in an order.</p>
 
@@ -366,7 +379,7 @@
 <p><img src="/assets/klp5e-vol2/ch06/ch06-dfm-next-pcb-windows-app-2.png" style="width:100.0%" /></p>
 <p>Figure 6.8: The acute-angle finding on the capstone. “DFM Analysis” runs the check (❶), the “Signal Integrity” row reports an error and offers a “Check” button (❷), the detail window names the single instance and explains the rule behind it (❸), and clicking the instance highlights the offending corner on the canvas (❹).</p>
 <p>What it has found is one corner. The <code>nFAULT</code> track leaves the DRV8833, runs down the board, and turns to reach R1, the resistor that pulls it up to <code>VINT</code>. That turn is a right angle. Every other corner on this board is a 135 degree join, because that is what KiCad’s router produces when it is left in its default 45 degree corner mode, and this one corner is the exception. The 9.84 mil in the report is that track’s width, 0.25 mm, which is enough to find it without hunting.</p>
-<p>Two separate considerations sit behind the rule, and they are worth separating, because only one of them is really about manufacturing. The first is etching. A sharp inside corner can hold etchant after the rest of the board has drained, so the copper in that corner is etched for longer than the copper around it and the track can thin there. That is called ‘acid trap’<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, and it is the reason this rule exists at all. It is also far less of a threat than it once was, because process control has improved, and it becomes a genuine risk at angles well below 90 degrees rather than at 90 itself. The second issue is electrical. Copper measured across the diagonal of a corner is wider than the track on either side of it, so the impedance changes over that short distance and a fast edge can reflect from it. On a high-speed line that is a real effect. Here it does not matter, because <code>nFAULT</code> is a status line held high through a resistor, and nothing on it moves quickly.</p>
+<p>Two separate considerations sit behind the rule, and they are worth separating, because only one of them is really about manufacturing. The first is etching. A sharp inside corner can hold etchant after the rest of the board has drained, so the copper in that corner is etched for longer than the copper around it and the track can thin there. That is called ‘acid trap’<a data-jump="fn4" tabindex="0" class="footnote-ref note-jump" id="fnref4" role="doc-noteref"><sup>4</sup></a>, and it is the reason this rule exists at all. It is also far less of a threat than it once was, because process control has improved, and it becomes a genuine risk at angles well below 90 degrees rather than at 90 itself. The second issue is electrical. Copper measured across the diagonal of a corner is wider than the track on either side of it, so the impedance changes over that short distance and a fast edge can reflect from it. On a high-speed line that is a real effect. Here it does not matter, because <code>nFAULT</code> is a status line held high through a resistor, and nothing on it moves quickly.</p>
 <p>This corner would almost certainly have been fabricated without trouble and worked. I fixed it anyway, and the reason is worth stating, because it is not the same reason that applied to the smallest-trace warning the plugin raised earlier. That warning called for a judgement: I had to look up the narrowest width on the board, compare it with NextPCB’s minimum, and satisfy myself that the difference was comfortable. The judgement cost more than the warning did, and the answer was that nothing needed changing. This corner is the opposite case. The fix is a single drag of the track in the PCB editor, which costs less than deciding whether the corner is worth fixing, so there is no reason to spend the time deciding. You can put the router in its default 45 degree corner mode, drag the corner, and it becomes two 135 degree joins with a short diagonal between them (Figure 6.9), which is the same shape as every other corner on the board.</p>
 
 <p><img src="/assets/klp5e-vol2/ch06/ch06-dfm-repair.png" style="width:65.0%" /></p>
@@ -430,39 +443,48 @@
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>Etching is the chemical process that removes unwanted copper from the board. The factory protects the copper you want to keep with a resist, then dissolves the rest with an etchant solution, leaving behind the tracks, pads, and pours the design calls for.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Panelisation is the practice of arranging multiple copies of a board onto a single larger panel that moves through fabrication and assembly as one unit, then is separated into individual boards at the end. It makes small boards economical to produce, because handling them one at a time is slow and wasteful.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>A solder-paste stencil is a thin metal sheet with an opening cut over each surface-mount pad. Laid on the board and wiped with paste, it deposits solder only on the pads, so that components can be placed and the board heated until the paste melts into solid joints.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>An acid trap is a sharp inside corner in a copper trace where etchant pools after the rest of the board has drained. The trapped etchant keeps dissolving copper in that corner after the surrounding area has finished, thinning the track where it turns and, in extreme cases, breaking it.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Etching is the chemical process that removes unwanted copper from the board. The factory protects the copper you want to keep with a resist, then dissolves the rest with an etchant solution, leaving behind the tracks, pads, and pours the design calls for.<a data-jump="fnref1" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Panelisation is the practice of arranging multiple copies of a board onto a single larger panel that moves through fabrication and assembly as one unit, then is separated into individual boards at the end. It makes small boards economical to produce, because handling them one at a time is slow and wasteful.<a data-jump="fnref2" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>A solder-paste stencil is a thin metal sheet with an opening cut over each surface-mount pad. Laid on the board and wiped with paste, it deposits solder only on the pads, so that components can be placed and the board heated until the paste melts into solid joints.<a data-jump="fnref3" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>An acid trap is a sharp inside corner in a copper trace where etchant pools after the rest of the board has drained. The trapped etchant keeps dissolving copper in that corner after the surrounding area has finished, thinning the track where it turns and, in extreme cases, breaking it.<a data-jump="fnref4" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
 </div>
 <script>
-  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
-  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
-  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  // In-page jump handler for every [data-jump] element: TOC rows, A-Z terms and
+  // footnote markers. Two reasons these are not plain anchors. First, inside an
+  // iframe the parent page can suppress native anchor navigation, so the jump has
+  // to be scripted anyway. Second, an href="#id" resolves against the note's own
+  // URL, which publishes the notes host in the status bar and on the clipboard.
+  // scrollIntoView scrolls the nearest scrollable ancestor, the iframe's own body.
+  //
+  // Delegated at document level so it covers the term index and the footnotes,
+  // which a handler bound to the first .note-toc never reached.
   (function () {
-    function initTocScroll() {
-      var toc = document.querySelector('.note-toc');
-      if (!toc) return;
-      toc.addEventListener('click', function (e) {
-        var a = e.target.closest('a');
-        if (!a) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var id = href.substring(1);
-        var target = document.getElementById(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function jump(el) {
+      var target = document.getElementById(el.getAttribute('data-jump'));
+      if (!target) return false;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    function initJumps() {
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-jump]');
+        if (el && jump(el)) e.preventDefault();
+      });
+      // Keyboard equivalent: these are focusable but not real links, so Enter
+      // and Space have to be wired by hand.
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        if (el && jump(el)) e.preventDefault();
       });
     }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTocScroll);
+      document.addEventListener('DOMContentLoaded', initJumps);
     } else {
-      initTocScroll();
+      initJumps();
     }
   })();
 </script>

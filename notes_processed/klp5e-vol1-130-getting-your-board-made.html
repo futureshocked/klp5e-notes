@@ -247,6 +247,19 @@
   }
   .note-term-index .note-toc-sub li { margin-bottom: 0; }
 
+  /* ---- In-page jump targets (TOC rows, A-Z terms, footnote markers). These
+     carry data-jump instead of href="#id": an href would resolve against the
+     note's own URL and publish the notes host in the status bar and on the
+     clipboard, which is the exposure coding_plans/notes-content-protection.md
+     exists to close. Without an href they lose the link cursor and the focus
+     ring, so both are restored here. ---- */
+  .note-jump { cursor: pointer; }
+  .note-jump:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
@@ -264,13 +277,13 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c10-bom">Exporting a BOM</a>
+    <li><a class="note-jump" data-jump="sec:c10-bom" role="link" tabindex="0">Exporting a BOM</a>
     </li>
-    <li><a href="#sec:c10-gerbers">Generating Gerbers</a>
+    <li><a class="note-jump" data-jump="sec:c10-gerbers" role="link" tabindex="0">Generating Gerbers</a>
     </li>
-    <li><a href="#sec:c10-dfm">DFM Basics</a>
+    <li><a class="note-jump" data-jump="sec:c10-dfm" role="link" tabindex="0">DFM Basics</a>
     </li>
-    <li><a href="#sec:c10-order">Ordering a PCB</a>
+    <li><a class="note-jump" data-jump="sec:c10-order" role="link" tabindex="0">Ordering a PCB</a>
     </li>
   </ul>
 </details>
@@ -376,7 +389,7 @@
 <p><img src="/assets/klp5e-vol1/ch10/ch10-7-gerbviewer-measurement.png" style="width:45.0%" /></p>
 <p>Figure 10.7: The measuring ruler in action. GerbView reads out the horizontal and vertical spans (<code>x</code>, <code>y</code>), the straight-line distance (<code>r</code>), and the angle (<code>θ</code>) as you drag — here a 2.1 mm hop measured directly off the Gerbers.</p>
 <p>Look for the obvious things, because the obvious things are what go wrong. Is the board outline, the <code>Edge.Cuts</code> layer, a single closed shape the right size? Are the copper layers present and sensible, with no track left floating? Does the silkscreen text sit clear of the pads? Are the drill holes where holes belong, at the header, the through-hole component leads, and any vias where two tracks crossed? You are not hunting for subtle faults here; you are confirming that the right files made it into the folder and that nothing is missing or empty. A blank layer or an absent drill file is glaringly obvious in GerbView and almost invisible everywhere else. Spend a minute here and you will never pay for a board that was wrong before it was even sent.</p>
-<p>One last habit before we move on. The plotting and drill settings I showed you are the ones NextPCB’s quote page reads cleanly, but they are not a universal law: every manufacturer publishes its own guidance on exactly how it wants Gerbers and drill files prepared, and the details differ from house to house. Before you order from a fab for the first time, find its file-requirements page and skim it. NextPCB’s, for instance, spells out precisely which layers and formats it expects from KiCad — you will find it at <a href="https://www.nextpcb.com/helpcenter/nextpcb-gerber-from-kicad">nextpcb.com/helpcenter/nextpcb-gerber-from-kicad</a> — and it is what tells you, among other things, to write the drill data as a single file in decimal format, the very setting you applied back in Chapter 8. Do not assume the settings in this book will pass unchanged everywhere; assume instead that a two-minute read of your own fab’s page will save you a rejected order.</p>
+<p>One last habit before we move on. The plotting and drill settings I showed you are the ones NextPCB’s quote page reads cleanly, but they are not a universal law: every manufacturer publishes its own guidance on exactly how it wants Gerbers and drill files prepared, and the details differ from house to house. Before you order from a fab for the first time, find its file-requirements page and skim it. NextPCB’s, for instance, spells out precisely which layers and formats it expects from KiCad — you will find it at <a href="https://www.nextpcb.com/helpcenter/nextpcb-gerber-from-kicad" target="_blank" rel="noopener noreferrer">nextpcb.com/helpcenter/nextpcb-gerber-from-kicad</a> — and it is what tells you, among other things, to write the drill data as a single file in decimal format, the very setting you applied back in Chapter 8. Do not assume the settings in this book will pass unchanged everywhere; assume instead that a two-minute read of your own fab’s page will save you a rejected order.</p>
 <h2 id="sec:c10-dfm">DFM Basics</h2>
 <p>Before you upload anything, it helps to understand what a factory actually needs from your design in order to build it reliably. The general name for designing with the factory’s limits in mind is ‘design for manufacturing,’ or DFM. It sounds like a specialist’s concern, and at the far end it is, but the core of it for a simple board comes down to a short list of physical limits, and the good news is that the boards you have already drawn respect every one of them without your having lifted a finger.</p>
 <p>A fab is a machine shop working in copper, and like any machine shop it has a smallest feature it can make cleanly. Four limits cover almost everything a beginner meets (Figure 10.8):</p>
@@ -395,7 +408,7 @@
 <p>For a Volume 1 board, eyeballing your design in GerbView and trusting the sensible defaults is genuinely enough. In Volume 2 you will meet a dedicated tool that checks all of this automatically, scanning your files against a factory’s real limits and flagging anything marginal before you order. It is a wonderful thing to have once your boards grow ambitious. For the boards in this book, you are ready to order as you are.</p>
 <h2 id="sec:c10-order">Ordering a PCB</h2>
 <p>This is the step that turns a folder of files into a parcel of boards, and it is far less daunting than it sounds. I will walk through it with NextPCB, but I want to say once more, plainly, that what you are about to learn is the shape every online fab shares. The screens differ, the colours differ, but the sequence is the same everywhere: make an account, upload your files, confirm the preview, choose a few options, read the quote, and place the order. Learn it here and you can order from any of these services, NextPCB included, with the same confidence. As a second real example, OSH Park in the United States is a lovely, beginner-friendly service I have recommended for years; most fab houses you will come across work in just this way.</p>
-<p>Start by creating an account at the manufacturer’s site (for NextPCB, that is <a href="https://www.nextpcb.com/">nextpcb.com</a>) and finding its online quote or ordering page. Choose the standard, two-layer PCB service and upload the <code>.zip</code> archive you made earlier (Figure 10.9). The site reads your Gerbers and renders a preview of the board, which is the same sanity check you did in GerbView, now done by the factory’s own software: glance at it and confirm it is the board you meant to send.</p>
+<p>Start by creating an account at the manufacturer’s site (for NextPCB, that is <a href="https://www.nextpcb.com/" target="_blank" rel="noopener noreferrer">nextpcb.com</a>) and finding its online quote or ordering page. Choose the standard, two-layer PCB service and upload the <code>.zip</code> archive you made earlier (Figure 10.9). The site reads your Gerbers and renders a preview of the board, which is the same sanity check you did in GerbView, now done by the factory’s own software: glance at it and confirm it is the board you meant to send.</p>
 
 <p><img src="/assets/klp5e-vol1/ch10/ch10-8-nextpcb-1-start-order-process.png" /></p>
 <p>Figure 10.9: Starting the order. Choose the standard PCB service (❶) and upload your Gerber <code>.zip</code> (❷). A running quote sits on the right the whole time, so the price responds live as you set the options. Every online fab follows this same shape.</p>
@@ -426,30 +439,39 @@
 
 </div>
 <script>
-  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
-  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
-  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  // In-page jump handler for every [data-jump] element: TOC rows, A-Z terms and
+  // footnote markers. Two reasons these are not plain anchors. First, inside an
+  // iframe the parent page can suppress native anchor navigation, so the jump has
+  // to be scripted anyway. Second, an href="#id" resolves against the note's own
+  // URL, which publishes the notes host in the status bar and on the clipboard.
+  // scrollIntoView scrolls the nearest scrollable ancestor, the iframe's own body.
+  //
+  // Delegated at document level so it covers the term index and the footnotes,
+  // which a handler bound to the first .note-toc never reached.
   (function () {
-    function initTocScroll() {
-      var toc = document.querySelector('.note-toc');
-      if (!toc) return;
-      toc.addEventListener('click', function (e) {
-        var a = e.target.closest('a');
-        if (!a) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var id = href.substring(1);
-        var target = document.getElementById(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function jump(el) {
+      var target = document.getElementById(el.getAttribute('data-jump'));
+      if (!target) return false;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    function initJumps() {
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-jump]');
+        if (el && jump(el)) e.preventDefault();
+      });
+      // Keyboard equivalent: these are focusable but not real links, so Enter
+      // and Space have to be wired by hand.
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        if (el && jump(el)) e.preventDefault();
       });
     }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTocScroll);
+      document.addEventListener('DOMContentLoaded', initJumps);
     } else {
-      initTocScroll();
+      initJumps();
     }
   })();
 </script>

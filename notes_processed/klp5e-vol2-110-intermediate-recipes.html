@@ -247,6 +247,19 @@
   }
   .note-term-index .note-toc-sub li { margin-bottom: 0; }
 
+  /* ---- In-page jump targets (TOC rows, A-Z terms, footnote markers). These
+     carry data-jump instead of href="#id": an href would resolve against the
+     note's own URL and publish the notes host in the status bar and on the
+     clipboard, which is the exposure coding_plans/notes-content-protection.md
+     exists to close. Without an href they lose the link cursor and the focus
+     ring, so both are restored here. ---- */
+  .note-jump { cursor: pointer; }
+  .note-jump:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
@@ -264,45 +277,45 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c10-buses">Buses</a>
+    <li><a class="note-jump" data-jump="sec:c10-buses" role="link" tabindex="0">Buses</a>
     </li>
-    <li><a href="#sec:c10-teardrops">Teardrops</a>
+    <li><a class="note-jump" data-jump="sec:c10-teardrops" role="link" tabindex="0">Teardrops</a>
     </li>
-    <li><a href="#sec:c10-net-ties">Net Ties</a>
+    <li><a class="note-jump" data-jump="sec:c10-net-ties" role="link" tabindex="0">Net Ties</a>
     </li>
-    <li><a href="#sec:c10-bulk-edits">Bulk Edits</a>
+    <li><a class="note-jump" data-jump="sec:c10-bulk-edits" role="link" tabindex="0">Bulk Edits</a>
     </li>
-    <li><a href="#sec:c10-symbol-fields-table">The Symbol Fields Table</a>
+    <li><a class="note-jump" data-jump="sec:c10-symbol-fields-table" role="link" tabindex="0">The Symbol Fields Table</a>
     </li>
-    <li><a href="#sec:c10-back-annotation">Back-Annotation</a>
+    <li><a class="note-jump" data-jump="sec:c10-back-annotation" role="link" tabindex="0">Back-Annotation</a>
     </li>
-    <li><a href="#sec:c10-geographical-reannotation">Geographical Reannotation</a>
+    <li><a class="note-jump" data-jump="sec:c10-geographical-reannotation" role="link" tabindex="0">Geographical Reannotation</a>
     </li>
-    <li><a href="#sec:c10-tables">Tables (K9)</a>
+    <li><a class="note-jump" data-jump="sec:c10-tables" role="link" tabindex="0">Tables (K9)</a>
     </li>
-    <li><a href="#sec:c10-design-blocks">Design Blocks (K9/K10)</a>
+    <li><a class="note-jump" data-jump="sec:c10-design-blocks" role="link" tabindex="0">Design Blocks (K9/K10)</a>
     </li>
-    <li><a href="#sec:c10-multi-channel">Multi-Channel Design (K9)</a>
+    <li><a class="note-jump" data-jump="sec:c10-multi-channel" role="link" tabindex="0">Multi-Channel Design (K9)</a>
     </li>
-    <li><a href="#sec:c10-embedded-files">Embedded Files (K9)</a>
+    <li><a class="note-jump" data-jump="sec:c10-embedded-files" role="link" tabindex="0">Embedded Files (K9)</a>
     </li>
-    <li><a href="#sec:c10-pin-table-csv">Symbol Pin-Table CSV (K10)</a>
+    <li><a class="note-jump" data-jump="sec:c10-pin-table-csv" role="link" tabindex="0">Symbol Pin-Table CSV (K10)</a>
     </li>
-    <li><a href="#sec:c10-design-variants">Design Variants / DNP (K10)</a>
+    <li><a class="note-jump" data-jump="sec:c10-design-variants" role="link" tabindex="0">Design Variants / DNP (K10)</a>
     </li>
-    <li><a href="#sec:c10-project-templates">Project Templates</a>
+    <li><a class="note-jump" data-jump="sec:c10-project-templates" role="link" tabindex="0">Project Templates</a>
     </li>
-    <li><a href="#sec:c10-fab-design-rules">Importing a Fab’s Design Rules</a>
+    <li><a class="note-jump" data-jump="sec:c10-fab-design-rules" role="link" tabindex="0">Importing a Fab’s Design Rules</a>
     </li>
-    <li><a href="#sec:c10-footprint-wizard">The Footprint Wizard</a>
+    <li><a class="note-jump" data-jump="sec:c10-footprint-wizard" role="link" tabindex="0">The Footprint Wizard</a>
     </li>
-    <li><a href="#sec:c10-calculator-tools">The Calculator Tools</a>
+    <li><a class="note-jump" data-jump="sec:c10-calculator-tools" role="link" tabindex="0">The Calculator Tools</a>
     </li>
-    <li><a href="#sec:c10-drc-suggested-fixes">Suggested Fixes for DRC Violations (K10)</a>
+    <li><a class="note-jump" data-jump="sec:c10-drc-suggested-fixes" role="link" tabindex="0">Suggested Fixes for DRC Violations (K10)</a>
     </li>
-    <li><a href="#sec:c10-report-a-bug">Reporting a KiCad Bug</a>
+    <li><a class="note-jump" data-jump="sec:c10-report-a-bug" role="link" tabindex="0">Reporting a KiCad Bug</a>
     </li>
-    <li><a href="#sec:c10-conclusion">Recipes conclusion</a>
+    <li><a class="note-jump" data-jump="sec:c10-conclusion" role="link" tabindex="0">Recipes conclusion</a>
     </li>
   </ul>
 </details>
@@ -317,7 +330,7 @@
 <p><img src="/assets/klp5e-vol2/ch10/ch10-bus.png" style="width:85.0%" /></p>
 <p>Figure 10.1: Four control lines gathered into a bus. The TB6612FNG’s AIN1, AIN2, BIN1, and BIN2 pins each leave through a bus entry onto the <code>CTRL{AIN1 AIN2 BIN1 BIN2}</code> bus and reappear at the Conn_01x04 header, connecting by name; because the group is named, the nets resolve to CTRL.AIN1 through CTRL.BIN2. </p>
 <h2 id="sec:c10-teardrops">Teardrops</h2>
-<p>The default way by which a track meets a pad or via is an abrupt join, a narrow line hitting a wide circle at a point. A ‘teardrop’ softens that join by adding a small triangular fillet of copper, so the track widens smoothly into the pad like the tail of a teardrop. There are good engineering reasons for terminating wire with a teardrop. A teardropped join is mechanically stronger and more tolerant of the small misregistration<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> that happens when the PCB manufacturer drills a hole slightly off-centre. When the track-pad joint uses a teardrop, the track is less likely to crack or neck at the very spot where it is most vulnerable.</p>
+<p>The default way by which a track meets a pad or via is an abrupt join, a narrow line hitting a wide circle at a point. A ‘teardrop’ softens that join by adding a small triangular fillet of copper, so the track widens smoothly into the pad like the tail of a teardrop. There are good engineering reasons for terminating wire with a teardrop. A teardropped join is mechanically stronger and more tolerant of the small misregistration<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a> that happens when the PCB manufacturer drills a hole slightly off-centre. When the track-pad joint uses a teardrop, the track is less likely to crack or neck at the very spot where it is most vulnerable.</p>
 <p>You can add teardrops from the Edit Teardrops dialogue. Open it from “Edit” and “Edit Teardrops…” (Figure 10.2). The “Scope” section provides you broad way to choose which kinds of object to treat: plated-through-hole pads, SMD pads, vias, and the track-to-track joins where two different widths meet. The “Filter Items” section narrows the job further, by net, net class, or layer, or to round pads only, or to just the items you have selected on the board. Under “Action,” choose “Add teardrops with default values for shape” to use the shapes you set once in Board Setup; the “Edit default values in Board Setup” link jumps straight there, where round pads, rectangular pads, and track-to-track joins each carry their own defaults. Click “Apply and Close,” and the joins fill in.</p>
 <p>That covers both ways of working: tick “Selected items only” to teardrop just the connections you have picked, or leave the filters off to treat the whole board in one action, which is the usual way. There is no mode that adds teardrops as you route, so treat them as a finishing step. Teardrops are essentially very small copper zones, so they refill along with the board’s other zones whenever you run the design rules check or generate fabrication files, and re-running the dialogue updates existing teardrops rather than stacking new ones on top. They will not appear on fresh routing by themselves, though, so add them once the board is routed and run the dialogue again if you rework the copper afterwards. Teardrops are particularly useful on boards that carry current or that you want rugged, which makes the motor driver a natural candidate; they cost nothing at the factory and a few seconds of your time, so on a board that matters they are an easy yes.</p>
 
@@ -334,7 +347,7 @@
 <p>Figure 10.3: The teardrop defaults in Board Setup (Design Rules → Teardrops), with separate settings for round pads, rectangular pads, and track-to-track joins. Each group carries the same controls: the best and maximum length and width of the fillet, whether it may span two track segments or prefer a zone connection, the track-width limit that suppresses teardrops on wide tracks, and whether its edges are curved.</p>
 <h2 id="sec:c10-net-ties">Net Ties</h2>
 <p>Every so often you want two separate nets to touch at exactly one place, on purpose. KiCad normally treats copper from two different nets meeting as a short circuit and raises a design-rule error, which is precisely what you want almost everywhere. A ‘net tie’ is how you make one deliberate exception. It is a small footprint whose job is to join two nets with a bridge of copper at a single, controlled point, without the design rules check complaining.</p>
-<p>The classic reason to reach for one is grounds. A board that mixes a quiet section with a noisy one, or a power ground with a signal ground, is often best wired, so those grounds meet at just one ‘star’ point, so that heavy return currents cannot wash through the sensitive part of the circuit. A net tie gives you exactly that single, defined junction. The same trick makes a clean ‘Kelvin’<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> sense connection, where a measuring line must touch a power line at one precise spot and nowhere else.</p>
+<p>The classic reason to reach for one is grounds. A board that mixes a quiet section with a noisy one, or a power ground with a signal ground, is often best wired, so those grounds meet at just one ‘star’ point, so that heavy return currents cannot wash through the sensitive part of the circuit. A net tie gives you exactly that single, defined junction. The same trick makes a clean ‘Kelvin’<a data-jump="fn2" tabindex="0" class="footnote-ref note-jump" id="fnref2" role="doc-noteref"><sup>2</sup></a> sense connection, where a measuring line must touch a power line at one precise spot and nowhere else.</p>
 <p>To see why that single join matters, it helps to have the circuit in front of you. Figure 10.4 is a small board built for this recipe, and it deliberately sets a noisy job beside a quiet one. On the left, a 555 timer runs as an oscillator and flashes an LED: it switches hard a few times a second, and every switch pulls a sharp pulse of current back through its ground. On the right, an op-amp buffers a steady reference voltage tapped off a two-resistor divider, exactly the sort of quiet analogue node whose only job is to hold still. Both are fed from the same 5 V input, and both have to return their current to ground.</p>
 <p>If they returned it through the same ground copper, they would interfere. Copper has a little resistance, so the 555’s pulsing return current develops a few millivolts of wobble along any ground it shares, and anything else tied to that copper, the op-amp’s reference included, wobbles with it. If you give each section its own ground, the problem goes away: a digital ground <code>GNDD</code> carries the 555’s messy return, an analogue ground <code>GNDA</code> carries the op-amp’s, and the two never mix. The catch is that both must still sit at the same potential, so they cannot be left as separate islands. That is the net tie’s whole reason for existence: <code>NT1</code> (the arrow in Figure 10.4) joins <code>GNDD</code> and <code>GNDA</code> at one point, giving the grounds a shared reference while keeping the noisy return current out of the quiet side.</p>
 
@@ -370,7 +383,7 @@
 <p><img src="/assets/klp5e-vol2/ch10/ch10-symbol-fields-table.png" style="width:85.0%" /></p>
 <p>Figure 10.9: The Symbol Fields Table. On the left, the field list sets each field’s “BOM Name” and whether it is included and grouped, with “View presets” and “Schematic variants” panels below it. On the right, the “Edit” and “Export” tabs sit above the grid, “Group symbols” is ticked so the three <code>10k</code> resistors and the two <code>100nF</code> capacitors each collapse to a single row, and every cell is editable in place.</p>
 <h2 id="sec:c10-back-annotation">Back-Annotation</h2>
-<p>The normal direction of travel in KiCad is from the schematic to the board. You change the schematic, run “Update PCB from Schematic”, and the change crosses to the layout. This forward direction is the one that decides what the design contains: add a symbol and you add a part, delete one and you remove it, and the board follows when you import the changes from the schematic to the PCB. Occasionally, a change starts on the board instead. You may assign a footprint while working on the layout, set a part to do-not-populate<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> as you work on the physical design, or you may renumber the parts to match their positions on the finished board. ‘Back-annotation’ is the reverse update that carries those board-side changes back into the schematic, so the two views stay in sync. You run it with “Update Schematic from PCB”, on the “Tools” menu of either editor.</p>
+<p>The normal direction of travel in KiCad is from the schematic to the board. You change the schematic, run “Update PCB from Schematic”, and the change crosses to the layout. This forward direction is the one that decides what the design contains: add a symbol and you add a part, delete one and you remove it, and the board follows when you import the changes from the schematic to the PCB. Occasionally, a change starts on the board instead. You may assign a footprint while working on the layout, set a part to do-not-populate<a data-jump="fn3" tabindex="0" class="footnote-ref note-jump" id="fnref3" role="doc-noteref"><sup>3</sup></a> as you work on the physical design, or you may renumber the parts to match their positions on the finished board. ‘Back-annotation’ is the reverse update that carries those board-side changes back into the schematic, so the two views stay in sync. You run it with “Update Schematic from PCB”, on the “Tools” menu of either editor.</p>
 <p>Back-annotation often confuses new users, as it appears to suggest that placing a footprint in the layout and back-importing it to the schematic editor will also automatically add its symbol. This is not how it works. Back-annotation only updates parts that already exist in both views, and it never creates or removes them. The tool carries a property change back to a symbol that is already there, and it has no way to invent or guess a symbol for a footprint the schematic doesn’t have. The two directions are not mirror images. The forward flow is the one that adds and removes parts, because the schematic is the source of truth for what the design is made of, while back-annotation only refines the parts that the forward flow already placed. So if you drop a footprint straight onto the board, a mounting hole, say, and then run “Update Schematic from PCB”, KiCad cannot set a symbol for it. It reports the footprint as unmatched and moves on. To give that mounting hole a home in both views, work forwards instead: place a <code>MountingHole</code> symbol from KiCad’s <code>Mechanical</code> library on the schematic, assign it the mounting-hole footprint, and run “Update PCB from Schematic”. If you would rather the part live on the board alone, tick the footprint’s “Not in schematic” attribute, and the sync will stop flagging it.</p>
 <p>What back-annotation does carry across is the set of properties a board-side change can touch: reference designators, values, footprint assignments, other fields, attributes such as DNP and exclude-from-BOM, and net names. The dialogue lets you switch each kind on or off, so you bring back only what you mean to. The most common reason to reach for it is to tidy reference numbers, and a real case shows it best.</p>
 <p>Take the net-tie board from earlier in this chapter. When you drew its schematic, the LED’s <code>1k</code> series resistor was one of the last parts you added, so annotation handed it <code>R5</code>, the highest resistor number on the board. On the finished layout, though, it does not sit last. It sits over by the timer and the LED, ahead of the two <code>10k</code> resistors that form the op-amp’s reference divider. Read across the board, the resistor numbers jump about instead of climbing in order, which is a small nuisance for anyone hand-populating or inspecting it. Tidying that up is a change that starts on the board, and it is just what ‘geographical reannotation’ and back-annotation are for.</p>
@@ -651,7 +664,7 @@ This recipe is being revised for KiCad 10 and will appear in a later update.
 </div>
 <h2 id="sec:c10-project-templates">Project Templates</h2>
 <p>By the time you have set up a board the way you like it, with a stackup, a set of constraints from your fabricator, your net classes, your predefined track and via sizes, and your title block, you have done a fair amount of work that you would rather not repeat on every new project. A ‘project template’ saves all of it as a starting point: you create a new project from the template, and it opens with your setup already in place instead of on a blank sheet. KiCad also offers a lighter-weight version of the same idea inside Board Setup, an “Import Settings from Another Board” button that copies the rules out of an existing board and into the one you are working on, which is handy when you want the setup but not a whole project skeleton. Either way the goal is the same, to start each new board from a known-good baseline so the careful setup you did once keeps paying off.</p>
-<p>To see how much work that baseline saves, take a real board of mine. In another course I built a small USB mass-storage drive around an RP2040, with an eMMC flash chip for storage, a USB 2.0 bridge, a buck-converter supply, and a small sensor block for temperature and current monitoring. None of that circuitry is important here; what is important, however, is everything I had to set up before I could route a single track. Because it is a four-layer board, it needed a proper stackup calculated using the manufacturer’s impedance tool<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. This stackup includes a signal layer on top, an internal ground plane, an internal power plane, and a signal layer on the bottom, each with its copper weight and dielectric thickness set. Its nets are not all alike, so it grew seven net classes, where the power rails route on wide 0.5 mm copper, the eMMC data lines and the USB pair route on thin, tightly-spaced tracks with their own clearances, and the crystal and QSPI signals get classes of their own. On top of that sit a set of predefined track widths and via sizes, so that while routing I pick a ready value from a list instead of typing one each time (Figure 10.62), and a page of constraints matched to my fabricator, down to the minimum track, via, hole, and annular-ring sizes the factory guarantees, plus a few custom design rules for the fine-pitch parts. That is hours of work, and none of it is specific to a USB drive. The next four-layer board I send to the same factory would need the same stackup setup.</p>
+<p>To see how much work that baseline saves, take a real board of mine. In another course I built a small USB mass-storage drive around an RP2040, with an eMMC flash chip for storage, a USB 2.0 bridge, a buck-converter supply, and a small sensor block for temperature and current monitoring. None of that circuitry is important here; what is important, however, is everything I had to set up before I could route a single track. Because it is a four-layer board, it needed a proper stackup calculated using the manufacturer’s impedance tool<a data-jump="fn4" tabindex="0" class="footnote-ref note-jump" id="fnref4" role="doc-noteref"><sup>4</sup></a>. This stackup includes a signal layer on top, an internal ground plane, an internal power plane, and a signal layer on the bottom, each with its copper weight and dielectric thickness set. Its nets are not all alike, so it grew seven net classes, where the power rails route on wide 0.5 mm copper, the eMMC data lines and the USB pair route on thin, tightly-spaced tracks with their own clearances, and the crystal and QSPI signals get classes of their own. On top of that sit a set of predefined track widths and via sizes, so that while routing I pick a ready value from a list instead of typing one each time (Figure 10.62), and a page of constraints matched to my fabricator, down to the minimum track, via, hole, and annular-ring sizes the factory guarantees, plus a few custom design rules for the fine-pitch parts. That is hours of work, and none of it is specific to a USB drive. The next four-layer board I send to the same factory would need the same stackup setup.</p>
 
 <p><img src="/assets/klp5e-vol2/ch10/ch10-project-templates-import-settings-from-another-board.png" style="width:85.0%" /></p>
 <p>Figure 10.62: The drive’s predefined sizes, on the “Pre-defined Sizes” page of Board Setup. The list holds the ready track widths (0.114, 0.15, 0.2, and 0.3 mm) and via sizes (0.3 mm with a 0.15 mm hole, 0.4 with 0.2) I pick from while routing rather than typing a value each time. The arrow marks the “Import Settings from Another Board…” button at the lower left, the lighter-weight way to copy a setup like this into another board without making a template of it.</p>
@@ -722,7 +735,7 @@ This recipe is awaiting its screenshots and will appear in a later update.
 This recipe is awaiting its screenshots and will appear in a later update.
 </div>
 <h2 id="sec:c10-report-a-bug">Reporting a KiCad Bug</h2>
-<p>Every other recipe in this drawer tells you how to make KiCad do something. This one is for the day it does something it should not, and you decide to say so. That day arrives sooner than you would expect. KiCad is a large program under fast development, and the capstone project in Chapter 9 turned up one bug worth filing and one behaviour that turned out not to be a bug at all, which is a distinction this recipe will also help you draw. The tracker is at <a href="https://gitlab.com/kicad/code/kicad/-/issues" class="uri">https://gitlab.com/kicad/code/kicad/-/issues</a>, and filing there is free and open to anyone.</p>
+<p>Every other recipe in this drawer tells you how to make KiCad do something. This one is for the day it does something it should not, and you decide to say so. That day arrives sooner than you would expect. KiCad is a large program under fast development, and the capstone project in Chapter 9 turned up one bug worth filing and one behaviour that turned out not to be a bug at all, which is a distinction this recipe will also help you draw. The tracker is at <a href="https://gitlab.com/kicad/code/kicad/-/issues" class="uri" target="_blank" rel="noopener noreferrer">https://gitlab.com/kicad/code/kicad/-/issues</a>, and filing there is free and open to anyone.</p>
 <p>Understand first where your effort is best spent, because it is not where most people put it. A developer reading your report does not need it written well. They need to make the fault happen on their own machine. A fault they can reproduce is a fault they can fix, and one they cannot reproduce is usually closed for want of information no matter how carefully you described it. So put your time into the reproduction and let the prose be plain.</p>
 <ol type="1">
 <li><strong>Search the tracker first.</strong> If somebody has already filed it, add what you know to their report instead of opening a second one. Duplicates split the evidence across two pages and make both of them weaker. The bug in Chapter 9 had been reported twice before, and both attempts were closed for want of information, so the third report opened by naming them and saying what it was adding.</li>
@@ -738,39 +751,48 @@ This recipe is awaiting its screenshots and will appear in a later update.
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>The small misalignment between a drilled hole and its intended position on a pad or via, arising from manufacturing tolerances during drilling. The drill may land off-centre, leaving the hole closer to one edge of the pad and reducing the copper available for a track to connect on that side. Teardrops compensate by widening the join gradually, so the connection stays sound even when the drill wanders.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>A Kelvin connection, named after Lord Kelvin, is a wiring technique that separates the path carrying current from the path measuring voltage, so the measurement sees the true value at the load rather than a value reduced by the voltage drop along the current-carrying line. The sense line carries negligible current, so it develops almost no drop of its own, and it must meet the power line at exactly the point whose voltage you want to measure.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>A ‘do-not-populate’ (DNP) marking tells the assembler to leave a part off the board, even though the part remains in the design files. The footprint stays on the layout, so the copper and pads are still fabricated, but no component is fitted or soldered there. Designers use it for parts held back for testing, for options that ship in some builds and not others, or for debug components that are fitted during development and removed for production.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>In that project, I used the calculator at https://www.nextpcb.com/pcb-impedance-calculator<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>The small misalignment between a drilled hole and its intended position on a pad or via, arising from manufacturing tolerances during drilling. The drill may land off-centre, leaving the hole closer to one edge of the pad and reducing the copper available for a track to connect on that side. Teardrops compensate by widening the join gradually, so the connection stays sound even when the drill wanders.<a data-jump="fnref1" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A Kelvin connection, named after Lord Kelvin, is a wiring technique that separates the path carrying current from the path measuring voltage, so the measurement sees the true value at the load rather than a value reduced by the voltage drop along the current-carrying line. The sense line carries negligible current, so it develops almost no drop of its own, and it must meet the power line at exactly the point whose voltage you want to measure.<a data-jump="fnref2" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>A ‘do-not-populate’ (DNP) marking tells the assembler to leave a part off the board, even though the part remains in the design files. The footprint stays on the layout, so the copper and pads are still fabricated, but no component is fitted or soldered there. Designers use it for parts held back for testing, for options that ship in some builds and not others, or for debug components that are fitted during development and removed for production.<a data-jump="fnref3" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>In that project, I used the calculator at https://www.nextpcb.com/pcb-impedance-calculator<a data-jump="fnref4" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
 </div>
 <script>
-  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
-  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
-  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  // In-page jump handler for every [data-jump] element: TOC rows, A-Z terms and
+  // footnote markers. Two reasons these are not plain anchors. First, inside an
+  // iframe the parent page can suppress native anchor navigation, so the jump has
+  // to be scripted anyway. Second, an href="#id" resolves against the note's own
+  // URL, which publishes the notes host in the status bar and on the clipboard.
+  // scrollIntoView scrolls the nearest scrollable ancestor, the iframe's own body.
+  //
+  // Delegated at document level so it covers the term index and the footnotes,
+  // which a handler bound to the first .note-toc never reached.
   (function () {
-    function initTocScroll() {
-      var toc = document.querySelector('.note-toc');
-      if (!toc) return;
-      toc.addEventListener('click', function (e) {
-        var a = e.target.closest('a');
-        if (!a) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var id = href.substring(1);
-        var target = document.getElementById(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function jump(el) {
+      var target = document.getElementById(el.getAttribute('data-jump'));
+      if (!target) return false;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    function initJumps() {
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-jump]');
+        if (el && jump(el)) e.preventDefault();
+      });
+      // Keyboard equivalent: these are focusable but not real links, so Enter
+      // and Space have to be wired by hand.
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        if (el && jump(el)) e.preventDefault();
       });
     }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTocScroll);
+      document.addEventListener('DOMContentLoaded', initJumps);
     } else {
-      initTocScroll();
+      initJumps();
     }
   })();
 </script>

@@ -247,6 +247,19 @@
   }
   .note-term-index .note-toc-sub li { margin-bottom: 0; }
 
+  /* ---- In-page jump targets (TOC rows, A-Z terms, footnote markers). These
+     carry data-jump instead of href="#id": an href would resolve against the
+     note's own URL and publish the notes host in the status bar and on the
+     clipboard, which is the exposure coding_plans/notes-content-protection.md
+     exists to close. Without an href they lose the link cursor and the focus
+     ring, so both are restored here. ---- */
+  .note-jump { cursor: pointer; }
+  .note-jump:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
@@ -260,27 +273,27 @@
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
 <h1 class="note-title">Copper Zones and Fills</h1>
 
-<p>In the last chapter you set up the board and assigned its nets to net classes, so the power nets are routed with wide tracks and the logic nets with narrow ones. The next step is to fill the empty space between the tracks with copper. This copper has two jobs on a board like this one. It is the ground return path<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> that carries the motor current back to its source, and it provides a common voltage reference for the whole circuit. KiCad calls an area of copper like this a ‘filled zone’. In this chapter you will learn how to create filled zones, how to stop copper from filling the areas where you do not want it, and how to manage a board that contains several zones.</p>
+<p>In the last chapter you set up the board and assigned its nets to net classes, so the power nets are routed with wide tracks and the logic nets with narrow ones. The next step is to fill the empty space between the tracks with copper. This copper has two jobs on a board like this one. It is the ground return path<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a> that carries the motor current back to its source, and it provides a common voltage reference for the whole circuit. KiCad calls an area of copper like this a ‘filled zone’. In this chapter you will learn how to create filled zones, how to stop copper from filling the areas where you do not want it, and how to manage a board that contains several zones.</p>
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c04-filled-zones">Filled Zones</a>
+    <li><a class="note-jump" data-jump="sec:c04-filled-zones" role="link" tabindex="0">Filled Zones</a>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c04-creating-a-zone">Creating a Zone</a></li>
+        <li><a class="note-jump" data-jump="sec:c04-creating-a-zone" role="link" tabindex="0">Creating a Zone</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c04-zone-properties">Zone Properties</a></li>
+        <li><a class="note-jump" data-jump="sec:c04-zone-properties" role="link" tabindex="0">Zone Properties</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c04-pad-connections">Pad Connections and Thermal Relief</a></li>
+        <li><a class="note-jump" data-jump="sec:c04-pad-connections" role="link" tabindex="0">Pad Connections and Thermal Relief</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c04-via-stitching">Via Stitching</a></li>
+        <li><a class="note-jump" data-jump="sec:c04-via-stitching" role="link" tabindex="0">Via Stitching</a></li>
       </ul>
     </li>
-    <li><a href="#sec:c04-keep-outs">Keep-Outs</a>
+    <li><a class="note-jump" data-jump="sec:c04-keep-outs" role="link" tabindex="0">Keep-Outs</a>
     </li>
-    <li><a href="#sec:c04-zone-manager">The Zone Manager (K9/K10)</a>
+    <li><a class="note-jump" data-jump="sec:c04-zone-manager" role="link" tabindex="0">The Zone Manager (K9/K10)</a>
     </li>
   </ul>
 </details>
@@ -345,7 +358,7 @@
 <p><img src="/assets/klp5e-vol2/ch04/ch04-zones-thermal-reliefs.png" style="width:85.0%" /></p>
 <p>Figure 4.7: The same header pad with the setting changed to “Thermal reliefs”. The pour no longer touches the ring. It reaches it through four narrow spokes, marked by the yellow arrows, each one the 0.3 mm the “Thermal spoke width” field specifies, and the dark wedges between them are the 0.5 mm “Thermal relief gap”. Pad 5 below it has not changed at all, because it is on “VM” and was never connected to this pour in the first place. The three fields that produced the difference are boxed on the right.</p>
 <p>This board takes the thermal reliefs, on all three pours, because of the header. J1 is a through-hole part, and pin 6 sits on the ground net. If that pin is soldered solid into a pour that covers the entire board, it becomes the hardest joint on this board to solder by hand. The pour carries the heat away faster than the iron can supply it, so you hold the tip on the pad for a long time, melt the plastic of the header body, and still get a dull, grey joint. I have melted more than one header body this way, which is why I check this setting before pouring a board that has through-hole ground pins on it. Four spokes fix it. At 0.3 mm each they put 1.2 mm of copper into the pad in total, far more than the current through a single header pin needs. Since a pad connection is a per-zone setting, that decision is recorded three times, once on each pour, and you can read it back on any of them in the Zone Manager at the end of this chapter.</p>
-<p>However, the setting does have a cost. Fine-pitch surface-mount pads do not always have room for the full set of spokes, and when a pad falls short, the design rules check reports a ‘starved thermal’<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. On this board that happens once, at U1 pad 13, which reaches the pour through a single spoke.</p>
+<p>However, the setting does have a cost. Fine-pitch surface-mount pads do not always have room for the full set of spokes, and when a pad falls short, the design rules check reports a ‘starved thermal’<a data-jump="fn2" tabindex="0" class="footnote-ref note-jump" id="fnref2" role="doc-noteref"><sup>2</sup></a>. On this board that happens once, at U1 pad 13, which reaches the pour through a single spoke.</p>
 <p>Expect to see this violation in the DRC fairly often. The constraint behind it is “Minimum thermal relief spoke count”, on the “Constraints” page of Board Setup, and the KiCad default is 2. It is on by default on every board you start, so a single-spoke pad becomes an error in the report. Two settings control what happens. The first is the constraint itself, which takes any value from 0 to 4, where 0 turns the constraint off. The second is its severity, on the “Violation Severity” page you met in the last chapter. This board accepts the defaults for both, which is why its report shows the error.</p>
 <p>When you do get a thermal relief spoke count violation, what should you do about it? As usual, the answer is “it depends”. On this board the correct answer is to accept it. This is because the chip’s ground does not depend on that spoke. Pad 17, the exposed pad sitting immediately beside pad 13, is on the same net, and you gave it a solid zone connection back in Chapter 2, so the pour fills right up to it with unbroken copper and continues to the bottom pour through its twelve vias. Ground reaches the part whatever happens to one 0.3 mm strip of copper. That strip is not marginal either; 0.3 mm is comfortably within what any fabricator can etch reliably. The spoke-count constraint is a robustness guideline about how firmly a pad is anchored into a pour, not a manufacturing floor of the kind the other numbers on the Constraints page represent, and here the anchoring is done by the exposed pad beside it.</p>
 <p>In my example, I record the decision rather than ignoring the violation. Right-click the violation in the design rules check dialogue and choose “Exclude with comment…”, then write down the reason you just worked out. The exclusion survives between runs, and it reappears, with your comment attached, whenever you tick the “Exclusions” box, so the next person to open this board reads your reasoning instead of finding nothing. Do not take the other option, which is setting the severity to “Ignore”, because that turns the check off for every pad on the board, including the one where a single spoke would be a genuine problem. The last chapter made this point in general terms on the “Violation Severity” page, and this is the specific case it was describing. An exclusion applies to the one violation you examined, and your comment records why you accepted it. Setting the severity to “Ignore” applies to every pad on the board, and nothing on the board records that you did it.</p>
@@ -400,37 +413,46 @@
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>A <em>return-path</em> is a conductor that carries current from a load back to its source, completing the circuit. Every current that flows out to a load needs a path back; on a PCB that path is usually a ground pour or a dedicated return trace.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>A <em>starved thermal</em> occurs when a thermal relief connection has fewer spokes than the design rules ask for, because the surrounding pads or tracks leave no room for the full set. The pad is still connected, but through less copper than the rule intends, so the design rules check reports it as a violation.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>A <em>return-path</em> is a conductor that carries current from a load back to its source, completing the circuit. Every current that flows out to a load needs a path back; on a PCB that path is usually a ground pour or a dedicated return trace.<a data-jump="fnref1" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A <em>starved thermal</em> occurs when a thermal relief connection has fewer spokes than the design rules ask for, because the surrounding pads or tracks leave no room for the full set. The pad is still connected, but through less copper than the rule intends, so the design rules check reports it as a violation.<a data-jump="fnref2" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
 </div>
 <script>
-  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
-  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
-  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  // In-page jump handler for every [data-jump] element: TOC rows, A-Z terms and
+  // footnote markers. Two reasons these are not plain anchors. First, inside an
+  // iframe the parent page can suppress native anchor navigation, so the jump has
+  // to be scripted anyway. Second, an href="#id" resolves against the note's own
+  // URL, which publishes the notes host in the status bar and on the clipboard.
+  // scrollIntoView scrolls the nearest scrollable ancestor, the iframe's own body.
+  //
+  // Delegated at document level so it covers the term index and the footnotes,
+  // which a handler bound to the first .note-toc never reached.
   (function () {
-    function initTocScroll() {
-      var toc = document.querySelector('.note-toc');
-      if (!toc) return;
-      toc.addEventListener('click', function (e) {
-        var a = e.target.closest('a');
-        if (!a) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var id = href.substring(1);
-        var target = document.getElementById(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function jump(el) {
+      var target = document.getElementById(el.getAttribute('data-jump'));
+      if (!target) return false;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    function initJumps() {
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-jump]');
+        if (el && jump(el)) e.preventDefault();
+      });
+      // Keyboard equivalent: these are focusable but not real links, so Enter
+      // and Space have to be wired by hand.
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        if (el && jump(el)) e.preventDefault();
       });
     }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTocScroll);
+      document.addEventListener('DOMContentLoaded', initJumps);
     } else {
-      initTocScroll();
+      initJumps();
     }
   })();
 </script>

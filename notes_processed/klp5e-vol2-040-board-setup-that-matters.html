@@ -247,6 +247,19 @@
   }
   .note-term-index .note-toc-sub li { margin-bottom: 0; }
 
+  /* ---- In-page jump targets (TOC rows, A-Z terms, footnote markers). These
+     carry data-jump instead of href="#id": an href would resolve against the
+     note's own URL and publish the notes host in the status bar and on the
+     clipboard, which is the exposure coding_plans/notes-content-protection.md
+     exists to close. Without an href they lose the link cursor and the focus
+     ring, so both are restored here. ---- */
+  .note-jump { cursor: pointer; }
+  .note-jump:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
@@ -264,19 +277,19 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c03-stackup">Stackup</a>
+    <li><a class="note-jump" data-jump="sec:c03-stackup" role="link" tabindex="0">Stackup</a>
     </li>
-    <li><a href="#sec:c03-design-rules">Design Rules</a>
+    <li><a class="note-jump" data-jump="sec:c03-design-rules" role="link" tabindex="0">Design Rules</a>
     </li>
-    <li><a href="#sec:c03-net-classes">Net Classes</a>
+    <li><a class="note-jump" data-jump="sec:c03-net-classes" role="link" tabindex="0">Net Classes</a>
     </li>
-    <li><a href="#sec:c03-track-via-sizes">Predefined Track and Via Sizes</a>
+    <li><a class="note-jump" data-jump="sec:c03-track-via-sizes" role="link" tabindex="0">Predefined Track and Via Sizes</a>
     </li>
-    <li><a href="#sec:c03-custom-rules">Custom Rules (Intro)</a>
+    <li><a class="note-jump" data-jump="sec:c03-custom-rules" role="link" tabindex="0">Custom Rules (Intro)</a>
     </li>
-    <li><a href="#sec:c03-violation-severity">Violation Severity</a>
+    <li><a class="note-jump" data-jump="sec:c03-violation-severity" role="link" tabindex="0">Violation Severity</a>
     </li>
-    <li><a href="#sec:c03-component-classes">Component Classes (K9)</a>
+    <li><a class="note-jump" data-jump="sec:c03-component-classes" role="link" tabindex="0">Component Classes (K9)</a>
     </li>
   </ul>
 </details>
@@ -301,7 +314,7 @@
 <p>That last point is the key to how KiCad layers its rules. If part of your board needs 0.2 mm clearance and the rest needs 0.3 mm, then you should set the smaller 0.2 mm as the floor and use a net class or a custom rule to ask for the larger clearance where you want it. Establish these constraints at the start, from your fabricator’s specification, and the rest of your setup builds on top of them. Remember that you do not have to copy those numbers in by hand, as some fabricators publish a ready-made file with their capability numbers already set. Chapter 10 shows how to import one directly into Board Setup with the “Import Settings from Another Board…” button.</p>
 <p>Two things on that page require a closer look. The first is the minimum track width of 0.127 mm, which is half of what the logic on this board will route at and roughly a twelfth of the power width. That gap is the whole idea rather than a mistake, because the floor describes what the factory can make and not what you intend to draw. The second is that several fields read zero, among them the minimum copper clearance and the minimum connection width. A zero is not an omission either. It says the fabricator has set no board-wide floor for that particular check and is content to let your net classes and your custom rules govern it, which is precisely what the sections that follow do.</p>
 <h2 id="sec:c03-net-classes">Net Classes</h2>
-<p>A ‘net class’ is a named set of routing rules, such as a track width, a clearance, and via sizes, that you attach to a group of nets so that they are all treated the same way<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Every board starts with one class, called “Default”, and on the simple boards of Volume 1, that single class was all you ever needed. The motor driver needs at least two, because it has two kinds of net with very different needs. The choices you make here affect the quality of the whole board.</p>
+<p>A ‘net class’ is a named set of routing rules, such as a track width, a clearance, and via sizes, that you attach to a group of nets so that they are all treated the same way<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Every board starts with one class, called “Default”, and on the simple boards of Volume 1, that single class was all you ever needed. The motor driver needs at least two, because it has two kinds of net with very different needs. The choices you make here affect the quality of the whole board.</p>
 <p>The logic nets are the four inputs from the control header, plus the sleep and fault lines. They only require thin default tracks. These tracks carry almost no current and there are a lot of them, so narrow is good. The power and motor nets are the opposite. The motor supply “VM”, the ground return, and the four bridge outputs that feed the motors all carry real current, and current in too thin a track means heat and voltage drop. This is a case where you should make a second net class, call it something like “Power”, give it a generously wide track and a larger clearance, and assign the VM, ground, and motor-output nets to it. The logic stays on “Default”. From that point on, KiCad automatically routes each net at the width its class specifies, and the design rules check will hold you to the wider clearance on the power nets. Without setting up different net rules for each track, you would have to remember to manually change track width depending on what kind of track you are drawing. This is why net classes stop being optional on the capstone board. On a board that carries current, the net class is what sets each track to a width that matches the current it has to carry.</p>
 <p>Here is what the motor driver ends up with, so that you have real numbers to use (Figure 3.4):</p>
 <ul>
@@ -397,7 +410,7 @@
 
 <p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-pre-defined-sizes.png" style="width:85.0%" /></p>
 <p>Figure 3.5: The “Pre-defined Sizes” page. The menu is deliberately short: three track widths (❶) and two via sizes (❷), and nothing else. Two of the widths are the ones the net classes already route at, and the third, 0.80 mm, is the neck-down size a power track uses for its last approach to a fine-pitch pad. The “Differential Pairs” column to the right stays empty, because this board has no differential pairs.</p>
-<p>For the motor driver the menu holds three track widths, 0.25 mm, 0.80 mm, and 1.50 mm, and two via sizes, 0.60 mm with a 0.30 mm hole and 0.80 mm with a 0.40 mm hole. Two of the widths you have already seen: 0.25 mm is what the logic routes at and 1.50 mm is what the power nets route at, so the menu simply puts the two class widths within reach. The exception is 0.80 mm, and it is there because a 1.50 mm track cannot physically arrive at a 0.4 mm pad on a fine-pitch chip. The last millimetre of a power run has to narrow, and 0.80 mm is the size you step down to when it does. That deliberate narrowing is called a ‘neck-down’<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, and it is why 0.80 mm belongs on the menu rather than in a number you type by hand and get slightly different every time.</p>
+<p>For the motor driver the menu holds three track widths, 0.25 mm, 0.80 mm, and 1.50 mm, and two via sizes, 0.60 mm with a 0.30 mm hole and 0.80 mm with a 0.40 mm hole. Two of the widths you have already seen: 0.25 mm is what the logic routes at and 1.50 mm is what the power nets route at, so the menu simply puts the two class widths within reach. The exception is 0.80 mm, and it is there because a 1.50 mm track cannot physically arrive at a 0.4 mm pad on a fine-pitch chip. The last millimetre of a power run has to narrow, and 0.80 mm is the size you step down to when it does. That deliberate narrowing is called a ‘neck-down’<a data-jump="fn2" tabindex="0" class="footnote-ref note-jump" id="fnref2" role="doc-noteref"><sup>2</sup></a>, and it is why 0.80 mm belongs on the menu rather than in a number you type by hand and get slightly different every time.</p>
 <h2 id="sec:c03-custom-rules">Custom Rules (Intro)</h2>
 <p>Net classes cover most of what a board needs, but sometimes you want a rule they cannot express. That is what ‘custom rules’ are for. They are written in KiCad’s design-rule language in the “Custom Rules” section of Board Setup, and they let you state conditions and constraints precisely, which the design rules check then enforces.</p>
 <p>The motor driver needs only one of them, and I mentioned it earlier in this chapter. A net class track width is the width KiCad routes at rather than a limit it enforces, so a power net left at 0.25 mm raises no violation at all. That is the one gap this board’s setup still has. A custom rule closes this gap. This rule sets a minimum width for anything in the Power class, and a track that is too thin for its job becomes a design rules check error instead of a problem that nothing reports.</p>
@@ -452,7 +465,7 @@ max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
 <p>Used carelessly, it hides real faults. Use the “Ignore” setting cautiously. Setting a check to “Ignore” disables that check across the whole board, which is far more sweeping than dismissing one specific violation you have looked at and judged harmless.</p>
 
 <p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-violation-severity.png" style="width:85.0%" /></p>
-<p>Figure 3.8: The top of the “Violation Severity” page, which runs on well past the bottom of this figure. Every check KiCad can make gets a row and a choice of three. The motor driver leaves every row at its default, but the page is worth reading slowly at least once, because knowing what the checker will and will not tell you is part of knowing what a clean report is worth.</p>
+<p>Figure 3.8: The top of the “Violation Severity” page, which runs on well past the bottom of this figure. Every check KiCad can make gets a row and a choice of three. The motor driver leaves every row at its default, but the page is worth reading slowly at least once, because knowing what the checker will and will not tell you is part of knowing how much a clean report actually proves.</p>
 <p>The motor driver keeps those defaults, and on most boards that is the right choice. Even so, it is worth knowing what a considered change looks like, because a few require no trade-off at all. Here are two to keep in mind:</p>
 <ol type="1">
 <li><strong>Switch on something that ships switched off.</strong> “Footprint has no courtyard defined” is set to “Ignore” by default, on the reasonable grounds that plenty of libraries omit courtyards. In this chapter and project, our situation is different because we drew a footprint by hand in Chapter 2, and a courtyard is often the sort of thing that gets left off a hand-drawn part. A potential result is that it stays invisible until two components overlap on the board (because the courtyard is missing). Raising this one to “Warning” is helpful because it only reports a problem like the above when there is one.</li>
@@ -468,7 +481,7 @@ max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
 <p>In my own boards I change very little on this page, and I would leave any check I was unsure about switched on.</p>
 <p>One last thing to look for. The violation severity page may have been changed, even though you did not change it. Remember the fabricator’s capability file you imported back in the “Design Rules” section? That file carries severity settings as well as constraints, and importing it applies both. On this board the import moved three rows. “Drilled hole too close to other hole”, visible in Figure 3.8, now reads “Error” where KiCad’s own default is “Warning”. That is NextPCB telling you their process takes hole spacing seriously. Further down the page, past what the figure shows, two checks for through-hole and non-plated holes sitting inside a courtyard have been turned down to “Ignore”. That is a judgement you may or may not agree with. Neither change is wrong, but both were made on your behalf, and this page is the only place they are visible.</p>
 <h2 id="sec:c03-component-classes">Component Classes (K9)</h2>
-<p>As you already know, net classes group nets. The new ‘component classes’ feature, added in KiCad 9, groups parts. A component class is a named label you attach to one or more components, in the schematic or in Board Setup, and unlike a net class it says nothing about clearance or track width. Its job is organisational, as it lets you refer to a group of parts by name, so that you can scope a custom design rule to just those parts, or mark a set of components as a repeated channel<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> for a multi-channel layout.</p>
+<p>As you already know, net classes group nets. The new ‘component classes’ feature, added in KiCad 9, groups parts. A component class is a named label you attach to one or more components, in the schematic or in Board Setup, and unlike a net class it says nothing about clearance or track width. Its job is organisational, as it lets you refer to a group of parts by name, so that you can scope a custom design rule to just those parts, or mark a set of components as a repeated channel<a data-jump="fn3" tabindex="0" class="footnote-ref note-jump" id="fnref3" role="doc-noteref"><sup>3</sup></a> for a multi-channel layout.</p>
 <p>On the two-motor capstone you can work without them, but they are worth introducing here. The moment a board has repeated sections, component classes are how you tell KiCad that a group of parts belongs together. Chapter 9’s four-motor extension of that capstone is a good example of this. A part can hold more than one class, and you can assign classes by hand or by rules that match on reference, footprint, sheet, and more.</p>
 <p>Three things they let you do are worth naming, so that you can recognise the situation when you meet it. The first is that a custom rule can be aimed at a group of parts rather than at a group of nets, which is how a requirement like “keep three millimetres between anything in the H-bridge and anything in the logic block” becomes something the checker can enforce rather than something you have to remember. The second is that a component class is one of the ways KiCad recognises a repeated block, so that a section of the board can be placed and routed once and then repeated across its copies. Chapter 9’s four-motor extension is built that way, with its second driver stage a copy of the first, and Chapter 10’s multi-channel recipe walks through how the repeating is done. The third is the simplest and the one you will use most: a class is a handle for selecting things, so that you can highlight every part in a functional block at once and see where each one was actually placed on the board (Figure 3.9).</p>
 
@@ -478,38 +491,47 @@ max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>These three words (“net”, “line”, “track”) are not synonyms. A ‘net’ is the <em>logical</em> connection, the set of pins the schematic declares must sit at the same potential. A ‘line’ is informal <em>shorthand</em> for a signal net, used when you name it by what it carries, so ‘the sleep line’ is the net that carries the sleep signal. A ‘track’ is the <em>physical</em> copper you lay on the board to make that net real. The net is the intent; the track is the copper.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p><strong>Neck-down</strong>: a deliberate, local reduction in the width of a track, made so that a wide track can reach a pad or pass through a gap narrower than the track itself. The track returns to its full width once it is clear of the obstruction. The narrowed section still carries the whole current of the run, so a neck-down is kept as short as the geometry allows.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p><strong>Channel</strong>: one instance of a circuit block that a board repeats several times over, such as one input stage of a multi-input mixer, or one motor stage of a two-motor driver. In a multi-channel layout you place and route a single channel by hand, and KiCad copies that placement and routing onto the identical copies. Chapter 9’s four-motor extension is built this way, and Chapter 10 walks through the procedure.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>These three words (“net”, “line”, “track”) are not synonyms. A ‘net’ is the <em>logical</em> connection, the set of pins the schematic declares must sit at the same potential. A ‘line’ is informal <em>shorthand</em> for a signal net, used when you name it by what it carries, so ‘the sleep line’ is the net that carries the sleep signal. A ‘track’ is the <em>physical</em> copper you lay on the board to make that net real. The net is the intent; the track is the copper.<a data-jump="fnref1" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><strong>Neck-down</strong>: a deliberate, local reduction in the width of a track, made so that a wide track can reach a pad or pass through a gap narrower than the track itself. The track returns to its full width once it is clear of the obstruction. The narrowed section still carries the whole current of the run, so a neck-down is kept as short as the geometry allows.<a data-jump="fnref2" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><strong>Channel</strong>: one instance of a circuit block that a board repeats several times over, such as one input stage of a multi-input mixer, or one motor stage of a two-motor driver. In a multi-channel layout you place and route a single channel by hand, and KiCad copies that placement and routing onto the identical copies. Chapter 9’s four-motor extension is built this way, and Chapter 10 walks through the procedure.<a data-jump="fnref3" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
 </div>
 <script>
-  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
-  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
-  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  // In-page jump handler for every [data-jump] element: TOC rows, A-Z terms and
+  // footnote markers. Two reasons these are not plain anchors. First, inside an
+  // iframe the parent page can suppress native anchor navigation, so the jump has
+  // to be scripted anyway. Second, an href="#id" resolves against the note's own
+  // URL, which publishes the notes host in the status bar and on the clipboard.
+  // scrollIntoView scrolls the nearest scrollable ancestor, the iframe's own body.
+  //
+  // Delegated at document level so it covers the term index and the footnotes,
+  // which a handler bound to the first .note-toc never reached.
   (function () {
-    function initTocScroll() {
-      var toc = document.querySelector('.note-toc');
-      if (!toc) return;
-      toc.addEventListener('click', function (e) {
-        var a = e.target.closest('a');
-        if (!a) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var id = href.substring(1);
-        var target = document.getElementById(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function jump(el) {
+      var target = document.getElementById(el.getAttribute('data-jump'));
+      if (!target) return false;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    function initJumps() {
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-jump]');
+        if (el && jump(el)) e.preventDefault();
+      });
+      // Keyboard equivalent: these are focusable but not real links, so Enter
+      // and Space have to be wired by hand.
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        if (el && jump(el)) e.preventDefault();
       });
     }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTocScroll);
+      document.addEventListener('DOMContentLoaded', initJumps);
     } else {
-      initTocScroll();
+      initJumps();
     }
   })();
 </script>

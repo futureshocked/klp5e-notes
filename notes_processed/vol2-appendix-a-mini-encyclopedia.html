@@ -247,6 +247,19 @@
   }
   .note-term-index .note-toc-sub li { margin-bottom: 0; }
 
+  /* ---- In-page jump targets (TOC rows, A-Z terms, footnote markers). These
+     carry data-jump instead of href="#id": an href would resolve against the
+     note's own URL and publish the notes host in the status bar and on the
+     clipboard, which is the exposure coding_plans/notes-content-protection.md
+     exists to close. Without an href they lose the link cursor and the focus
+     ring, so both are restored here. ---- */
+  .note-jump { cursor: pointer; }
+  .note-jump:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
@@ -266,139 +279,139 @@
     <li>
       <span class="note-term-letter">#</span>
       <ul class="note-toc-sub">
-        <li><a href="#d-model">3D model</a></li>
+        <li><a class="note-jump" data-jump="d-model" role="link" tabindex="0">3D model</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">A</span>
       <ul class="note-toc-sub">
-        <li><a href="#ampacity">Ampacity</a></li>
-        <li><a href="#annular-ring">Annular ring</a></li>
+        <li><a class="note-jump" data-jump="ampacity" role="link" tabindex="0">Ampacity</a></li>
+        <li><a class="note-jump" data-jump="annular-ring" role="link" tabindex="0">Annular ring</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">B</span>
       <ul class="note-toc-sub">
-        <li><a href="#back-annotation">Back-annotation</a></li>
-        <li><a href="#bill-of-materials-bom">Bill of materials (BOM)</a></li>
-        <li><a href="#boost-converter-step-up-converter">Boost converter (step-up converter)</a></li>
-        <li><a href="#bus">Bus</a></li>
+        <li><a class="note-jump" data-jump="back-annotation" role="link" tabindex="0">Back-annotation</a></li>
+        <li><a class="note-jump" data-jump="bill-of-materials-bom" role="link" tabindex="0">Bill of materials (BOM)</a></li>
+        <li><a class="note-jump" data-jump="boost-converter-step-up-converter" role="link" tabindex="0">Boost converter (step-up converter)</a></li>
+        <li><a class="note-jump" data-jump="bus" role="link" tabindex="0">Bus</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">C</span>
       <ul class="note-toc-sub">
-        <li><a href="#component-class">Component class</a></li>
-        <li><a href="#copper-pour">Copper pour</a></li>
-        <li><a href="#cross-probing">Cross-probing</a></li>
-        <li><a href="#custom-design-rule">Custom design rule</a></li>
+        <li><a class="note-jump" data-jump="component-class" role="link" tabindex="0">Component class</a></li>
+        <li><a class="note-jump" data-jump="copper-pour" role="link" tabindex="0">Copper pour</a></li>
+        <li><a class="note-jump" data-jump="cross-probing" role="link" tabindex="0">Cross-probing</a></li>
+        <li><a class="note-jump" data-jump="custom-design-rule" role="link" tabindex="0">Custom design rule</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">D</span>
       <ul class="note-toc-sub">
-        <li><a href="#design-block">Design block</a></li>
-        <li><a href="#design-rules-check-drc">Design Rules Check (DRC)</a></li>
-        <li><a href="#design-variant">Design variant</a></li>
-        <li><a href="#design-for-manufacturing-dfm">Design for manufacturing (DFM)</a></li>
-        <li><a href="#do-not-populate-dnp">Do not populate (DNP)</a></li>
-        <li><a href="#drill-file">Drill file</a></li>
+        <li><a class="note-jump" data-jump="design-block" role="link" tabindex="0">Design block</a></li>
+        <li><a class="note-jump" data-jump="design-rules-check-drc" role="link" tabindex="0">Design Rules Check (DRC)</a></li>
+        <li><a class="note-jump" data-jump="design-variant" role="link" tabindex="0">Design variant</a></li>
+        <li><a class="note-jump" data-jump="design-for-manufacturing-dfm" role="link" tabindex="0">Design for manufacturing (DFM)</a></li>
+        <li><a class="note-jump" data-jump="do-not-populate-dnp" role="link" tabindex="0">Do not populate (DNP)</a></li>
+        <li><a class="note-jump" data-jump="drill-file" role="link" tabindex="0">Drill file</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">E</span>
       <ul class="note-toc-sub">
-        <li><a href="#electrical-rules-check-erc">Electrical Rules Check (ERC)</a></li>
-        <li><a href="#embedded-files">Embedded files</a></li>
+        <li><a class="note-jump" data-jump="electrical-rules-check-erc" role="link" tabindex="0">Electrical Rules Check (ERC)</a></li>
+        <li><a class="note-jump" data-jump="embedded-files" role="link" tabindex="0">Embedded files</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">F</span>
       <ul class="note-toc-sub">
-        <li><a href="#fab-house">Fab house</a></li>
-        <li><a href="#footprint">Footprint</a></li>
-        <li><a href="#fr-4">FR-4</a></li>
+        <li><a class="note-jump" data-jump="fab-house" role="link" tabindex="0">Fab house</a></li>
+        <li><a class="note-jump" data-jump="footprint" role="link" tabindex="0">Footprint</a></li>
+        <li><a class="note-jump" data-jump="fr-4" role="link" tabindex="0">FR-4</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">G</span>
       <ul class="note-toc-sub">
-        <li><a href="#geographical-reannotation">Geographical reannotation</a></li>
-        <li><a href="#gerber">Gerber</a></li>
+        <li><a class="note-jump" data-jump="geographical-reannotation" role="link" tabindex="0">Geographical reannotation</a></li>
+        <li><a class="note-jump" data-jump="gerber" role="link" tabindex="0">Gerber</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">I</span>
       <ul class="note-toc-sub">
-        <li><a href="#ipc-2221">IPC-2221</a></li>
+        <li><a class="note-jump" data-jump="ipc-2221" role="link" tabindex="0">IPC-2221</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">K</span>
       <ul class="note-toc-sub">
-        <li><a href="#keep-out-area">Keep-out area</a></li>
+        <li><a class="note-jump" data-jump="keep-out-area" role="link" tabindex="0">Keep-out area</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">M</span>
       <ul class="note-toc-sub">
-        <li><a href="#mounting-hole">Mounting hole</a></li>
-        <li><a href="#multi-channel-design">Multi-channel design</a></li>
+        <li><a class="note-jump" data-jump="mounting-hole" role="link" tabindex="0">Mounting hole</a></li>
+        <li><a class="note-jump" data-jump="multi-channel-design" role="link" tabindex="0">Multi-channel design</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">N</span>
       <ul class="note-toc-sub">
-        <li><a href="#net">Net</a></li>
-        <li><a href="#net-class">Net class</a></li>
+        <li><a class="note-jump" data-jump="net" role="link" tabindex="0">Net</a></li>
+        <li><a class="note-jump" data-jump="net-class" role="link" tabindex="0">Net class</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">P</span>
       <ul class="note-toc-sub">
-        <li><a href="#pad">Pad</a></li>
-        <li><a href="#pad-stack">Pad stack</a></li>
-        <li><a href="#panel">Panel</a></li>
-        <li><a href="#paste-aperture">Paste aperture</a></li>
-        <li><a href="#paste-stencil">Paste stencil</a></li>
-        <li><a href="#pick-and-place">Pick-and-place</a></li>
-        <li><a href="#pin-table">Pin table</a></li>
+        <li><a class="note-jump" data-jump="pad" role="link" tabindex="0">Pad</a></li>
+        <li><a class="note-jump" data-jump="pad-stack" role="link" tabindex="0">Pad stack</a></li>
+        <li><a class="note-jump" data-jump="panel" role="link" tabindex="0">Panel</a></li>
+        <li><a class="note-jump" data-jump="paste-aperture" role="link" tabindex="0">Paste aperture</a></li>
+        <li><a class="note-jump" data-jump="paste-stencil" role="link" tabindex="0">Paste stencil</a></li>
+        <li><a class="note-jump" data-jump="pick-and-place" role="link" tabindex="0">Pick-and-place</a></li>
+        <li><a class="note-jump" data-jump="pin-table" role="link" tabindex="0">Pin table</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">R</span>
       <ul class="note-toc-sub">
-        <li><a href="#ratsnest">Ratsnest</a></li>
+        <li><a class="note-jump" data-jump="ratsnest" role="link" tabindex="0">Ratsnest</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">S</span>
       <ul class="note-toc-sub">
-        <li><a href="#silkscreen">Silkscreen</a></li>
-        <li><a href="#solder-paste">Solder paste</a></li>
-        <li><a href="#soldermask">Soldermask</a></li>
-        <li><a href="#stackup">Stackup</a></li>
-        <li><a href="#substrate">Substrate</a></li>
-        <li><a href="#suggested-fix">Suggested fix</a></li>
-        <li><a href="#surface-finish">Surface finish</a></li>
-        <li><a href="#surface-mount-smd">Surface-mount (SMD)</a></li>
-        <li><a href="#symbol">Symbol</a></li>
+        <li><a class="note-jump" data-jump="silkscreen" role="link" tabindex="0">Silkscreen</a></li>
+        <li><a class="note-jump" data-jump="solder-paste" role="link" tabindex="0">Solder paste</a></li>
+        <li><a class="note-jump" data-jump="soldermask" role="link" tabindex="0">Soldermask</a></li>
+        <li><a class="note-jump" data-jump="stackup" role="link" tabindex="0">Stackup</a></li>
+        <li><a class="note-jump" data-jump="substrate" role="link" tabindex="0">Substrate</a></li>
+        <li><a class="note-jump" data-jump="suggested-fix" role="link" tabindex="0">Suggested fix</a></li>
+        <li><a class="note-jump" data-jump="surface-finish" role="link" tabindex="0">Surface finish</a></li>
+        <li><a class="note-jump" data-jump="surface-mount-smd" role="link" tabindex="0">Surface-mount (SMD)</a></li>
+        <li><a class="note-jump" data-jump="symbol" role="link" tabindex="0">Symbol</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">T</span>
       <ul class="note-toc-sub">
-        <li><a href="#teardrop">Teardrop</a></li>
-        <li><a href="#thermal-relief">Thermal relief</a></li>
-        <li><a href="#thermal-via">Thermal via</a></li>
-        <li><a href="#through-hole-tht">Through-hole (THT)</a></li>
-        <li><a href="#trace">Trace</a></li>
+        <li><a class="note-jump" data-jump="teardrop" role="link" tabindex="0">Teardrop</a></li>
+        <li><a class="note-jump" data-jump="thermal-relief" role="link" tabindex="0">Thermal relief</a></li>
+        <li><a class="note-jump" data-jump="thermal-via" role="link" tabindex="0">Thermal via</a></li>
+        <li><a class="note-jump" data-jump="through-hole-tht" role="link" tabindex="0">Through-hole (THT)</a></li>
+        <li><a class="note-jump" data-jump="trace" role="link" tabindex="0">Trace</a></li>
       </ul>
     </li>
     <li>
       <span class="note-term-letter">V</span>
       <ul class="note-toc-sub">
-        <li><a href="#via">Via</a></li>
+        <li><a class="note-jump" data-jump="via" role="link" tabindex="0">Via</a></li>
       </ul>
     </li>
   </ul>
@@ -565,30 +578,39 @@
 
 </div>
 <script>
-  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
-  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
-  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  // In-page jump handler for every [data-jump] element: TOC rows, A-Z terms and
+  // footnote markers. Two reasons these are not plain anchors. First, inside an
+  // iframe the parent page can suppress native anchor navigation, so the jump has
+  // to be scripted anyway. Second, an href="#id" resolves against the note's own
+  // URL, which publishes the notes host in the status bar and on the clipboard.
+  // scrollIntoView scrolls the nearest scrollable ancestor, the iframe's own body.
+  //
+  // Delegated at document level so it covers the term index and the footnotes,
+  // which a handler bound to the first .note-toc never reached.
   (function () {
-    function initTocScroll() {
-      var toc = document.querySelector('.note-toc');
-      if (!toc) return;
-      toc.addEventListener('click', function (e) {
-        var a = e.target.closest('a');
-        if (!a) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var id = href.substring(1);
-        var target = document.getElementById(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function jump(el) {
+      var target = document.getElementById(el.getAttribute('data-jump'));
+      if (!target) return false;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    function initJumps() {
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-jump]');
+        if (el && jump(el)) e.preventDefault();
+      });
+      // Keyboard equivalent: these are focusable but not real links, so Enter
+      // and Space have to be wired by hand.
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        if (el && jump(el)) e.preventDefault();
       });
     }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTocScroll);
+      document.addEventListener('DOMContentLoaded', initJumps);
     } else {
-      initTocScroll();
+      initJumps();
     }
   })();
 </script>

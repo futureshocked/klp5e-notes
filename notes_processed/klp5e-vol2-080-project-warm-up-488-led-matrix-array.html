@@ -247,6 +247,19 @@
   }
   .note-term-index .note-toc-sub li { margin-bottom: 0; }
 
+  /* ---- In-page jump targets (TOC rows, A-Z terms, footnote markers). These
+     carry data-jump instead of href="#id": an href would resolve against the
+     note's own URL and publish the notes host in the status bar and on the
+     clipboard, which is the exposure coding_plans/notes-content-protection.md
+     exists to close. Without an href they lose the link cursor and the focus
+     ring, so both are restored here. ---- */
+  .note-jump { cursor: pointer; }
+  .note-jump:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
@@ -264,36 +277,36 @@
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
   <ul>
-    <li><a href="#sec:c07-learn">What This Project Teaches You</a>
+    <li><a class="note-jump" data-jump="sec:c07-learn" role="link" tabindex="0">What This Project Teaches You</a>
     </li>
-    <li><a href="#sec:c07-scope">The Board We’re Building</a>
+    <li><a class="note-jump" data-jump="sec:c07-scope" role="link" tabindex="0">The Board We’re Building</a>
     </li>
-    <li><a href="#sec:c07-source">Sourcing the Parts</a>
+    <li><a class="note-jump" data-jump="sec:c07-source" role="link" tabindex="0">Sourcing the Parts</a>
     </li>
-    <li><a href="#sec:c07-power-budget">Planning the Power Before You Draw</a>
+    <li><a class="note-jump" data-jump="sec:c07-power-budget" role="link" tabindex="0">Planning the Power Before You Draw</a>
     </li>
-    <li><a href="#sec:c07-process">The Process, With One Addition</a>
+    <li><a class="note-jump" data-jump="sec:c07-process" role="link" tabindex="0">The Process, With One Addition</a>
     </li>
-    <li><a href="#sec:c07-setup">Schematic: Setup</a>
+    <li><a class="note-jump" data-jump="sec:c07-setup" role="link" tabindex="0">Schematic: Setup</a>
     </li>
-    <li><a href="#sec:c07-first-cell">Building the First Cell</a>
+    <li><a class="note-jump" data-jump="sec:c07-first-cell" role="link" tabindex="0">Building the First Cell</a>
     </li>
-    <li><a href="#sec:c07-design-block">Capturing the Cell as a Design Block</a>
+    <li><a class="note-jump" data-jump="sec:c07-design-block" role="link" tabindex="0">Capturing the Cell as a Design Block</a>
     </li>
-    <li><a href="#sec:c07-mcu">MCU, Power, and Controls</a>
+    <li><a class="note-jump" data-jump="sec:c07-mcu" role="link" tabindex="0">MCU, Power, and Controls</a>
     </li>
-    <li><a href="#sec:c07-stamping">Stamping Out the Other Three</a>
+    <li><a class="note-jump" data-jump="sec:c07-stamping" role="link" tabindex="0">Stamping Out the Other Three</a>
     </li>
-    <li><a href="#sec:c07-erc">Annotate, Associate, and ERC</a>
+    <li><a class="note-jump" data-jump="sec:c07-erc" role="link" tabindex="0">Annotate, Associate, and ERC</a>
     </li>
-    <li><a href="#sec:c07-layout">Board and Layout</a>
+    <li><a class="note-jump" data-jump="sec:c07-layout" role="link" tabindex="0">Board and Layout</a>
       <ul class="note-toc-sub">
-        <li><a href="#sec:c07-cell-differences">What the Copy Cannot Make Identical</a></li>
+        <li><a class="note-jump" data-jump="sec:c07-cell-differences" role="link" tabindex="0">What the Copy Cannot Make Identical</a></li>
       </ul>
     </li>
-    <li><a href="#sec:c07-k10-features">The KiCad 10 Features This Board Puts to Work</a>
+    <li><a class="note-jump" data-jump="sec:c07-k10-features" role="link" tabindex="0">The KiCad 10 Features This Board Puts to Work</a>
     </li>
-    <li><a href="#sec:c07-next">What You’ll Carry Into the Capstone</a>
+    <li><a class="note-jump" data-jump="sec:c07-next" role="link" tabindex="0">What You’ll Carry Into the Capstone</a>
     </li>
   </ul>
 </details>
@@ -304,7 +317,7 @@
 <p><img src="/assets/klp5e-vol2/ch07/ch07_pcb-ideation-sketch_v10.png" style="width:85.0%" /></p>
 <p>Figure 7.1: The board as a sketch, before any of it was drawn in KiCad. The top face carries the four matrices in a single row, and beneath them everything that exists only once: the Arduino Nano down the left, then the power switch, the load switch that spares it the display current, and the USB-C receptacle near the right-hand edge, with the two buttons on the row below. The back carries nothing but the four MAX7219 drivers, each tucked under its own matrix with its current-setting resistor and its decoupling pair, which is the point of the drawing: one cell, four times over. The back is drawn see-through, so that each driver lines up with the matrix it serves rather than being mirrored. Only the 80 mm display band is a fixed number at this stage; the surrounding outline is a proposal.</p>
 <p>There are two things to notice in the sketch. The first is that the drawing is essentially one cell repeated four times. The cell contains a matrix display, a display driver placed on the back of the board, a current-setting resistor and a pair of decoupling capacitors. There is nothing different between the cell copies except the reference designators. The second is scale. The board is roughly 100 mm by 50 mm, but the exact dimensions are something we’ll determine in the layout editor. However, the 80 mm display band inside it comes from the four 20 mm matrices placed edge to edge. That is the only fixed dimension on the sketch.</p>
-<p>I built the first version of this board in the fourth edition of KiCad Like a Pro as a clock. This new modernised edition keeps the display, the two buttons and the power switch. I have also added a USB-C power receptacle (because it’s 2026), a P-channel MOSFET load switch so that the slide switch no longer has to carry the display current, and a new simplified board shape to make it easier to place the board in a project box. My inspiration for designing this gadget was the classic Pomodoro timer<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. For such a gadget, keeping time is not needed, and that is why I did not include a real time clock. I just need to be able to choose a timer preset, like a 10- or 15-minute session, and start/stop/reset the clock. This board counts down a work interval in the Pomodoro style, which the two buttons choose and start. Counting down a known number of minutes needs no absolute time reference, so nothing on the board has to know what day it is.</p>
+<p>I built the first version of this board in the fourth edition of KiCad Like a Pro as a clock. This new modernised edition keeps the display, the two buttons and the power switch. I have also added a USB-C power receptacle (because it’s 2026), a P-channel MOSFET load switch so that the slide switch no longer has to carry the display current, and a new simplified board shape to make it easier to place the board in a project box. My inspiration for designing this gadget was the classic Pomodoro timer<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a>. For such a gadget, keeping time is not needed, and that is why I did not include a real time clock. I just need to be able to choose a timer preset, like a 10- or 15-minute session, and start/stop/reset the clock. This board counts down a work interval in the Pomodoro style, which the two buttons choose and start. Counting down a known number of minutes needs no absolute time reference, so nothing on the board has to know what day it is.</p>
 <p>What you are building is that LED matrix cell, four times over, driven from the Arduino Nano across three wires (Figure 7.2). You can consider this as a base project rather than a finished product. If you want time and date keeping capability, the neatest route is not to add an RTC chip but to swap the Arduino Nano for one of the WiFi-capable modules in the same footprint, and let it fetch the time from the network. The schematic barely changes, and you get many more capabilities in return, because a board on the network can also be controlled remotely. That opens up capabilities such as scrolling live notifications, a status board for something you run at home, and a countdown someone else can start from a phone.</p>
 
 <p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-first-cell.png" style="width:85.0%" /></p>
@@ -705,7 +718,7 @@ python3 tools/checknet.py net.net --cascade 4</code></pre>
 
 <p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-nextpcb-constraints-import.png" style="width:85.0%" /></p>
 <p>Figure 7.28: The “Import Settings” dialogue, pointed at NextPCB’s “Simple” capability file. What is left unticked matters as much as what is ticked. “Net classes” is left alone so that the <code>Power</code> and <code>Default</code> classes you built in Schematic Setup survive the import, and “Custom rules” is left alone so that the rule you are about to type has somewhere to go. “Design rule constraints” is the group carrying the factory’s limits, and “Violation severities” quietly rewrites three rows on the Violation Severity page.</p>
-<p>Now repair the stackup, because the import has just changed it. NextPCB’s template is a four-layer board and “Board layers and physical stackup” was one of the groups you ticked, so yours is a four-layer board too at this moment. Open “Physical Stackup” and set “Copper layers” back to 2. The inner copper and the prepreg<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> either side of it go away, but their thickness does not. KiCad folds it into the core, which now reads 1.569981 mm and leaves the board 1.659981 mm thick. That figure is the template’s four-layer build-up. Type 1.51 mm into the core and the total at the foot of the page reads 1.6 mm (Figure 7.29), which is the standard two-layer board every low-cost fabricator quotes. After any stackup import, you should read the total at the foot of the page before you close the dialogue, because a stackup always arrives carrying the build-up of the board it came from.</p>
+<p>Now repair the stackup, because the import has just changed it. NextPCB’s template is a four-layer board and “Board layers and physical stackup” was one of the groups you ticked, so yours is a four-layer board too at this moment. Open “Physical Stackup” and set “Copper layers” back to 2. The inner copper and the prepreg<a data-jump="fn2" tabindex="0" class="footnote-ref note-jump" id="fnref2" role="doc-noteref"><sup>2</sup></a> either side of it go away, but their thickness does not. KiCad folds it into the core, which now reads 1.569981 mm and leaves the board 1.659981 mm thick. That figure is the template’s four-layer build-up. Type 1.51 mm into the core and the total at the foot of the page reads 1.6 mm (Figure 7.29), which is the standard two-layer board every low-cost fabricator quotes. After any stackup import, you should read the total at the foot of the page before you close the dialogue, because a stackup always arrives carrying the build-up of the board it came from.</p>
 
 <p><img src="/assets/klp5e-vol2/ch07/ch07-ledmatrix-layout-board-stackup-1.6mm.png" style="width:85.0%" /></p>
 <p>Figure 7.29: The “Physical Stackup” page after the copper layers have been set back to 2. The core is typed to 1.51 mm (❶) rather than the 1.569981 mm the import left behind, so that “Board thickness from stackup” reads exactly 1.6 mm (❷). Above and below the core sit the two 0.035 mm copper layers, which is the 1 oz copper every track width in this chapter assumes.</p>
@@ -776,7 +789,7 @@ python3 tools/checknet.py net.net --cascade 4</code></pre>
 </tr>
 </tbody>
 </table>
-<p>Those five thicknesses add up to the 1.6 mm the page reports. The dielectric constant<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> of 4.2 and the loss tangent<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> of 0.02 on the core, and the 3.3 on each solder mask layer, came across with the template and can be left as they are, since they only do work when you are designing to a controlled impedance, which this board is not. The one number in the table to think about carefully rather than accept is the 0.035 mm on each copper layer. That is 1 oz copper, the cheap standard, and it is what the <code>Default</code> class’s 0.25 mm and the <code>Power</code> class’s 1.00 mm were sized against for the 1.3 A this board draws. If you order a board in 2 oz copper, both of those widths need looking at again, because thicker copper carries the same current in a narrower track.</p>
+<p>Those five thicknesses add up to the 1.6 mm the page reports. The dielectric constant<a data-jump="fn3" tabindex="0" class="footnote-ref note-jump" id="fnref3" role="doc-noteref"><sup>3</sup></a> of 4.2 and the loss tangent<a data-jump="fn4" tabindex="0" class="footnote-ref note-jump" id="fnref4" role="doc-noteref"><sup>4</sup></a> of 0.02 on the core, and the 3.3 on each solder mask layer, came across with the template and can be left as they are, since they only do work when you are designing to a controlled impedance, which this board is not. The one number in the table to think about carefully rather than accept is the 0.035 mm on each copper layer. That is 1 oz copper, the cheap standard, and it is what the <code>Default</code> class’s 0.25 mm and the <code>Power</code> class’s 1.00 mm were sized against for the 1.3 A this board draws. If you order a board in 2 oz copper, both of those widths need looking at again, because thicker copper carries the same current in a narrower track.</p>
 <p>Two things remain to do. Go to the “Net Classes” page and confirm that <code>Power</code> arrived with the 1.00 mm track width you gave it in Schematic Setup. Net classes are a property of the project rather than of the sheet, so they cross over on their own, and the import you just ran was set to leave them alone. Then go to the “Custom Rules” page and type in the <code>Power</code> minimum width rule exactly as Figure 7.9 shows it, watching for the “No errors found.” message below the text box. Notice where its numbers sit against everything else on this page. The rule’s 0.8 mm minimum is more than six times the 0.127 mm floor you imported a moment ago. That is the layering Chapter 3 describes, working on a real board. The factory’s number says what can be made, the class says what you draw by default, and the rule says what you will not be allowed to go below on a power net. From now on a power track drawn too thin will trigger a design rules violation.</p>
 <p><strong>Step 1, import from the schematic.</strong> If the handoff at the end of the schematic worked, the PCB Editor is already open with your parts on the canvas. If not, press “F8” to bring them across.</p>
 <p>One option in that dialogue is critical (Figure 7.30). Tick <strong>“Group footprints based on symbol group”</strong>. Later you will ask KiCad to treat each cell as a repeated unit, and one of the ways it recognises such a unit is a named group of footprints. Three of your four cells are already groups on the schematic, because you left “Place as group” ticked when you stamped them out (Figure 7.16), and this option carries those groups across to the board. Forgetting it is not a serious problem, since you can group the footprints by hand on the board later, but of course it is faster to simply import the group names now.</p>
@@ -1167,39 +1180,48 @@ python3 tools/checknet.py net.net --cascade 4</code></pre>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>A Pomodoro Timer is a time management device or tool based on the Pomodoro Technique, a method developed by Francesco Cirillo in the late 1980s. It breaks work into focused intervals (traditionally 25 minutes, called a “Pomodoro”) followed by a short 5-minute break. After completing four Pomodoros, a longer break (typically 15–30 minutes) is taken. The timer helps improve productivity by encouraging sustained focus and regular rest.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p><strong>Prepreg</strong> (short for “pre-impregnated”) is glass cloth pre-coated with partially cured resin, used as the bonding layer between the copper layers of a multi-layer board. Under heat and pressure the resin flows and cures, gluing the stack together and setting the spacing between layers. A two-layer board has no prepreg, since its single core already provides both the insulation and the bond.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p><strong>Dielectric constant</strong> (also written as relative permittivity, or Dk, or Er) is a measure of how strongly an insulating material stores electric charge compared with a vacuum. On a PCB it decides how much capacitance sits between a track and the copper near it, and therefore both the impedance of the track and the speed at which a signal travels along it. Standard FR4 sits around 4.2. It is one of the two high-speed design values in this stackup, and Volume 4 works with both of them in detail.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p><strong>Loss tangent</strong> (also written as dissipation factor, or Df, or tan δ) is a measure of how much of the energy passing through an insulating material is turned into heat rather than carried onwards. The higher the figure, the more a signal is attenuated as it travels, and the effect grows with frequency. Standard FR4 sits around 0.02, which is fine at the speeds in this book and poor at the speeds Volume 4 deals with, where lower-loss laminates justify their extra cost.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>A Pomodoro Timer is a time management device or tool based on the Pomodoro Technique, a method developed by Francesco Cirillo in the late 1980s. It breaks work into focused intervals (traditionally 25 minutes, called a “Pomodoro”) followed by a short 5-minute break. After completing four Pomodoros, a longer break (typically 15–30 minutes) is taken. The timer helps improve productivity by encouraging sustained focus and regular rest.<a data-jump="fnref1" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><strong>Prepreg</strong> (short for “pre-impregnated”) is glass cloth pre-coated with partially cured resin, used as the bonding layer between the copper layers of a multi-layer board. Under heat and pressure the resin flows and cures, gluing the stack together and setting the spacing between layers. A two-layer board has no prepreg, since its single core already provides both the insulation and the bond.<a data-jump="fnref2" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><strong>Dielectric constant</strong> (also written as relative permittivity, or Dk, or Er) is a measure of how strongly an insulating material stores electric charge compared with a vacuum. On a PCB it decides how much capacitance sits between a track and the copper near it, and therefore both the impedance of the track and the speed at which a signal travels along it. Standard FR4 sits around 4.2. It is one of the two high-speed design values in this stackup, and Volume 4 works with both of them in detail.<a data-jump="fnref3" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><strong>Loss tangent</strong> (also written as dissipation factor, or Df, or tan δ) is a measure of how much of the energy passing through an insulating material is turned into heat rather than carried onwards. The higher the figure, the more a signal is attenuated as it travels, and the effect grows with frequency. Standard FR4 sits around 0.02, which is fine at the speeds in this book and poor at the speeds Volume 4 deals with, where lower-loss laminates justify their extra cost.<a data-jump="fnref4" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
 </div>
 <script>
-  // TOC jump-link handler: in iframe contexts, native anchor navigation can be
-  // suppressed by the parent page. Intercept TOC clicks and use scrollIntoView,
-  // which scrolls the nearest scrollable ancestor (the iframe's own body).
+  // In-page jump handler for every [data-jump] element: TOC rows, A-Z terms and
+  // footnote markers. Two reasons these are not plain anchors. First, inside an
+  // iframe the parent page can suppress native anchor navigation, so the jump has
+  // to be scripted anyway. Second, an href="#id" resolves against the note's own
+  // URL, which publishes the notes host in the status bar and on the clipboard.
+  // scrollIntoView scrolls the nearest scrollable ancestor, the iframe's own body.
+  //
+  // Delegated at document level so it covers the term index and the footnotes,
+  // which a handler bound to the first .note-toc never reached.
   (function () {
-    function initTocScroll() {
-      var toc = document.querySelector('.note-toc');
-      if (!toc) return;
-      toc.addEventListener('click', function (e) {
-        var a = e.target.closest('a');
-        if (!a) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var id = href.substring(1);
-        var target = document.getElementById(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    function jump(el) {
+      var target = document.getElementById(el.getAttribute('data-jump'));
+      if (!target) return false;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    function initJumps() {
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-jump]');
+        if (el && jump(el)) e.preventDefault();
+      });
+      // Keyboard equivalent: these are focusable but not real links, so Enter
+      // and Space have to be wired by hand.
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        if (el && jump(el)) e.preventDefault();
       });
     }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTocScroll);
+      document.addEventListener('DOMContentLoaded', initJumps);
     } else {
-      initTocScroll();
+      initJumps();
     }
   })();
 </script>
