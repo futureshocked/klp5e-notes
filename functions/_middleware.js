@@ -1,13 +1,18 @@
 /**
- * Notes enrolment gate — preview/staging only (lives on the `notes-gate` branch;
- * `main` and therefore production never carries this file).
+ * Notes enrolment gate. Developed on the `notes-gate` branch and proven against
+ * `notes-staging.techexplorations.com`; promoted to `main` (production) at step
+ * B4 of coding_plans/notes-content-protection.md.
  *
- * Contract (see coding_plans/notes-content-protection.md, step 2 A5):
+ * Contract (see coding_plans/notes-content-protection.md, steps 2 A5 and A8):
  *  1. Verify the `te_notes` cookie HMAC in constant time, then check `exp`.
  *  2. On success call next() and re-apply step 1's headers on the response,
  *     because Pages Functions disable the `_headers` file for the whole project.
  *  3. On failure return 403 with a human-readable page, same headers applied.
  *  4. Skip the check for /robots.txt only. Assets are gated too.
+ *  5. Honour the toolchain probe bypass (`X-TE-Notes-Probe`, step A8) ahead of
+ *     the cookie path, so the deploy pipeline's cookie-less HEAD probes are not
+ *     403ed. Verified here and nowhere else; disabled entirely when its secret
+ *     is unset or empty.
  *
  * Step 1's four protections, re-applied here in code:
  *  - X-Robots-Tag: noindex, nofollow
@@ -19,6 +24,15 @@
 
 const COOKIE_NAME = "te_notes";
 const SKIP_PATHS = new Set(["/robots.txt"]);
+
+/**
+ * Toolchain probe bypass header (step A8). Deliberately NOT the zone WAF's
+ * `X-TE-Test` header: that one is matched by Cloudflare's zone rules against
+ * `TE_CF_PROD_TOKEN`/`TE_CF_TEST_TOKEN`, and a single header cannot carry two
+ * different secrets to two different verifiers. Two layers, two secrets, two
+ * headers — neither substitutable for the other, so one leak cannot open both.
+ */
+const PROBE_HEADER_NAME = "X-TE-Notes-Probe";
 
 const STEP1_HEADERS = {
   "X-Robots-Tag": "noindex, nofollow",
@@ -140,6 +154,29 @@ export async function onRequest(context) {
 
   if (SKIP_PATHS.has(url.pathname)) {
     return next();
+  }
+
+  // Toolchain probe bypass (step A8), checked before the cookie path so a probe
+  // never does HMAC work. `verify_notes_reachable()` HEADs every notes URL from
+  // `requests`, which has no browser and therefore no cookie; without this the
+  // gate would abort every future lesson-content apply. Unset or empty secret
+  // disables the bypass entirely — the same fail-closed posture as the missing
+  // TE_NOTES_SECRET case below. Compared byte-wise through the same
+  // constant-time helper the cookie signature uses, never with ===.
+  const probeSecret = env.TE_NOTES_PROBE_SECRET;
+  const probeProvided = request.headers.get(PROBE_HEADER_NAME);
+  if (probeSecret && probeProvided) {
+    const probeEnc = new TextEncoder();
+    if (
+      timingSafeEqual(
+        probeEnc.encode(probeSecret),
+        probeEnc.encode(probeProvided)
+      )
+    ) {
+      const probeResponse = await next();
+      applyStep1Headers(probeResponse.headers);
+      return probeResponse;
+    }
   }
 
   const secret = env.TE_NOTES_SECRET;
