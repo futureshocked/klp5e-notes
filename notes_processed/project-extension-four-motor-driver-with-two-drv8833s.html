@@ -272,6 +272,7 @@
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
 <h1 class="note-title">Project (Extension): Four-Motor Driver with Two DRV8833s</h1>
+
 <p>This chapter takes the board you finished in Chapter 8 and adds a second DRV8833. The new board will be able to drive a small four-wheeled robot with independent control of each wheel. Almost none of the work you are about to do is new drawing. The driver stage already exists, wired and placed and routed and proven clean, so the job here is to capture it once and stamp it out again (Figure 9.1).</p>
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
@@ -314,8 +315,7 @@
 <li><strong>Component classes.</strong> A component class is a name you attach to a group of parts so that you can refer to the whole group by that one name. Chapter 3, Board Setup, introduced them on this board in its section on component classes and said the two-motor version could do without them. You need one here for the last section. A class that names the eight parts of the second stage lets you mark all eight do-not-populate in a single step, which is what turns the four-motor board back into a two-motor one, while keeping the ability to add the second stage open.</li>
 <li><strong>A design variant applied to a whole block.</strong> Chapter 5 varied a pair of resistors. Here the override covers a complete captured stage, and one project produces both the four-motor board and Chapter 8’s two-motor board.</li>
 </ol>
-<p>Of course, reuse is not risk-free. The part, the footprint and the custom rules all propagate through the copy, which is why you must take care to set them up properly. Despite the fact that the first stage is properly setup, there are still two things we will need to fix: the <code>Power</code> class width, which was originally set for a single chip’s 3 A (and now facing 6 A), and the breakout rule’s scope. That rule is Chapter 8’s “U1 fine-pitch breakout”, which relaxes track width and clearance so that the narrow escapes from the fine-pitch package pass the design rules check. Its scope is a single named rule area drawn around <code>U1</code>, so it stops covering the second chip when that chip is added to the board.</p>
-
+<p>Of course, reuse is not risk-free. The part, the footprint and the custom rules all propagate through the copy, which is why you must take care to set them up properly. Despite the fact that the first stage is properly setup, there are still two things we will need to fix: the <code>Power</code> class width, which was originally set for a single chip’s 3 A (and now facing 6 A), and the breakout rule’s scope. That rule is Chapter 8’s “U1 fine-pitch breakout”, which relaxes track width and clearance so that the narrow escapes from the fine-pitch package pass the design rules check. Its scope is a single named rule area drawn around <code>U1</code>, so it stops covering the second chip when that chip is added to the board.  </p>
 <h2 id="sec:c09-scope">The four-motor board</h2>
 <p>The extension converts the capstone project board into a four-motor driver built from two DRV8833PWP chips. This board is sufficient for a small four-wheeled robot with independent control of each wheel. The architecture is simple so you can focus on the build:</p>
 <ul>

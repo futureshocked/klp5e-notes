@@ -272,6 +272,7 @@
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
 <h1 class="note-title">Assembling the Board: Reflow or Hand Soldering</h1>
+
 <p>Chapter 8 ended by placing an order for the board you designed. The Gerbers, the drill file, the two position files and the paste layer went off to a factory, and some days later a padded envelope arrived with a stack of bare boards in it. This chapter is about what happens next: turning one of those bare boards into a working one.</p>
 <details class="note-toc" open>
   <summary>In this chapter:</summary>
@@ -297,7 +298,7 @@
 
 <p>The chapter is optional. The capstone is a complete design exercise regardless of whether anybody builds the board. But one of the reasons I chose this package was the assembly challenge it presents. Back in Chapter 2, I picked the HTSSOP<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a> over the QFN<a data-jump="fn2" tabindex="0" class="footnote-ref note-jump" id="fnref2" role="doc-noteref"><sup>2</sup></a>, because HTSSOP can be soldered by hand while still carrying the exposed pad needed for its thermal management.</p>
 <p>There are two methods for building this board, and they differ in how they treat the joint under the chip, where the exposed pad on the underside of the package meets the copper of pad 17. That joint is where the chip sheds its heat, and it is the chip’s connection to ground as well. One method makes it the joint the datasheet asks for, with solder across the whole face of the pad. The other makes a joint that grounds the pad and works, but conducts less heat.</p>
-<p>One section follows for each method. The first uses solder paste, a stencil and heat, which is what the board was drawn for. Three sections follow it, on the heat itself, on checking the board that comes off the plate, and on why the paste opening under the chip is split in two. The second method uses a soldering iron. After them comes the connection that is common to both methods, and then what changes on the four-motor board of Chapter 9.</p>
+<p>One section follows for each method. The first uses solder paste, a stencil and heat, which is what the board was drawn for. Three sections follow it, on the heat itself, on checking the board that comes off the plate, and on why the paste opening under the chip is split in two. The second method uses a soldering iron. After them comes the connection that is common to both methods, and then what changes on the four-motor board of Chapter 9. </p>
 <h2 id="sec:c11-reflow">The reflow method: align, paste, place, reflow</h2>
 <p>This is the method the board was designed for. It takes six steps:</p>
 <ol type="1">
