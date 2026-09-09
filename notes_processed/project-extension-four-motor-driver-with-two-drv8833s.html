@@ -627,11 +627,14 @@
 <p><strong>Optional: prove the twelve renames with the netlist.</strong> Chapter 8 settled the same kind of question with a netlist rather than with a rules check, and this project carries the same script, taught about the second chip. It is here for the times you want the answer in writing rather than by eye.</p>
 <p>Export the netlist with “File”, then “Export”, then “Netlist…”, leaving the format on the KiCad tab, and run the checker over the file:</p>
 <pre><code>python3 tools/checknet.py net.net --nets --u2-pins --classes</code></pre>
-<pre><code>  --   J4 is Chapter 8&#39;s 8-pin header, so the four C and D inputs have nowhere to go yet
-  OK   31 named nets + 1 auto-named, 32 in all, and every J4 pin carries the signal the table gives it
+<pre><code>  --   J4 is Chapter 8&#39;s 8-pin header, so the four C and D inputs have
+       nowhere to go yet
+  OK   31 named nets + 1 auto-named, 32 in all, and every J4 pin carries
+       the signal the table gives it
   OK   all 17 U2 pins wired exactly once, pad included
-  OK   *VM* / *GND / *OUT* / *ISEN resolved all 32 nets, the twelve new ones included</code></pre>
-<p>Look at the net count on the second line first. Every label you rename should add one net to the total. If the total is lower than that, a label you meant to rename still carries its old name, so the net it should have created has merged with an existing one. The third line is a check nothing else in the process makes, because <code>U2</code>’s exposed pad can sit on no net at all and every drawing of the board will still look right. The first line is the script working out which of this chapter’s two sheets you handed it, which is how the same command works again in the section on the control header.</p>
+  OK   *VM* / *GND / *OUT* / *ISEN resolved all 32 nets, the twelve new
+       ones included</code></pre>
+<p>Look at the net count in the second check first. Every label you rename should add one net to the total. If the total is lower than that, a label you meant to rename still carries its old name, so the net it should have created has merged with an existing one. The third check is one nothing else in the process makes, because <code>U2</code>’s exposed pad can sit on no net at all and every drawing of the board will still look right. The first entry, the one marked <code>--</code>, is the script working out which of this chapter’s two sheets you handed it, which is how the same command works again in the section on the control header.</p>
 <p>Run it with no options and it prints every net and the pins on it, one net per line.</p>
 </blockquote>
 
@@ -928,9 +931,11 @@
 <p><strong>Optional: prove the pin map with the netlist.</strong> Export the netlist again and run exactly the same command as before. The script will count <code>J4</code>’s twelve pins, and switch to this section’s pin map on its own.</p>
 <pre><code>python3 tools/checknet.py net.net --nets --u2-pins --classes</code></pre>
 <pre><code>  --   J4 is the 2 x 6, so the twelve-row pin map is the one checked
-  OK   31 named nets + 1 auto-named, 32 in all, and every J4 pin carries the signal the table gives it
+  OK   31 named nets + 1 auto-named, 32 in all, and every J4 pin carries
+       the signal the table gives it
   OK   all 17 U2 pins wired exactly once, pad included
-  OK   *VM* / *GND / *OUT* / *ISEN resolved all 32 nets, the twelve new ones included</code></pre>
+  OK   *VM* / *GND / *OUT* / *ISEN resolved all 32 nets, the twelve new
+       ones included</code></pre>
 <p>The count is still thirty-two, because the header gained pins but did not create new nets.</p>
 </blockquote>
 
@@ -1078,8 +1083,8 @@
 
 <p><img src="/assets/klp5e-vol2/ch09/ch09-schematic-group-by-component-class.png" style="width:85.0%" /></p>
 <p>Figure 9.32: One tick applied to eight parts. <code>Component Class</code> is the only field with “Group By” set (1), so the whole sheet collapses to two rows. <code>two-motor</code> is the highlighted entry in the variants list (2), which is what to check before touching anything, because under <code>&lt; Default &gt;</code> the same table would be editing the base design. Ticking the DNP box on the group row (4) flagged all eight members of <code>Stage-2</code> in one operation, and the row expanded at (3) shows them carrying it. Those DNP cells are drawn as a highlighted band because they are what this edit changed, and the band verifies that only what is in the band will be affected. The upper row contains everything else, and its DNP box is partially ticked because a few of its members, <code>D1</code> among them, have carried the flag since Chapter 8.</p>
-<p>Then run “Update PCB from Schematic”, because variant data lives in the schematic and travels forward to the board, never the reverse. Over in the PCB editor the same name now appears in its own selector, and choosing it draws stage two’s eight footprints with an X on the board and on its fabrication layers. That X is KiCad’s mark for a part that is in the design but not in this build.</p>
-<p>The DNP flag you just raised changes what the assembler reads. The eight parts drop out of that build’s bill of materials, or stay in it flagged as DNP if you choose to keep them listed. They leave the pick-and-place position file, and they are drawn with an X through them on the sheet and on the board’s fabrication layers. It leaves alone everything else the fabricator reads. The copper, the pours, the board outline and the drill file are exactly as they were, because a variant does not change the board, only what gets fitted onto it.</p>
+<p>Then run “Update PCB from Schematic”, because variant data lives in the schematic and travels forward to the board, never the reverse. Over in the PCB editor the same name now appears in its own selector, and choosing it there sets which build the plots will describe. Do not look for the eight unfitted parts on the board editor’s canvas, because it draws no mark for them and looks the same under either build. The X that stands for ‘in the design, but not in this build’ arrives when you plot, on the <code>F.Fab</code> and <code>B.Fab</code> fabrication layers. Chapter 10, Intermediate Recipes, shows it in the plotted files, and gives the setting that puts it there, in its section on design variants and DNP.</p>
+<p>The DNP flag you just raised changes what the assembler reads. The eight parts drop out of that build’s bill of materials, or stay in it flagged as DNP if you choose to keep them listed. They leave the pick-and-place position file, they are drawn with an X on the schematic sheet, and they are plotted with an X on the board’s fabrication layers. It leaves alone everything else the fabricator reads. The copper, the pours, the board outline and the drill file are exactly as they were, because a variant does not change the board, only what gets fitted onto it.</p>
 <p>Design variants and component classes are at their most useful together, and this is what they give us here: two products off the same panel. You order one fabrication, and the two-motor build comes out of it as the four-motor build minus eight parts at assembly.</p>
 <p>What they do not give you is a different bare board. The unpopulated stage is still in the fabrication outputs. The pads, the holes and the <code>COUT</code> and <code>DOUT</code> silkscreen labels remain, and so does the routed copper that fed the second chip, on a board where nothing will be soldered to it. That leftover copper is also an upgrade path, because the two-motor board keeps a place for the second stage, and fitting it later is a quick assembly job.</p>
 <p>The risk sits in the schematic rather than on the board. A wrong tick in the fields table does not change the copper, so the flags go out with the files you send for fabrication and assembly. In this case, the outcome is an incorrect bill of materials.</p>
@@ -1123,6 +1128,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -1131,14 +1140,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚧 Assembling the Board: Reflow or Hand Soldering — KiCad Like a Pro, 5th Edition — Volume 2</title>
+<title>Assembling the Board: Reflow or Hand Soldering — KiCad Like a Pro, 5th Edition — Volume 2</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -271,10 +271,132 @@
 <body>
 <div class="lightbox-wrapper" data-lightbox-wrapper>
 <p class="note-eyebrow">KiCad Like a Pro, 5th Edition — Volume 2</p>
-<h1 class="note-title">🚧 Assembling the Board: Reflow or Hand Soldering</h1>
-<div class="draft-pending">
-This chapter is still being written and will appear in a future update.
-</div>
+<h1 class="note-title">Assembling the Board: Reflow or Hand Soldering</h1>
+<p>Chapter 8 ended by placing an order for the board you designed. The Gerbers, the drill file, the two position files and the paste layer went off to a factory, and some days later a padded envelope arrived with a stack of bare boards in it. This chapter is about what happens next: turning one of those bare boards into a working one.</p>
+<details class="note-toc" open>
+  <summary>In this chapter:</summary>
+  <ul>
+    <li><a class="note-jump" data-jump="sec:c11-reflow" role="link" tabindex="0">The reflow method: align, paste, place, reflow</a>
+    </li>
+    <li><a class="note-jump" data-jump="sec:c11-reflow-profile" role="link" tabindex="0">The heat: getting the board to liquidus</a>
+    </li>
+    <li><a class="note-jump" data-jump="sec:c11-reflow-check" role="link" tabindex="0">Checking the reflowed board</a>
+    </li>
+    <li><a class="note-jump" data-jump="sec:c11-window-pane" role="link" tabindex="0">Why the paste opening is split in two</a>
+    </li>
+    <li><a class="note-jump" data-jump="sec:c11-hand" role="link" tabindex="0">The hand method: a soldering iron, and twelve holes</a>
+    </li>
+    <li><a class="note-jump" data-jump="sec:c11-pad" role="link" tabindex="0">Why the pad is not optional</a>
+    </li>
+    <li><a class="note-jump" data-jump="sec:c11-four-motor" role="link" tabindex="0">One board with two DRV8833</a>
+    </li>
+    <li><a class="note-jump" data-jump="sec:c11-close" role="link" tabindex="0">Closing Volume 2</a>
+    </li>
+  </ul>
+</details>
+
+<p>The chapter is optional. The capstone is a complete design exercise regardless of whether anybody builds the board. But one of the reasons I chose this package was the assembly challenge it presents. Back in Chapter 2, I picked the HTSSOP<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a> over the QFN<a data-jump="fn2" tabindex="0" class="footnote-ref note-jump" id="fnref2" role="doc-noteref"><sup>2</sup></a>, because HTSSOP can be soldered by hand while still carrying the exposed pad needed for its thermal management.</p>
+<p>There are two methods for building this board, and they differ in how they treat the joint under the chip, where the exposed pad on the underside of the package meets the copper of pad 17. That joint is where the chip sheds its heat, and it is the chip’s connection to ground as well. One method makes it the joint the datasheet asks for, with solder across the whole face of the pad. The other makes a joint that grounds the pad and works, but conducts less heat.</p>
+<p>One section follows for each method. The first uses solder paste, a stencil and heat, which is what the board was drawn for. Three sections follow it, on the heat itself, on checking the board that comes off the plate, and on why the paste opening under the chip is split in two. The second method uses a soldering iron. After them comes the connection that is common to both methods, and then what changes on the four-motor board of Chapter 9.</p>
+<h2 id="sec:c11-reflow">The reflow method: align, paste, place, reflow</h2>
+<p>This is the method the board was designed for. It takes six steps:</p>
+<ol type="1">
+<li><strong>Build the jig.</strong> The foil you specified in Chapter 8, Project (Capstone): DRV8833 Dual H-Bridge Motor Driver, in its section on the stencil, is frameless, so nothing holds it flat except the jig you build for it. Set the board on a flat surface and surround it with scrap boards of the same 1.6 mm thickness, taped down, so that the foil is supported level right up to the board edge (Figure 11.1).</li>
+<li><strong>Align the foil.</strong> Take your time with this step so the alignment between the foil and the board is perfect. Lower the foil and move it until every aperture sits over its pad. This board carries no fiducials<a data-jump="fn3" tabindex="0" class="footnote-ref note-jump" id="fnref3" role="doc-noteref"><sup>3</sup></a>, so you are matching apertures to pads by eye. <code>U1</code> is the part to match first, as it is the biggest and has the most pads. Its sixteen lead apertures are on a 0.65 mm pitch, the finest spacing on the foil, and the 0603, 0805 and 1206 apertures elsewhere have far more room to spare. Check a part at the far end of the board as well, because a small unintended rotation will be obvious across that distance.</li>
+<li><strong>Tape the hinge.</strong> When the foil sits where you want it, tape one edge of it down to the jig. The foil now lifts clear of the board so that you can place the parts, and it comes back down in the same position if the print has to be wiped off and repeated.</li>
+<li><strong>Lay the paste.</strong> The foil is 0.125 mm and front only, and the apertures put down 3.58 mm² of paste over <code>U1</code>’s pad in two dabs<a data-jump="fn4" tabindex="0" class="footnote-ref note-jump" id="fnref4" role="doc-noteref"><sup>4</sup></a> plus one dab per lead. Draw the squeegee across the foil in one steady pass, held at roughly 45 degrees.</li>
+<li><strong>Lift the foil.</strong> Take it straight up on its hinge, slowly, and do not let it slide sideways as it lifts away to prevent damaging the deposits.</li>
+<li><strong>Inspect the print, then place the parts.</strong> Under magnification, each deposit should be full and square on its pad, the two dabs on <code>U1</code> should still be separate, and no deposit should touch its neighbour along either row of leads (Figure 11.2). If any of that is wrong, clean the board with isopropyl alcohol, dry it, and print it again. Only once the print is good does a part go onto it.</li>
+</ol>
+
+
+<p><img src="/assets/klp5e-vol2/ch11/ch11_stencil-jig_v10.png" style="width:100.0%" /></p>
+<p>Figure 11.1: The printing jig from above, with the seam between board and scrap drawn twice in section below it. Every opening in the foil comes from the <code>F.Paste</code> Gerber, and <code>U1</code>’s lead apertures are the finest features on the foil. Scrap boards of the board’s own thickness carry the foil level on all four sides, and the taped strip along the left edge is the hinge the foil lifts on. The squeegee starts beside that hinge and travels away from it, crossing <code>U1</code>’s two rows of leads rather than running along them. The scrap is important because it provides support to the foil around the edges so that the foil lies flat and the deposit is full. Without this support, the foil bends over the board edge, lifts off the pad and smears the paste.</p>
+<p>Both inspections, this one and the one after reflow, need magnification. At a 0.65 mm pitch, a bridge between two of <code>U1</code>’s leads is a tenth of a millimetre of metal. This is too small to be able to see it with the naked eye. Three tools can help you with this. A 10x jeweller’s loupe is the cheapest and shows you everything on this board, but it occupies one hand. A USB microscope on a stand costs a little more, puts the image on a screen, and leaves both hands free to hold an iron while you look, and it is the one I use. A stereo microscope is the top-tier tool, and it shows depth, which is what you want when you are judging whether a chip is sitting flat, but it costs several times either of the others. Any of the three is enough for this board.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch11/ch11_paste-print-faults_v10.png" style="width:100.0%" /></p>
+<p>Figure 11.2: The print over <code>U1</code> after the foil lifts, drawn from the footprint’s own geometry and enlarged about eight times, so that a millimetre of board is about eight millimetres on the page. Every panel draws the same pads at the same scale and in the same place, so the only thing that differs between them is the paste. A lead’s copper pad, its mask opening and its stencil aperture are all the same 1.5 by 0.45 mm rectangle, so a good deposit covers the pad edge to edge and leaves no copper showing around it. The two thermal dabs are the deposits with copper around them, because they sit inside a larger mask window of 2.46 by 2.31 mm. In the three fault panels the dashed outline is the print the stencil was cut to make, so each panel can be read against it without looking away. Smearing comes from a foil that slid sideways as it lifted, or that had no scrap under it, and it closes the 0.20 mm of clear mask between two deposits in a row. Starving comes from too fast a stroke, too little paste, or an aperture still holding the last print. Merged dabs close the 0.24 mm gap the flux vents through, and the two barrel mouths that show in that gap in the first panel are gone under the paste in the last. If any of the three faults happen, you’ll have to wipe the board with isopropyl alcohol, dry it, and print it again.</p>
+<h2 id="sec:c11-reflow-profile">The heat: getting the board to liquidus</h2>
+<p>Solder paste goes onto the board matte grey and comes off it bright. Getting it from one state to the other means holding the whole board at a set of temperatures for set lengths of time. Every paste is sold with a datasheet, and on that datasheet is a recommended reflow profile. The profile is a curve of temperature against time in four named parts, a preheat, a soak, a ramp to a peak, and a cooling slope.</p>
+<p>Two numbers on that curve control whether the joint forms properly. The first is the alloy’s liquidus temperature, the point at which the solder becomes fully liquid, which is about 217 °C for the lead-free SAC305 that most paste is made from today and 183 °C for the older Sn63/Pb37. Below liquidus the paste softens but never wets the pad, and what you get is a dry joint (which is a fault). The second is the peak, which the paste maker sets above the liquidus by a stated margin and pairs with a stated time the board may spend above liquidus.</p>
+<p>The parts have a limit of their own. Surface-mount packages are qualified to a peak reflow temperature under the JEDEC J-STD-020 standard, and a part’s datasheet says which classification it carries. A standard lead-free profile stays inside that limit on a board like this one, but you should check anyway.</p>
+<p>Two tools deliver that profile on a bench: a reflow oven, or a ‘hotplate’<a data-jump="fn5" tabindex="0" class="footnote-ref note-jump" id="fnref5" role="doc-noteref"><sup>5</sup></a>. Both build the same joint, and what separates them is how much of the profile the tool runs and how much of it you run.</p>
+<p>A reflow oven is an enclosed box that heats the board with hot air from every side. You enter the paste maker’s numbers, put the board in, close the door, and the oven holds each stage for as long as the profile asks. With a hotplate you have to manually control the temperature. It heats the board by conduction through its underside. You watch a thermocouple taped to a spare corner of the board, judge when the soak has gone on long enough, and you lift the board off the heat yourself.</p>
+<p>The oven is repeatable but more expensive. The hotplate is cheap, but you run the profile yourself. For one or two boards the hotplate is the usual choice, and it is the one I use, because the board sits out in the open, face up, where you can watch every joint form. An oven runs the same profile behind a closed door, and even on the models with a window you are looking at the board through glass at the far end of a hot box, so with an oven the inspection begins when the door opens. A few boards done on a plate teach you more about what timing and heat do to solder than the curve on the datasheet does.</p>
+<p>Both tools drive the flux off the board as smoke, and so does the iron in the second method. Work where the air moves, and keep the smoke away from your face. Use a small fume extractor, or a desk fan set to pull the plume sideways. Rosin smoke irritates the airways, and repeated exposure to it is a recognised cause of occupational asthma, so ventilation is part of the setup rather than an optional extra.</p>
+<p>On a hotplate you can watch the profile happen. Solder paste is matte grey when it goes down, and it stays matte through the preheat and the soak while the flux does its work. At liquidus the whole board changes appearance at once. Each deposit turns bright and wet, collapses onto its pad, and pulls into a fillet against the lead above it. The small passives twitch as this happens, because surface tension drags each one square onto its two pads, and a part that went down slightly crooked straightens itself.</p>
+<p>When the last matte patch has turned shiny, the board has reflowed. A patch that stays matte has not reached liquidus, and giving it more time will not help if the heat is not arriving there, so raise the plate temperature instead.</p>
+<h2 id="sec:c11-reflow-check">Checking the reflowed board</h2>
+<p>Let the board cool without moving it, and then look at it under the same magnification you used on the print. There are five things to look for:</p>
+<ul>
+<li>a bridge of solder between two of <code>U1</code>’s sixteen leads</li>
+<li>a passive standing on one end instead of lying on both its pads</li>
+<li>a deposit that did not melt, still matte and still the shape the stencil left it</li>
+<li>loose balls of solder scattered around the fine-pitch rows</li>
+<li>a chip that is not flat against the board, and rocks when you press one corner</li>
+</ul>
+<p>The first four are visible, and repairable with an iron, flux and desoldering braid.</p>
+<p>But, there is one joint you cannot inspect at all. The thermal pad is under the chip, and the underside of the board carries no window onto it, so there is nothing to look at from either side. A factory inspects this with an X-ray machine. On the bench you check with the board itself, and the test is a specific one. Put a real mechanical load on both motors, because a motor spinning freely draws a fraction of the current it draws working and will never warm the chip enough to tell you anything. Then drive both bridges at the same time, with the board out in the open and nothing sitting on it, and leave them running for ten minutes.</p>
+<p><code>nFAULT</code> is the one part of this test you have to measure with a multimeter. You can do the test easily by setting your multimeter to DC volts, because a thermal shutdown holds for a few seconds at a time and a meter’s display can follow it easily. Put the black probe on pin 2 of <code>J4</code>, which is ground, and the red probe on pin 4. There is no fixed number to expect here, because <code>R1</code> pulls that line up to pin 1 of the same header, and pin 1 is fed by your controller rather than by the board. Whatever logic rail you wired into pin 1 is what “high” means, and “low” is a few tenths of a volt. If you left pin 1 unconnected, <code>nFAULT</code> has nothing to pull up to and the reading tells you nothing, so connect it before you start the run.</p>
+<p>A board whose pad is soldered warms for the first minute or two and then stops warming. The case settles at a temperature you can keep a fingertip on. Both motors keep turning for as long as you leave them running, and <code>nFAULT</code> stays high the whole time.</p>
+<p>A board whose pad is dry runs a cycle instead, and the cycle is what you are looking for:</p>
+<ol type="1">
+<li>The case climbs past what you can touch.</li>
+<li>Both bridges switch off at once, the two motors stop at the same instant, and <code>nFAULT</code> goes low. The die has reached the DRV8833’s thermal shutdown threshold, and the chip has turned off all eight of its output transistors to protect itself. Nothing is damaged, which is what that protection is for.</li>
+<li>A few seconds later the die has cooled enough for the chip to release the shutdown on its own, and the motors start again without you touching anything.</li>
+<li>Then it happens again, and each shutdown comes sooner than the one before it, because the board itself is hotter each time round.</li>
+</ol>
+<p>That repeating run, stop, run under load, on a board whose sixteen visible lead joints are all good, is the signature of a dry thermal pad, and the section on why the pad is not optional is about why one dry joint is enough to cause it.</p>
+<p>That is as far as this book goes on reflow. Doing it well is a craft in its own right, with whole books written about it, and covering it properly would take a chapter of its own.</p>
+<h2 id="sec:c11-window-pane">Why the paste opening is split in two</h2>
+<p>Step 4 of the print put two dabs of paste on <code>U1</code>’s thermal pad, and step 6 asked you to check that they were still separate. Those two dabs come from two separate openings in the stencil. Figure 8.63, back in Chapter 8, showed the arrangement from above. There is one copper pad, one solder mask window over it, and inside that window two apertures side by side with a gap of 0.24 mm between them. The squeegee crosses both in the same stroke, so the foil leaves two rectangles of paste on the one thermal pad. Figure 11.4 shows those same two deposits in section, in its reflow panel.</p>
+<p>Consider what a single opening would do instead. Cut to the full size of the window, it would print one block of paste 2.46 by 2.31 mm. Molten solder in that quantity under a part as light as <code>U1</code> will lift the chip, tilt it, and let it settle out of line with its pads. The two smaller volumes cannot lift it the same way.</p>
+<p>Those two smaller volumes still melt and run together into one continuous joint across the same pad, so a single joint is what you get either way. The difference is in how they get there. While the two are collapsing, the gap between them is a vent path to the edge of the pad for the flux outgassing<a data-jump="fn6" tabindex="0" class="footnote-ref note-jump" id="fnref6" role="doc-noteref"><sup>6</sup></a> from the paste, and flux that leaves this way is not trapped inside the joint as a void<a data-jump="fn7" tabindex="0" class="footnote-ref note-jump" id="fnref7" role="doc-noteref"><sup>7</sup></a>. A void over the centre of that pad is the one to avoid, because the centre is the path the heat takes out of the silicon.</p>
+<h2 id="sec:c11-hand">The hand method: a soldering iron, and twelve holes</h2>
+<p>The hand method solders the sixteen leads with an iron from above, then makes the thermal connection by filling the twelve plated barrels under the chip one at a time, working from the underside of the board. The plating inside those holes is all an iron can reach here, so the hand method builds its thermal path down through the twelve barrels instead of across the face of the pad.</p>
+<p>Start with the leads. Soldering sixteen gull-wing leads on a 0.65 mm pitch is fine-pitch work, and it is not difficult with a bit of practice. Tack<a data-jump="fn8" tabindex="0" class="footnote-ref note-jump" id="fnref8" role="doc-noteref"><sup>8</sup></a> one corner pin, check the part is square against its silkscreen outline, then tack the opposite corner. Before you drag a row, lay a bead of no-clean rosin<a data-jump="fn9" tabindex="0" class="footnote-ref note-jump" id="fnref9" role="doc-noteref"><sup>9</sup></a> flux along it from a flux pen or a gel syringe. The flux is what lets the solder flow along the row behind the tip instead of balling up on it. “No-clean”<a data-jump="fn10" tabindex="0" class="footnote-ref note-jump" id="fnref10" role="doc-noteref"><sup>10</sup></a> flux leaves a residue you can leave in place or wash off with isopropyl alcohol. Then drag-solder each row, and lift any bridge off with desoldering braid. Every one of those joints is visible from above and can be inspected and reworked.</p>
+<p>Then, continue with the pad. Turn the board over in the 3D viewer and look at what is actually exposed on the back (Figure 11.3). The 2.8 by 4.4 mm landing under the chip is there, as well as the twelve annular rings. All of it is under solder mask. The footprint you drew in Chapter 2 has no <code>B.Mask</code> layer on any of its pads, so nothing opens the mask on the back of the board. The film runs across the whole underside without a break. The only bare metal down there is the ring of plating inside each of the twelve 0.3 mm holes, and that is what the hand method takes advantage of.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch11/ch11-3D-rear.png" style="width:85.0%" /></p>
+<p>Figure 11.3: The back of the board under <code>U1</code>, in the 3D viewer. The arrow points at the twelve 0.3 mm barrels, and the ring of plating inside each one is the only bare metal anywhere on this side. The 2.8 by 4.4 mm landing they run into cannot be picked out at all, because the mask film closes over it and over the twelve annular rings without a break, the footprint having no <code>B.Mask</code> pad to open it. That is why an iron has nothing to tin down here, and why the hand method fills the barrels instead. The eight pins along the left edge are <code>J4</code>’s.</p>
+<p>Because of this, you cannot tin a patch of copper and let it flow. What you can do is treat each barrel as a small plated hole and fill it, and an iron is good at that. Here is the process:</p>
+<ol type="1">
+<li>Preheat the board. Do not skip this step here, because you are about to push heat into a pad that is deliberately connected to the whole ground plane with no thermal relief.</li>
+<li>Work the six barrels inside the mask window, which are the ones whose top ends open into the pad rather than into mask. Put the iron tip against the rim of a hole, feed solder into it, and let it draw down until the hole stops taking any.</li>
+<li>Then do the outer six. Their top ends are under mask, so they will not wet to the pad above, but they are still plated through into the ground plane on both sides and filling them adds copper to the thermal path.</li>
+</ol>
+<p>What you get from this is a real thermal path. Figure 11.4 draws the two side by side so that you can see the difference. Twelve barrels filled with solder are 0.85 mm² of metal running through the full 1.6 mm thickness of the board and into the back plane. What they do not do is wet the 5.68 mm² of pad face that the mask window exposes to the underside of the chip, where the heat leaves the silicon. You should expect the hand-built board to run hotter than the reflowed one under the same load.</p>
+<p>That is a reasonable trade on one or two boards, but not on a production run.</p>
+
+
+<p><img src="/assets/klp5e-vol2/ch11/ch11_assembly-two-ways_v10.png" style="width:100.0%" /></p>
+<p>Figure 11.4: The same pad cut through, and the board built by both methods. The cut runs along the inner row of vias, the only plane holding the mask window, both paste apertures and three barrels at once. No lead lies in that plane, so the two at the frame edges are drawn faint. Reflow (❶) fills the joint from above and pulls solder down the two barrels that sat under an aperture, leaving untouched the one that straddled the gap. The iron (❷) fills all twelve from below but never wets the much larger face of the pad the window exposes. One scale serves both axes here, and only the copper foils and the mask films are drawn thicker than life, so that they can be named at all.</p>
+<h2 id="sec:c11-pad">Why the pad is not optional</h2>
+<p>Whichever method you use, you have to solder the pad. The datasheet is specific about it. The exposed pad is the only path the heat has out of the package, and both the <code>GND</code> pin and the pad must be connected to ground.</p>
+<p>A joint where the solder never wetted the metal is called a ‘dry’ joint, and on this board it is a failure you cannot see, because the pad is under the chip. A DRV8833 with sixteen good lead joints and a dry thermal pad will work on the bench, and it may run one motor on a cool day, but it will shut down on thermal protection the first time both bridges are put to work together.</p>
+<h2 id="sec:c11-four-motor">One board with two DRV8833</h2>
+<p>Chapter 9 put a second DRV8833 on the board, and the two methods do not scale with it equally. The reflow method is unaffected, because a stencil carrying two pads’ worth of apertures is printed exactly as a stencil carrying one. The hand method becomes harder, and on that board I would not attempt it. There are twelve more barrels to fill one at a time, and they are filled against a larger ground plane. A bigger plane draws heat away from the iron tip faster, so each barrel takes longer to fill.</p>
+<p>If you want to assemble the four-motor board yourself, buy the stencil instead of using the iron.</p>
+<h2 id="sec:c11-close">Closing Volume 2</h2>
+<p>That brings Volume 2 to a close. You began it able to use other people’s parts and other people’s rules. You end it having drawn your own symbol and your own footprint, set up a board around the current it carries, poured and relieved copper on purpose, expressed two builds from a single project, sent the files to a factory, and put the returned board together with your own hands. Those are the skills the introduction promised, and you now have all of them.</p>
+<p>One part of the book remains, and it is not one to read straight through. The Mini Encyclopedia at the back is a glossary of every term these chapters have introduced, gathered in one place so that you can look something up quickly. Turn to it whenever you need it. And when you are ready to go further, Volume 3 takes up the two subjects this volume named but did not cover: the full design rule language, and KiCad’s Python side.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p><strong>HTSSOP</strong>: Heatsink Thin Shrink Small Outline Package. A surface-mount package with gull-wing leads protruding on two sides, so every joint is visible from above and reachable with an iron, plus an exposed metal pad under the body that carries the chip’s heat into the board.<a data-jump="fnref1" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><strong>QFN</strong>: Quad Flat No-lead. A surface-mount package whose contacts are flat pads set around the rim of its underside instead of leads that protrude, with a large exposed pad in the middle. Nothing sticks out, so the joints finish up underneath the chip where an iron cannot reach them.<a data-jump="fnref2" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><strong>Fiducials</strong> are the small copper dots a machine’s camera reads to locate a board; Chapter 6 put a pair on the panel rail. This board has none, so the pads are your only reference.<a data-jump="fnref3" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><strong>Dab</strong> is an informal name for one deposit of solder paste, meaning the amount that a single aperture in the stencil leaves on the board when the foil lifts. One aperture puts down one dab, whatever its size, so <code>U1</code>‘s thermal pad receives two of them because you drew two apertures over it in Chapter 2, and each lead receives one from its own smaller aperture. Giving one large pad several small openings instead of a single big one is called a ’window-pane’ pattern.<a data-jump="fnref4" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p><strong>Hotplate</strong>: a flat heated plate, aluminium or ceramic, with a temperature controller and a digital readout, sold for this job. The board sits on it face up, and the heat travels up into the board from underneath. There is no enclosure, no fan and no programmed curve: you set a temperature and you watch. These plates run from small USB-powered units with a heated area about 30 mm square up to mains-powered plates of 100 mm square and larger, and the small ones are the most widely sold. Check the heated area against your board before you buy one. This board is 52 by 48 mm and a 30 mm plate will not cover it. An electric cooking surface is a different tool and is not a substitute because it has no useful temperature regulation, and a pan that has had solder on it must never go back into a kitchen.<a data-jump="fnref5" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p><strong>Outgassing</strong> is gas given off by a material as it heats. In solder paste it is mostly the flux’s own solvents boiling off during the preheat and the soak, before the alloy melts.<a data-jump="fnref6" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>A <strong>void</strong> is a cavity left inside a solder joint when gas could not escape before the metal solidified. Nothing on the surface gives one away, so they are found by X-ray. What matters here is not how many but where: a void under the centre of a thermal pad sits across the path the heat has to take out of the chip.<a data-jump="fnref7" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p><strong>To tack</strong> is to make one quick joint whose only job is to hold a part still while the rest of its leads are soldered. It takes a small amount of solder on a single lead and is remade properly when the row is drag-soldered over it, so a tack that turns out to be in the wrong place can be reheated and the part nudged square. Two tacks at opposite corners fix position and rotation together.<a data-jump="fnref8" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p><strong>Rosin</strong> is a resin refined from pine sap, and the most common carrier for hand-soldering flux. It is mild enough that its residue can stay on the board.<a data-jump="fnref9" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p><strong>No-clean</strong> describes a flux whose residue is meant to stay on the board. It is not residue-free. What remains is a hard film that does not corrode copper and does not conduct, so there is no washing step after soldering. The alternative, a water-soluble flux, leaves a residue that has to come off.<a data-jump="fnref10" tabindex="0" class="footnote-back note-jump" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 
 </div>
 <script>
@@ -288,6 +410,10 @@ This chapter is still being written and will appear in a future update.
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -296,14 +422,14 @@ This chapter is still being written and will appear in a future update.
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

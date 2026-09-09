@@ -311,7 +311,7 @@
 
 <p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-constraints.png" style="width:85.0%" /></p>
 <p>Figure 3.3: The “Constraints” page after NextPCB’s “Simple” capability file has been imported into it. Every number here is something the factory guarantees its process can hold: a 0.127 mm track, a 0.09 mm annular ring, a 0.48 mm via on a 0.15 mm drill, 0.25 mm from copper to any hole, and 0.5 mm from copper to the board edge. Not one of them is a number you will actually design to. They are the limits the design must not go below.</p>
-<p>That last point is the key to how KiCad layers its rules. If part of your board needs 0.2 mm clearance and the rest needs 0.3 mm, then you should set the smaller 0.2 mm as the floor and use a net class or a custom rule to ask for the larger clearance where you want it. Establish these constraints at the start, from your fabricator’s specification, and the rest of your setup builds on top of them. Remember that you do not have to copy those numbers in by hand, as some fabricators publish a ready-made file with their capability numbers already set. Chapter 10 shows how to import one directly into Board Setup with the “Import Settings from Another Board…” button.</p>
+<p>That last point is the key to how KiCad layers its rules. If part of your board needs 0.2 mm clearance and the rest needs 0.3 mm, then you should set the smaller 0.2 mm as the floor and use a net class or a custom rule to ask for the larger clearance where you want it. Establish these constraints at the start, from your fabricator’s specification, and the rest of your setup builds on top of them. Remember that you do not have to copy those numbers in by hand, as some fabricators publish a ready-made file with their capability numbers already set. Chapter 10, Intermediate Recipes, shows how to import one directly into Board Setup with the “Import Settings from Another Board…” button, in its section on importing a fab’s design rules.</p>
 <p>Two things on that page require a closer look. The first is the minimum track width of 0.127 mm, which is half of what the logic on this board will route at and roughly a twelfth of the power width. That gap is the whole idea rather than a mistake, because the floor describes what the factory can make and not what you intend to draw. The second is that several fields read zero, among them the minimum copper clearance and the minimum connection width. A zero is not an omission either. It says the fabricator has set no board-wide floor for that particular check and is content to let your net classes and your custom rules govern it, which is precisely what the sections that follow do.</p>
 <h2 id="sec:c03-net-classes">Net Classes</h2>
 <p>A ‘net class’ is a named set of routing rules, such as a track width, a clearance, and via sizes, that you attach to a group of nets so that they are all treated the same way<a data-jump="fn1" tabindex="0" class="footnote-ref note-jump" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Every board starts with one class, called “Default”, and on the simple boards of Volume 1, that single class was all you ever needed. The motor driver needs at least two, because it has two kinds of net with very different needs. The choices you make here affect the quality of the whole board.</p>
@@ -321,7 +321,7 @@
 <li><strong>Default</strong>, for the logic and everything else: 0.20 mm clearance, 0.25 mm track width, and a 0.60 mm via with a 0.30 mm hole.</li>
 <li><strong>Power</strong>, for the current-carrying nets: 0.30 mm clearance, 1.50 mm track width, and a 0.80 mm via with a 0.40 mm hole. Its members are <code>VM</code>, <code>GND</code>, and the four bridge outputs <code>AOUT1</code>, <code>AOUT2</code>, <code>BOUT1</code>, and <code>BOUT2</code>.</li>
 </ul>
-<p>Each of these numbers comes out of KiCad’s own Calculator Tools, worked from the current the DRV8833 datasheet says a net has to carry and the copper weight you just set in the stackup. The calculation belongs with the board rather than with this dialogue, so I have kept it there. Chapter 8 shows how each value was arrived at, and Chapter 10 has the recipe for using the calculators yourself. Take the numbers as given for now; the sections that follow show how each one is applied.</p>
+<p>Each of these numbers comes out of KiCad’s own Calculator Tools, worked from the current the DRV8833 datasheet says a net has to carry and the copper weight you just set in the stackup. The calculation belongs with the board rather than with this dialogue, so I have kept it there. Chapter 8, Project (Capstone): DRV8833 Dual H-Bridge Motor Driver, shows how each value was arrived at in its section on sizing the Power net class, and Chapter 10, Intermediate Recipes, has the recipe for using the calculators yourself in its section on the calculator tools. Take the numbers as given for now; the sections that follow show how each one is applied.</p>
 <p>Building the Power class takes six steps:</p>
 <ol type="1">
 <li><strong>Open the page.</strong> Open Board Setup and select “Net Classes” from the section list on the left. The “Netclasses” table at the top is the one you are about to add a row to.</li>
@@ -446,7 +446,8 @@ max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
 <p>There is one more rule this board needs, and it follows directly from the neck-down. A 0.80 mm track cannot reach the driver chip’s pads either. They are 0.45 mm wide on a 0.65 mm pitch, which leaves only 0.20 mm of bare board between one pad and the next, so the last hop of every motor output narrows a second time, to 0.30 mm. The rule you have just written would flag every one of those approaches. So the project carries a second rule that permits them:</p>
 <pre><code>(rule &quot;U1 fine-pitch breakout width&quot;
     (constraint track_width (min 0.2mm))
-    (condition &quot;A.NetName == &#39;/AOUT*&#39; || A.NetName == &#39;/BOUT*&#39; || A.NetName == &#39;/VM&#39;&quot;)
+    (condition
+        &quot;A.NetName == &#39;/AOUT*&#39; || A.NetName == &#39;/BOUT*&#39; || A.NetName == &#39;/VM&#39;&quot;)
 )</code></pre>
 <p>Build it the same way as the first, under “Routing width”, and set its condition type to “Custom Query” so that you can name the nets rather than a whole class. Where both rules apply, this one wins, because KiCad reads the rules file from the bottom up and stops at the first rule that matches. That is worth remembering as a working habit long before you need the theory: write the broad rule first and the narrow exception below it, never the other way round.</p>
 <p>The third rule this board carries does a different job, and it is the one that shows you what custom rules are really for. Both rules so far constrain something. This one excuses something. J1, the connector that brings the logic signals in, is mounted so that its pins deliberately project past the left edge of the board, and its printed outline goes with them. The design rules check notices, correctly, and reports eleven separate “silkscreen clipped by board edge” warnings, one for each segment of J1’s outline that crosses the edge. Every one of those warnings is right. Every one of them is also something you meant to do.</p>
@@ -483,7 +484,7 @@ max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
 <h2 id="sec:c03-component-classes">Component Classes (K9)</h2>
 <p>As you already know, net classes group nets. The new ‘component classes’ feature, added in KiCad 9, groups parts. A component class is a named label you attach to one or more components, in the schematic or in Board Setup, and unlike a net class it says nothing about clearance or track width. Its job is organisational, as it lets you refer to a group of parts by name, so that you can scope a custom design rule to just those parts, or mark a set of components as a repeated channel<a data-jump="fn3" tabindex="0" class="footnote-ref note-jump" id="fnref3" role="doc-noteref"><sup>3</sup></a> for a multi-channel layout.</p>
 <p>On the two-motor capstone you can work without them, but they are worth introducing here. The moment a board has repeated sections, component classes are how you tell KiCad that a group of parts belongs together. Chapter 9’s four-motor extension of that capstone is a good example of this. A part can hold more than one class, and you can assign classes by hand or by rules that match on reference, footprint, sheet, and more.</p>
-<p>Three things they let you do are worth naming, so that you can recognise the situation when you meet it. The first is that a custom rule can be aimed at a group of parts rather than at a group of nets, which is how a requirement like “keep three millimetres between anything in the H-bridge and anything in the logic block” becomes something the checker can enforce rather than something you have to remember. The second is that a component class is one of the ways KiCad recognises a repeated block, so that a section of the board can be placed and routed once and then repeated across its copies. Chapter 9’s four-motor extension is built that way, with its second driver stage a copy of the first, and Chapter 10’s multi-channel recipe walks through how the repeating is done. The third is the simplest and the one you will use most: a class is a handle for selecting things, so that you can highlight every part in a functional block at once and see where each one was actually placed on the board (Figure 3.9).</p>
+<p>Three things they let you do are worth naming, so that you can recognise the situation when you meet it. The first is that a custom rule can be aimed at a group of parts rather than at a group of nets, which is how a requirement like “keep three millimetres between anything in the H-bridge and anything in the logic block” becomes something the checker can enforce rather than something you have to remember. The second is that a component class is one of the ways KiCad recognises a repeated block, so that a section of the board can be placed and routed once and then repeated across its copies. Chapter 9’s four-motor extension is built that way, with its second driver stage a copy of the first. Chapter 10, Intermediate Recipes, walks through how the repeating is done in its section on multi-channel design. The third is the simplest and the one you will use most: a class is a handle for selecting things, so that you can highlight every part in a functional block at once and see where each one was actually placed on the board (Figure 3.9).</p>
 
 <p><img src="/assets/klp5e-vol2/ch03/ch03-board-setup-component-classes.png" style="width:85.0%" /></p>
 <p>Figure 3.9: Component classes on a board of mine that has enough parts to need them, the Smart Drive rather than the motor driver. “Assign component class per sheet” is ticked at the top, which alone gives every schematic sheet a class of its own, and below it two assignments name their sheets explicitly. The boxed one gathers everything on the <code>/RP2040/</code> sheet into an RP2040 class, and the small button at the end of its row, marked by the arrow, highlights those parts on the canvas. The result is the block picked out on the left: the microcontroller, its crystal, and its supporting passives, shown as a group rather than as a list of reference designators.</p>
@@ -509,6 +510,10 @@ max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -517,14 +522,14 @@ max = width + tolerance = 1.50 mm + 0.70 mm = 2.20 mm</code></pre>
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

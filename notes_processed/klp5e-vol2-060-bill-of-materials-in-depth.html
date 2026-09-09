@@ -394,7 +394,7 @@
 <h2 id="sec:c05-design-variants">Design Variants and DNP (K10)</h2>
 <p>Often one design has to be built in more than one configuration. The capstone is a small example of exactly this. The motor driver can be built with current limiting or without it, depending on the value fitted to its two current-sense resistors, and those are two genuinely different products from one layout. The old way to handle this was to keep two copies of the project. I have done that on two boards. Both times the two copies became inconsistent without my noticing, and I only discovered it when the fabricated boards arrived. KiCad 10’s ‘design variants’ let a single project describe both builds at once.</p>
 <p>A variant is a named set of overrides applied on top of one base design. The base design remains the single definitive version, and each variant records only what differs from it. Every project starts with one implicit variant, the default, which is the base design with nothing overridden. You select the active variant from a dropdown in the main toolbar, present in both the schematic and the PCB editors, and the moment you pick one the display updates to show that configuration.</p>
-<p>The most common override is ‘fitting’, which is simply whether a part is placed on the finished board at all. You mark a part ‘do not populate’ in one variant, and it stays in the design, footprint included, so the board still has a place for it. In that variant it is drawn with an X through it on the schematic and on the board’s fabrication layers, flagged as DNP in that build’s bill of materials, and left off the assembled board. Switch back to the default and it reappears, fitted. A variant can do more than fit or omit a part, though. It can override almost any field, swapping a value, a footprint, or a part number for one build, and it can independently exclude a component from the BOM, from the pick-and-place position files, or from simulation. It can even be applied to a whole ‘hierarchical sheet’ at once, that is, to every part in one of the sub-schematics that a large design is split into. The single thing a variant may not change is a component’s reference designator, because that would produce a different netlist, which is beyond what an assembly variant is for.</p>
+<p>The most common override is ‘fitting’, which is simply whether a part is placed on the finished board at all. You mark a part ‘do not populate’ in one variant, and it stays in the design, footprint included, so the board still has a place for it. In that variant it is drawn with an X through it on the schematic and on the board’s plotted fabrication layers, flagged as DNP in that build’s bill of materials, and left off the assembled board. Switch back to the default and it reappears, fitted. A variant can do more than fit or omit a part, though. It can override almost any field, swapping a value, a footprint, or a part number for one build, and it can independently exclude a component from the BOM, from the pick-and-place position files, or from simulation. It can even be applied to a whole ‘hierarchical sheet’ at once, that is, to every part in one of the sub-schematics that a large design is split into. The single thing a variant may not change is a component’s reference designator, because that would produce a different netlist, which is beyond what an assembly variant is for.</p>
 <p>The capstone uses a <strong>field override</strong> rather than a fitting one, and the reason matters more than the mechanism. My first instinct was to mark the two current-sense resistors ‘do not populate’ in the “without-sense” variant, which is the obvious move and the wrong one. Look at what those resistors are connected to. They sit between the driver’s AISEN and BISEN pins and ground, and the datasheet’s pin table describes those pins as “bridge A ground / ISENSE”, to be connected “to current sense resistor for bridge A, <strong>or GND if current control not needed</strong>”. They are not an optional sense tap hanging off the side of the circuit. They are the path the motor current takes on its way back to ground. Leave one off and that half of the chip has no return path at all, so the motor does not turn. The board would have been assembled, shipped and found dead on the bench.</p>
 <p>So both builds fit both resistors, and what changes is the value. The default build uses 0.2 Ω, which is what tells the chip to limit the current, and the “without-sense” build uses 0 Ω, a plain link that grounds the bridge and lets it draw whatever the motor asks for. One project, two boards, and both of them work.</p>
 <p>Remember this the next time you reach for DNP. Choosing which kind of override to use is an engineering decision about the circuit, not a housekeeping decision about the bill of materials, and the checker cannot help you with it. Neither the electrical rules check nor the design rules check has any idea that a missing resistor breaks a current path, because as far as both are concerned the part is still in the design.</p>
@@ -423,6 +423,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -431,14 +435,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

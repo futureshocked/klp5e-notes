@@ -659,7 +659,7 @@
 <p>Everything so far has been done on the canvas or in a pad dialogue, with the Properties panel down the left side of the editor showing you what the selected object is. That panel is useful, but there is more information we must give to the footprint using a separate dialogue box. Click the footprint properties button in the top toolbar, or double-click an empty spot on the canvas, and the “Footprint Properties” dialogue opens on six tabs: “General”, “Layers”, “Clearance Overrides”, “Pad Connections”, “3D Models” and “Embedded Files” (Figure 2.37). The last two are where this chapter finishes.</p>
 <p>Start on “General”, which holds the four fields every library footprint is born with: “Reference”, “Value”, “Datasheet” and “Description”. They are the same four you met on the symbol in Chapter 1, they match it name for name, and none of them can be deleted. Two are already filled in, because KiCad set “Reference” to <code>REF**</code> and “Value” to the footprint’s own name when you saved it. “Description” is worth a line of plain English for the benefit of anyone browsing the library later. “Datasheet” is the interesting one.</p>
 <p>That field contains a route back to the document (the datasheet) this chapter came out of, and you have three ways to fill it. You can paste the manufacturer’s web address, which works from any machine with a connection and stops working the day the manufacturer reorganises its website. You can also point it at a copy of the PDF on your local file system, which never breaks but only resolves on the machine that holds the file (so it won’t work if you share this project with others). Or you can point it at that local copy and have KiCad embed the PDF into the footprint, which is what I do and what Figure 2.37 shows. The field reads <code>kicad-embed://drv8833.pdf</code> rather than a path, because the document itself is now stored inside the footprint. The cost is a larger file, so this is a trade-off you should consider. Embedding this datasheet of just under a megabyte, took my footprint from 57 kB to 1.2 MB. The advantage of embedding is a footprint that arrives on someone else’s machine with its datasheet already attached, and for a part you authored yourself that is usually the better trade.</p>
-<p>Doing the embedding takes four steps. Open the “Embedded Files” tab of the same “Footprint Properties” dialogue, click the add button beneath the empty list, and choose the PDF wherever it sits on your disk. KiCad copies the contents into the footprint there and then, and the file appears in the list beside its “Embedded Reference”, which is the <code>kicad-embed://drv8833.pdf</code> address. Right-click that reference and choose “Copy Embedded Reference”. Then go back to the “General” tab and paste it into the “Datasheet” field. Nothing is written beside your project, and the original PDF can be moved or deleted afterwards without breaking the field. The recipe on embedded files in Chapter 10 covers the mechanism in full, including the shortcut a symbol offers and how to export an embedded copy back out to disk.</p>
+<p>Doing the embedding takes four steps. Open the “Embedded Files” tab of the same “Footprint Properties” dialogue, click the add button beneath the empty list, and choose the PDF wherever it sits on your disk. KiCad copies the contents into the footprint there and then, and the file appears in the list beside its “Embedded Reference”, which is the <code>kicad-embed://drv8833.pdf</code> address. Right-click that reference and choose “Copy Embedded Reference”. Then go back to the “General” tab and paste it into the “Datasheet” field. Nothing is written beside your project, and the original PDF can be moved or deleted afterwards without breaking the field. Chapter 10, Intermediate Recipes, covers the mechanism in full in its section on embedded files, including the shortcut a symbol offers and how to export an embedded copy back out to disk.</p>
 
 <p><img src="/assets/klp5e-vol2/ch02/ch02-layout-datasheet.png" style="width:85.0%" /></p>
 <p>Figure 2.37: The “General” tab of “Footprint Properties”, with the six tabs across the top and the four default fields in the table. The boxed “Datasheet” row reads <code>kicad-embed://drv8833.pdf</code>, the address KiCad uses for a file it has stored inside the footprint, rather than a path to a PDF sitting somewhere on my disk. “Value” carries the footprint’s name, and the “Metadata” and “Fabrication Attributes” panels below hold the description, the keywords a library search reads, and the “Component type” of “SMD”.</p>
@@ -713,6 +713,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -721,14 +725,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

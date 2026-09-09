@@ -402,7 +402,7 @@
 
 <p><img src="/assets/klp5e-vol2/ch04/ch04-zones-keep-out-4.png" style="width:85.0%" /></p>
 <p>Figure 4.13: Both faces of the finished board. On the left, the top: the ground pour (❶) covering everything the tracks have not taken, the motor-supply pour (❷) as a slightly different shade above the chip, and the keep-out (❸) as bare board in the corner. On the right, the bottom: the second ground pour (❹) and the same keep-out (❺), which appears in the opposite corner only because you are looking at the board from the other side. The stitching vias show as a small grid of holes in both views, which is the visual proof that the two pours are joined.</p>
-<p>Rule areas do more than keep things out. Because a rule area is a named region, you can attach a custom design rule that applies only inside it, giving you fine control over one patch of the board without touching the rest. Rule areas are also how KiCad marks the repeated sections of a multi-channel layout. When a board carries several identical copies of a circuit, you place and route one of them and let KiCad copy that work onto the others, and it fences each copy inside its own placement rule area so that it knows where one channel ends and the next begins. You will meet that twice more in this volume: the warm-up project in Chapter 7 repeats the same 8×8 matrix module four times, and Chapter 9’s four-motor extension repeats a motor stage, while the multi-channel recipe in Chapter 10 walks through the whole procedure. For now, treat the rule area as your tool for keeping copper out of a region, and remember that it is there the day a board needs a rule that applies to one patch of the board and nowhere else.</p>
+<p>Rule areas do more than keep things out. Because a rule area is a named region, you can attach a custom design rule that applies only inside it, giving you fine control over one patch of the board without touching the rest. Rule areas are also how KiCad marks the repeated sections of a multi-channel layout. When a board carries several identical copies of a circuit, you place and route one of them and let KiCad copy that work onto the others, and it fences each copy inside its own placement rule area so that it knows where one channel ends and the next begins. You will meet that twice more in this volume: the warm-up project in Chapter 7 repeats the same 8×8 matrix module four times, and Chapter 9’s four-motor extension repeats a motor stage. Chapter 10, Intermediate Recipes, walks through the whole procedure in its section on multi-channel design. For now, treat the rule area as your tool for keeping copper out of a region, and remember that it is there the day a board needs a rule that applies to one patch of the board and nowhere else.</p>
 <h2 id="sec:c04-zone-manager">The Zone Manager (K9/K10)</h2>
 <p>One zone is easy to manage from the canvas. A real board quickly has several. A ground pour on the top, another on the bottom, and perhaps a small power pour feeding the motor supply. Finding each one separately to change a setting is slow work. KiCad 9 introduced the ‘Zone Manager’ to solve this problem, and it is a useful addition. Open it from “Tools” and “Zone Manager”, and you get a single dialogue listing every zone on the board, each with its name, its net, and the layers it occupies, alongside a live preview and the full settings for whichever zone you select (Figure 4.14). Instead of searching for each copper zone and editing it on its own, you review and adjust all of them in one place.</p>
 
@@ -430,6 +430,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -438,14 +442,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }
