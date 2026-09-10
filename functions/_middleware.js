@@ -200,9 +200,30 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Cloudflare's Email Obfuscation rewrites any contiguous address it finds in a
+ * response body — including one this Function just injected, because the
+ * obfuscator runs downstream of Functions. Measured on staging 2026-09-10: the
+ * watermark came back as
+ *   Licensed to Ada Lovelace, <a href="/cdn-cgi/l/email-protection" class="__cf_email__" …
+ * plus a de-obfuscation script, so with JavaScript disabled the reader would not
+ * see their own email and the attribution the watermark exists to provide would be
+ * degraded. Splitting the "@" into its own inline element renders identically in
+ * every browser (a bare <span> is unstyled and inline) while presenting no
+ * contiguous address for the obfuscator to match.
+ */
+function formatEmail(email) {
+  const at = email.indexOf("@");
+  if (at < 0) return escapeHtml(email);
+  return (
+    escapeHtml(email.slice(0, at)) + "<span>@</span>" + escapeHtml(email.slice(at + 1))
+  );
+}
+
 function watermarkHtml(payload) {
-  const who = [payload.name, payload.email]
-    .map((part) => escapeHtml(String(part || "").trim()))
+  const name = escapeHtml(String(payload.name || "").trim());
+  const email = String(payload.email || "").trim();
+  const who = [name, email ? formatEmail(email) : ""]
     .filter(Boolean)
     .join(", ");
   return (
