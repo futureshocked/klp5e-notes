@@ -148,12 +148,24 @@ function readCookie(header, name) {
   return null;
 }
 
+/**
+ * TEMPORARY CANARY — step 3 prerequisite 1. Exists only to prove that
+ * `notes-staging.techexplorations.com` really serves this branch and not `main`:
+ * while both branches sit on the same commit the pin cannot be verified any other
+ * way, and the Pages API is misleading (the production deployment lists both
+ * custom domains as aliases). Reverted before the watermark work merges.
+ */
+function withCanary(response) {
+  response.headers.set("X-TE-Canary", "notes-gate");
+  return response;
+}
+
 export async function onRequest(context) {
   const { request, next, env } = context;
   const url = new URL(request.url);
 
   if (SKIP_PATHS.has(url.pathname)) {
-    return next();
+    return withCanary(await next());
   }
 
   // Toolchain probe bypass (step A8), checked before the cookie path so a probe
@@ -175,7 +187,7 @@ export async function onRequest(context) {
     ) {
       const probeResponse = await next();
       applyStep1Headers(probeResponse.headers);
-      return probeResponse;
+      return withCanary(probeResponse);
     }
   }
 
@@ -188,10 +200,10 @@ export async function onRequest(context) {
     secret && cookieValue ? await verifyCookie(cookieValue, secret) : null;
 
   if (!payload) {
-    return gateResponse();
+    return withCanary(gateResponse());
   }
 
   const response = await next();
   applyStep1Headers(response.headers);
-  return response;
+  return withCanary(response);
 }
