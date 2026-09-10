@@ -13,6 +13,15 @@
  *     the cookie path, so the deploy pipeline's cookie-less HEAD probes are not
  *     403ed. Verified here and nowhere else; disabled entirely when its secret
  *     is unset or empty.
+ *  6. Stamp a successful cookie response with a per-reader licence line and an
+ *     invisible `data-r` marker (step 3 of the same plan). The verified payload
+ *     is the only place the edge learns who is reading, so this needs no new
+ *     infrastructure. HTML responses only — figures and other binaries are
+ *     passed through untouched, because HTMLRewriter cannot rewrite them.
+ *  7. The probe bypass is honoured on HEAD only, and every use is logged (open
+ *     items 5 and 6, closed with step 3). Rationale: a leaked probe secret is an
+ *     unattributed key to the whole book, so it must not be able to download one
+ *     and must not be usable invisibly.
  *
  * Step 1's four protections, re-applied here in code:
  *  - X-Robots-Tag: noindex, nofollow
@@ -138,6 +147,98 @@ function gateResponse() {
   return response;
 }
 
+/**
+ * Step 3: per-reader watermark.
+ *
+ * Presentation normally belongs to the build — `TEMPLATE` in
+ * `_toolchain/scripts/build-notes.py` carries a `.note-licence` rule with values
+ * identical to WATERMARK_STYLE below. But every note bakes its CSS into an inline
+ * `<style>` block (there is no shared `css/` directory to update), and Vol 2's
+ * `make notes-sync` is blocked by the RENUMBER-2026-09-01 key collision, so the
+ * already-deployed notes cannot all be rebuilt today. The middleware is therefore
+ * self-sufficient via an inline `style` attribute and will agree with, rather than
+ * fight, the class rule once notes are rebuilt.
+ *
+ * Two constraints from the plan, both honoured here:
+ *  - the footer is appended to `body`, which lands it AFTER the closing
+ *    `</div>` of `[data-lightbox-wrapper]`, so the planned language switcher
+ *    (which swaps that wrapper's contents via fetch) cannot make it vanish;
+ *  - the injected markup never contains the literal token that the deploy-time
+ *    auto-height injector keys on, so `build-notes.py`'s hard-fail check stays
+ *    satisfied and the height measurement is unaffected. The footer is part of
+ *    the initial HTML, so the auto-height script measures it and the parent
+ *    iframe simply grows to fit.
+ */
+const WATERMARK_CLASS = "note-licence";
+
+const WATERMARK_STYLE = [
+  "margin:3rem 0 0",
+  "padding-top:0.9rem",
+  "border-top:1px solid #e2e8f0",
+  // Single quotes ONLY: this string is emitted inside a double-quoted style=""
+  // attribute, so a double quote here would terminate the attribute early and
+  // corrupt the markup. CSS accepts both quote styles, and the matching
+  // `.note-licence` rule in build-notes.py uses single quotes to stay identical.
+  "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
+  "font-size:0.75rem",
+  "line-height:1.5",
+  "color:#64748b",
+  "text-align:center",
+].join(";");
+
+/**
+ * Cookie payload fields come from the WordPress user table and are inserted into
+ * HTML, so they are escaped. A display name containing `<` or `"` would otherwise
+ * break the note's markup or inject into it.
+ */
+function escapeHtml(value) {
+  return String(value === undefined || value === null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function watermarkHtml(payload) {
+  const who = [payload.name, payload.email]
+    .map((part) => escapeHtml(String(part || "").trim()))
+    .filter(Boolean)
+    .join(", ");
+  return (
+    `<div class="${WATERMARK_CLASS}" data-note-licence style="${WATERMARK_STYLE}">` +
+    `Licensed to ${who || "a registered reader"}. Not for redistribution.</div>`
+  );
+}
+
+/**
+ * Stamp a verified reader's licence line onto an HTML response, and mark `body`
+ * with `data-r="{uid}"` — an invisible per-reader marker that survives
+ * view-source, print and browser "save as PDF", so a leaked copy names its source.
+ *
+ * Returns the response unchanged when it is not HTML (figures, CSS, anything
+ * binary) or not a success, so assets cost no rewriting and a 404 page is not
+ * decorated. Fails open on presentation only: if a note somehow had no `<body>`
+ * the content is still served — and still gated.
+ */
+function applyWatermark(response, payload) {
+  if (response.status < 200 || response.status >= 300) return response;
+  const type = (response.headers.get("Content-Type") || "").toLowerCase();
+  if (!type.includes("text/html")) return response;
+
+  const uid = payload.uid;
+  return new HTMLRewriter()
+    .on("body", {
+      element(body) {
+        if (uid !== undefined && uid !== null && uid !== "") {
+          body.setAttribute("data-r", escapeHtml(uid));
+        }
+        body.append(watermarkHtml(payload), { html: true });
+      },
+    })
+    .transform(response);
+}
+
 function readCookie(header, name) {
   if (!header) return null;
   for (const part of header.split(";")) {
@@ -173,6 +274,30 @@ export async function onRequest(context) {
         probeEnc.encode(probeProvided)
       )
     ) {
+      // Open item 6 (closed with step 3): HEAD only. Measured 2026-09-10 — this
+      // origin answers HEAD with 200 for both notes and figures, and
+      // `verify_notes_reachable()` HEADs first, falling back to GET only on
+      // 405/501/403, so that fallback never fires and the toolchain needs no
+      // change. A leaked probe secret can therefore establish that a slug exists
+      // and how fast it answers, but cannot download a single byte of the book.
+      if (request.method !== "HEAD") {
+        return gateResponse();
+      }
+      // Open item 5 (closed with step 3): this is the highest-value secret in
+      // the inventory — permanent and unattributed — so every accepted use is
+      // logged. The record carries no secret value and no cookie.
+      console.log(
+        JSON.stringify({
+          event: "notes_probe_bypass",
+          method: request.method,
+          host: url.hostname,
+          path: url.pathname,
+          country: request.cf ? request.cf.country : null,
+          colo: request.cf ? request.cf.colo : null,
+          ray: request.headers.get("CF-Ray"),
+          ua: request.headers.get("User-Agent"),
+        })
+      );
       const probeResponse = await next();
       applyStep1Headers(probeResponse.headers);
       return probeResponse;
@@ -192,6 +317,9 @@ export async function onRequest(context) {
   }
 
   const response = await next();
-  applyStep1Headers(response.headers);
-  return response;
+  // Step 3: stamp the reader first — HTMLRewriter returns a NEW Response, so the
+  // step-1 headers must be applied to the stamped one or they would be lost.
+  const stamped = applyWatermark(response, payload);
+  applyStep1Headers(stamped.headers);
+  return stamped;
 }
