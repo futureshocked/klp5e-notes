@@ -263,6 +263,26 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* ---- Per-reader licence line (step 3 of coding_plans/notes-content-protection.md).
+     This element is NOT emitted by the build: functions/_middleware.js injects it at
+     the edge, as the last child of <body> — deliberately OUTSIDE
+     [data-lightbox-wrapper], so the planned language switcher (which swaps that
+     wrapper's contents via fetch) cannot make the attribution vanish.
+     The middleware also emits these same declarations as an inline style=""
+     attribute, so notes built before this rule existed still render correctly.
+     KEEP THE TWO IN STEP: WATERMARK_STYLE in functions/_middleware.js.
+     font-family uses single quotes to match that inline attribute byte for byte. */
+  .note-licence {
+    margin: 3rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #64748b;
+    text-align: center;
+  }
+
   /* Offset anchored headers so they don't hide under any sticky iframe top. */
   h2[id], h3[id] { scroll-margin-top: 1.5em; }
 
@@ -281,28 +301,28 @@
     </li>
     <li><a class="note-jump" data-jump="sec:c3-pass" role="link" tabindex="0">The 8-Step Pass to Gerbers</a>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-1-import-from-the-schematic" role="link" tabindex="0">Step 1: Import from the schematic</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step1" role="link" tabindex="0">Step 1: Import from the schematic</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-2-set-up-the-board-outline" role="link" tabindex="0">Step 2: Set up the board outline</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step2" role="link" tabindex="0">Step 2: Set up the board outline</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-3-place-components" role="link" tabindex="0">Step 3: Place components</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step3" role="link" tabindex="0">Step 3: Place components</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-4-route-the-tracks" role="link" tabindex="0">Step 4: Route the tracks</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step4" role="link" tabindex="0">Step 4: Route the tracks</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-5-add-copper-fills" role="link" tabindex="0">Step 5: Add copper fills</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step5" role="link" tabindex="0">Step 5: Add copper fills</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-6-design-rules-check" role="link" tabindex="0">Step 6: Design rules check</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step6" role="link" tabindex="0">Step 6: Design rules check</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-7-add-text-and-silkscreen" role="link" tabindex="0">Step 7: Add text and silkscreen</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step7" role="link" tabindex="0">Step 7: Add text and silkscreen</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-8-generate-the-gerbers" role="link" tabindex="0">Step 8: Generate the Gerbers</a></li>
+        <li><a class="note-jump" data-jump="sec:c3-step8" role="link" tabindex="0">Step 8: Generate the Gerbers</a></li>
       </ul>
     </li>
   </ul>
@@ -328,7 +348,7 @@
 </ol>
 <p>Don’t try to memorise the list. You will have walked all eight by the end of this chapter, and we will pin them down properly as a reusable checklist in Chapter 5. For now, just notice the shape: you build the board up physically, you check it, then you export it. Let’s walk through it. </p>
 <h2 id="sec:c3-pass">The 8-Step Pass to Gerbers</h2>
-<h3 id="step-1-import-from-the-schematic">Step 1: Import from the schematic</h3>
+<h3 id="sec:c3-step1">Step 1: Import from the schematic</h3>
 <p>We start in the PCB Editor. If you followed the handoff at the end of the last chapter it is already open; if not, open it from the project manager by clicking its button, or by double-clicking the board file (the one ending in <code>.kicad_pcb</code>) in the file browser. Either way you land on a large, dark, empty canvas (Figure 3.2). This is the board, seen from above, and right now there is nothing on it.</p>
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-1-empty-editor.png" style="width:100.0%" /></p>
@@ -345,14 +365,14 @@
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-4-freshly-imported.png" style="width:45.0%" /></p>
 <p>Figure 3.5: Freshly imported. The thin lines are the ratsnest, a to-do list of connections.</p>
-<h3 id="step-2-set-up-the-board-outline">Step 2: Set up the board outline</h3>
+<h3 id="sec:c3-step2">Step 2: Set up the board outline</h3>
 <p>Before we tidy the parts, let’s give the board a shape. Right now there is no board, only parts floating in space; the rectangle of “board” you expect does not exist until you draw its edge. You draw that edge on a special layer called <strong>‘Edge.Cuts,’</strong> the layer KiCad reads as “this is where the board’s outline is, and this is where the factory will cut it out.”</p>
 <p>A board’s dimensions are nicer in round numbers, so switch to a coarse grid before you draw: find the grid dropdown above the canvas and choose “1.0 mm” (1 in Figure 3.6). Now the outline will snap to whole millimetres, which makes a tidy rectangle easy to get. Next, choose the layer you will draw on. To draw on a layer you first make it the <strong>‘active layer,’</strong> the one your next action will land on. Find “Edge.Cuts” in the list in the Appearance panel and click its name to select it (2); from now until you pick another layer, anything you draw goes onto Edge.Cuts.</p>
 <p>Now pick the rectangle tool from the right toolbar (3), click once to drop one corner of the board a little above and to the left of your clump of parts (4), then click again at the opposite corner so the rectangle comfortably surrounds them all (5). The only rule for a board outline is that it must be a single closed shape that does not cross itself; a plain rectangle satisfies that easily. Don’t fuss over the exact size, and don’t worry if it feels too tight or too loose. You can always select an edge and drag one of its dot handles later, after the parts are placed, to give yourself room. We will do exactly that at the end of Step 3, once the parts tell us how much board they really need.</p>
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-5-outline-edge-cuts.png" style="width:100.0%" /></p>
 <p>Figure 3.6: Drawing the outline. Set the grid to 1.0 mm (1), make Edge.Cuts the active layer (2), choose the rectangle tool (3), and click two opposite corners (4, 5) to surround the parts.</p>
-<h3 id="step-3-place-components">Step 3: Place components</h3>
+<h3 id="sec:c3-step3">Step 3: Place components</h3>
 <p>Now we arrange the parts. This is the first step where your judgement matters, and it is genuinely satisfying once it clicks. The goal is simple: position the footprints so that the wiring in the next step is as easy as possible. Before you start nudging, drop to a finer grid so you can place parts precisely: open the grid dropdown again and choose “0.25 mm.” The coarse 1 mm grid was right for a tidy outline, but for sliding parts into their best positions a finer grid gives you the accuracy you want.</p>
 <p>Your guide as you place is the ratsnest. As you slide a part around, its ratsnest lines stretch and follow, and a good arrangement is one where those lines end up short and untangled rather than long and criss-crossed. Two simple priorities will carry you a long way, and they are the ones I used on this very board: first, <strong>keep the connections short</strong>, so no track has to travel further than it must; and second, <strong>avoid conflicts</strong>, the places where two ratsnest lines cross, because every crossing you leave is a track that will later have to fight its way past another. Spend a minute nudging parts until the web of lines looks as calm as you can make it; every crossing you remove now is a track you won’t have to fight later.</p>
 <p>A few moves are all you need:</p>
@@ -379,7 +399,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-6d-outline-rounded-corners.png" style="width:45.0%" /></p>
 <p>Figure 3.10: The outline resized to trim dead space, with its corners rounded using a 2 mm fillet (right-click the outline, then “Shape modification” then “Fillet”).</p>
-<h3 id="step-4-route-the-tracks">Step 4: Route the tracks</h3>
+<h3 id="sec:c3-step4">Step 4: Route the tracks</h3>
 <p>This is the heart of layout, and the most fun. <strong>‘Routing’</strong> means drawing the copper that turns each ratsnest line into a real connection. You draw a ‘track’ (we met the word, and its synonym ‘trace,’ back in Chapter 1) from one pad to another, and as you complete it the ratsnest line it replaces disappears. We will see in Chapter 4 that this is the whole game: the schematic already declared what connects to what, and routing is simply you giving each of those connections a physical path.</p>
 <p>Two quick settings before the first track. First, choose the layer you are routing on. Click “F.Cu” in the Appearance panel to make the front (top) copper layer active; tracks you draw now go on top. Second, decide how wide the tracks should be. Our board carries tiny currents and has plenty of room, so a generous, robust width is fine: I am using <strong>0.5 mm</strong> for every track. The tidiest way to make a custom width like that always available is to register it once in Board Setup. Open Board Setup again, go to “Design Rules” then “Pre-defined Sizes,” and add a track width of 0.5 mm to the list (Figure 3.11). From now on, “0.5 mm” appears in the track-width dropdown above the canvas, ready to pick whenever you route. Wider copper is sturdier and carries more current, and 0.5 mm is comfortable to route and easy for any fab to make.</p>
 
@@ -390,7 +410,7 @@
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-8-fully-routed-top-layer.png" style="width:100.0%" /></p>
 <p>Figure 3.12: The top layer routed. Every non-ground connection is now solid copper on F.Cu; the four ratsnest lines that remain belong to the GND net, which the copper pour in Step 5 will complete.</p>
 <p>How do you know when you are done? Look at the status line along the bottom of the window, where KiCad reports the number of <strong>‘unrouted’</strong> connections. There is a subtlety here worth understanding rather than fighting. On this board the count does not fall to zero; it settles at four (you can read “Unrouted: 4” at the bottom of Figure 3.12). That is on purpose. We are deliberately leaving the ground connections unrouted, because in the very next step we will tie all of them together at once with a sheet of copper rather than thread a separate track to each. So the rule for this board is: route every connection <em>except</em> the ground ones, and watch the unrouted count fall until only the GND net is left. Those four remaining ratsnest lines are not a mistake; they are a promise that Step 5 will keep. Save your work with “Ctrl+S.”</p>
-<h3 id="step-5-add-copper-fills">Step 5: Add copper fills</h3>
+<h3 id="sec:c3-step5">Step 5: Add copper fills</h3>
 <p>Here is that promise, and it is the most common trick in all of PCB layout: the ground. Rather than thread a thin track to every pad that needs ground, we will flood a whole side of the board with copper and let it tie those pads together. A large area of copper like this is a <strong>‘copper pour,’</strong> or ‘copper zone’ (you met the idea, under the name copper fill, in Chapter 1). A ground pour gives every grounded part a short, solid path back to ground, and it is good practice on nearly every board you will make.</p>
 <p>Make the back copper layer active by clicking “B.Cu” in the Appearance panel (1 in Figure 3.13); our pour will live on the bottom, out of the way of the tracks on top. Click “Add a filled zone” on the right toolbar (2) and click once on the board to drop the first corner of the zone. KiCad opens the Copper Zone Properties dialog (Figure 3.13), which asks, among other things, two questions that matter: which net this copper belongs to, and which layer it sits on. In the “Net name” box, choose “GND” (3), and confirm in the layer list on the left that “B.Cu” is the ticked layer. Click “OK” (4).</p>
 
@@ -400,12 +420,12 @@
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-10-finish-GND-zone-bottom-layer.png" style="width:65.0%" /></p>
 <p>Figure 3.14: Tracing the zone outline just inside the board edge, clicking each of the four corners (1–4) and double-clicking the last to close it.</p>
-<p>At this point you have only drawn the <em>outline</em> of the zone; there is no copper in it yet. Fill it by choosing “Fill All Zones” from the “Edit” menu, or by pressing “B.” The interior floods with copper, and KiCad neatly carves it around every pad and track that isn’t on the ground net, keeping the proper clearances automatically (Figure 3.15). Watch the unrouted count, too: as the pour connects each ground pad, those last four ratsnest lines from Step 4 wink out, and the board is finally complete. Look closely at where the pour meets a ground pad and you will see the connection is made not by solid metal but by a few short, narrow spokes. That is a <strong>‘thermal relief,’</strong> the same feature we met in Chapter 1; it deliberately pinches the connection so that, when you come to solder that pad, the heat from your iron doesn’t all run off into the big copper area before the joint can form.</p>
+<p>At this point you have only drawn the <em>outline</em> of the zone; there is no copper in it yet. Fill it by choosing “Fill All Zones” from the “Edit” menu, or by pressing “B.” The interior floods with copper, and KiCad neatly carves it around every pad and track that isn’t on the ground net, keeping the proper clearances automatically (Figure 3.15). Watch the unrouted count, too: as the pour connects each ground pad, those last four ratsnest lines from Step 4 wink out, and the board is finally complete. Look closely at where the pour meets a ground pad and you will see the connection is made not by solid metal but by a few short, narrow spokes. That is a <strong>‘thermal relief,’</strong> the same feature introduced in Chapter 1, What a PCB Is and How It’s Made, in its section on copper pours and thermal relief; it deliberately pinches the connection so that, when you come to solder that pad, the heat from your iron doesn’t all run off into the big copper area before the joint can form.</p>
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-11-pressed-B-to-fill-zones.png" style="width:65.0%" /></p>
 <p>Figure 3.15: The filled ground pour on B.Cu, carved around the non-ground pads, with thermal-relief spokes connecting the ground pads.</p>
 <p>One habit to build now: KiCad does not refill zones automatically. If you move a part or reroute a track after filling, the pour can fall out of date, so get into the habit of pressing “B” to refill before you check or export the board. We will see in the very next step that the design checker can do this for you, which is one less thing to remember.</p>
-<h3 id="step-6-design-rules-check">Step 6: Design rules check</h3>
+<h3 id="sec:c3-step6">Step 6: Design rules check</h3>
 <p>Before we let this board anywhere near a factory, we ask KiCad to check it, exactly as we asked the Schematic Editor to check the circuit with the ERC in the last chapter. The board’s checker is the <strong>‘Design Rules Check,’</strong> or DRC. Where the ERC studied the circuit’s logic, the DRC studies the board’s physical reality: copper too close to other copper, a track that doesn’t actually reach its pad, a part crowding the board edge, courtyards that overlap. These are mistakes of physical reality, and the DRC is excellent at catching them while they cost nothing to fix. Chapter 4 explains why the two checks are separate; for now, just run it.</p>
 <p>Open it from the “Inspect” menu by choosing “Design Rules Checker,” or from its button on the top toolbar (1 in Figure 3.16), and click “Run DRC” (2). This time, unlike the ERC in Chapter 2, the report does not come back perfectly empty, and that is a useful thing to see. Under the “Schematic Parity” tab sits a single warning: “Extra footprint,” referring to “Footprint REF**” (Figure 3.16). Nothing is wrong. That warning is our mounting hole (3), the cyan ring in the corner of the canvas. We added it directly on the board, so it has no matching symbol back in the schematic, and the parity test, whose whole job is to compare the board against the schematic, dutifully notices that the board has one footprint the schematic doesn’t. Because we put it there on purpose, the warning is expected and harmless. The skill is not making the report empty at any cost; it is being able to read each line and decide it is fine, exactly as we said about warnings in the last chapter. Notice, too, the two checkboxes at the top of the dialog: “Refill all zones before performing DRC” freshens the ground pour for you before every run, and “Test for parity between PCB and schematic” is the very check that produced our mounting-hole warning. Leave both ticked.</p>
 
@@ -416,14 +436,14 @@
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-13-DRC-multiple-errors.png" style="width:65.0%" /></p>
 <p>Figure 3.17: With R3 dragged out of place against the board edge, the DRC reports real violations: clearance, shorting, board-edge, and silkscreen problems all at once.</p>
 <p>Now fix it: drag R3 back where it belongs, re-tick “Refill all zones before performing DRC,” and run the check once more. The clearance, short, and board-edge violations all clear, leaving only the familiar mounting-hole parity warning we already understand. That is the habit to build: run the DRC, click each violation, decide whether it matters, fix the ones that do, and re-run until everything left in the report is something you understand and accept. Do it now, while the board is small and the fixes take seconds. The same flaw found <em>after</em> you have paid a factory and waited two weeks would cost you the whole order.</p>
-<h3 id="step-7-add-text-and-silkscreen">Step 7: Add text and silkscreen</h3>
+<h3 id="sec:c3-step7">Step 7: Add text and silkscreen</h3>
 <p>Our board works, electrically. Now let’s make it friendlier for the humans who will build and use it. The white lettering and outlines printed on a board are the <strong>‘silkscreen’</strong> (we met it in Chapter 1), and it carries no electricity; it is there purely to label things. A lot of your silkscreen is already in place: every footprint brought its reference designator (<code>U1</code>, <code>R1</code>, <code>D1</code>, and so on) across from the schematic, so the parts are labelled for you. What I like to add by hand is the board’s own name and version, so that a year from now I can pick up a board from a drawer and know at a glance exactly what it is.</p>
 <p>Make the front silkscreen layer active by clicking “F.Silkscreen” in the Appearance panel. Choose the “Add a text item” tool from the right toolbar and click where you want the text; the Text Properties dialog opens (Figure 3.18). Type a name and version into the “Text” box (1); I am using <code>BLINKY v1.0</code>. Confirm the “Layer” is set to “F.Silkscreen” (2) so the text prints on the front silkscreen, and set a comfortable size, here 0.8 mm for both width and height (3), which is legible without crowding a small board. Click “OK” (4), drop the text somewhere clear, and you have given your board an identity. This is a small habit with a large payoff, and I recommend you give every board you make a name and a version this way.</p>
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-14-add-blinky-label.png" style="width:65.0%" /></p>
 <p>Figure 3.18: The Text Properties dialog. Type the board name (1), set the layer to F.Silkscreen (2) and the size to 0.8 mm (3), then click “OK” (4).</p>
 <p>Because silkscreen is just printing and touches no copper, adding it can’t create an electrical problem, so the DRC will stay clean (apart, of course, from the harmless mounting-hole warning we already met). Even so, it is a good reflex to run the DRC one last time after any change, just to be sure nothing else drifted. Save the board with “Ctrl+S,” and we are ready to export.</p>
-<h3 id="step-8-generate-the-gerbers">Step 8: Generate the Gerbers</h3>
+<h3 id="sec:c3-step8">Step 8: Generate the Gerbers</h3>
 <p>The board is done. The last step is to produce the files a factory needs to build it. Before we export, though, let me show you a small reward. KiCad has a built-in <strong>‘3D viewer’</strong> that renders your board as it will physically look, and it is the best possible sanity check before you spend money. Open it from the “View” menu by choosing “3D Viewer,” then drag with the left mouse button to orbit around the board and admire it; the parts you placed appear as little 3D models, because most footprints in KiCad’s libraries carry one. This render is the very image we opened the chapter with, back in Figure 3.1, so turn back a few pages and look at it again now that you know it is <em>your</em> board, every part and pour and label put there by your own hand. If anything looks wrong here, a part facing the wrong way, a connector hanging off the edge, it is far cheaper to notice it now than on the real board.</p>
 <p>Now the export itself. The industry-standard format for sending a board to a fab is the set of <strong>‘Gerber’</strong> files we named in Chapter 1: plain-text files, one per layer, describing exactly where the copper, soldermask, and silkscreen go. Open the export dialog from the “File” menu by choosing “Plot,” or from the plot button on the top toolbar (1 in Figure 3.19). Leave the format set to “Gerber” (2), and set an output directory (3) so all the files land together in one folder. The heart of the dialog is the “Include Layers” list on the left (4), which decides what gets written. For our board, tick the copper layers (“F.Cu” and “B.Cu”), the board outline (“Edge.Cuts”), the soldermask layers (“F.Mask” and “B.Mask”), and the silkscreen (“F.Silkscreen” and “B.Silkscreen”). You will see in the screenshot that “F.Paste” and “B.Paste” are also ticked; those describe where solder paste goes for machine assembly, and are used to cut a stencil. They do no harm in the folder, but since we are soldering this board by hand you don’t actually need them.</p>
 <p>A few of the other options in this dialog are worth knowing, because they are the ones a fab cares about. On the right, under “Gerber Options,” leave “Generate Gerber job file” ticked: that writes one small extra file that names the whole set, so a manufacturer’s software can pick up your folder and know which Gerber is which. Leave “Use extended X2 format (recommended)” ticked as well; X2 is the modern flavour of Gerber that embeds a little metadata (which layer is which, which net a pad belongs to) right in the file, and every current fab understands it. The “Coordinate format” of “4.6, unit mm” sets how finely positions are recorded (four digits before the decimal point, six after, in millimetres), which is far more precision than our board needs and exactly the sensible default. Finally, tick “Check zone fills before plotting” so KiCad refreshes the ground pour one last time before writing it out, the export-time twin of the refill habit from Step 5. With the layers chosen and the options set, click “Plot” (5). KiCad writes out the Gerber files and logs each one in the “Output Messages” box (6), finishing with “Done.”</p>
@@ -434,7 +454,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch03/ch03-layout-17-Gerbers-drill.png" style="width:65.0%" /></p>
 <p>Figure 3.20: The Generate Drill Files dialog. Leave the format on Excellon, the universal default, and click “Generate” (2); the non-plated mounting hole lands in a separate NPTH file.</p>
-<p>One honest caveat before you celebrate. The settings we used here, plain Excellon for the drill file and X2 Gerbers with KiCad’s defaults, are the generic choice that the great majority of PCB manufacturers accept without a murmur, which is exactly why we teach them first. But “most” is not “all”: some fabs are particular about how a file or two is written, and the only reliable way to know is to check your chosen manufacturer’s own guidance before you order. We meet a real example of this in Chapter 10, where NextPCB’s quote page needs a couple of small changes to the drill export before it will read it cleanly. So treat the settings in this chapter as a sound default rather than gospel, and let the manufacturer you actually pick have the final word.</p>
+<p>One honest caveat before you celebrate. The settings we used here, plain Excellon for the drill file and X2 Gerbers with KiCad’s defaults, are the generic choice that the great majority of PCB manufacturers accept without a murmur, which is exactly why we teach them first. But “most” is not “all”: some fabs are particular about how a file or two is written, and the only reliable way to know is to check your chosen manufacturer’s own guidance before you order. We meet a real example of this in Chapter 10, Getting Your Board Made, in its section on generating Gerbers, where NextPCB’s quote page needs a couple of small changes to the drill export before it will read it cleanly. So treat the settings in this chapter as a sound default rather than gospel, and let the manufacturer you actually pick have the final word.</p>
 <p>You have just taken a circuit all the way from an idea on a schematic to a folder of manufacturing files, following the same eight steps you will use on every board from here on: import, outline, place, route, fill, check, label, and export. That folder of Gerbers and drill files is, quite literally, a board waiting to be made.</p>
 <p>And here is the genuinely exciting part: you can have it made right now. The folder you just produced is the universal language of board manufacturing, and almost every online PCB manufacturer will take exactly these files, the same Gerbers and drill files sitting in your output directory, as the order for a real, physical board. You upload the folder, choose a colour and a quantity, and a couple of weeks later a stack of your blinkers arrives in the post. This volume devotes a whole later chapter, “Getting Your Board Made” (Chapter 10), to doing precisely that: choosing a manufacturer, packaging the files, reading the quote, and what to check before you commit. You are welcome to skip ahead and read it now if the urge to hold this board in your hands is too strong to resist; nothing there depends on chapters in between.</p>
 <p>For now, take a moment to appreciate what you have done across these two chapters. You drew a complete schematic, then turned it into a complete, checked, manufacturable board, and you did it by acting first and understanding later. That was the plan. In the next chapter we close the loop and explain the <em>why</em> behind everything your hands just did: why KiCad splits the work into two editors, why each part wore two faces, how your connections crossed from schematic to board, and why we checked the work twice. Let’s understand why it all worked.</p>
@@ -451,6 +471,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -459,14 +483,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

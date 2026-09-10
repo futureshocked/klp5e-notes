@@ -263,6 +263,26 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* ---- Per-reader licence line (step 3 of coding_plans/notes-content-protection.md).
+     This element is NOT emitted by the build: functions/_middleware.js injects it at
+     the edge, as the last child of <body> — deliberately OUTSIDE
+     [data-lightbox-wrapper], so the planned language switcher (which swaps that
+     wrapper's contents via fetch) cannot make the attribution vanish.
+     The middleware also emits these same declarations as an inline style=""
+     attribute, so notes built before this rule existed still render correctly.
+     KEEP THE TWO IN STEP: WATERMARK_STYLE in functions/_middleware.js.
+     font-family uses single quotes to match that inline attribute byte for byte. */
+  .note-licence {
+    margin: 3rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #64748b;
+    text-align: center;
+  }
+
   /* Offset anchored headers so they don't hide under any sticky iframe top. */
   h2[id], h3[id] { scroll-margin-top: 1.5em; }
 
@@ -297,7 +317,7 @@
 <p>The book is roughly half concepts and half hands-on work. The first five chapters lay the foundation: what a PCB is, how to read a schematic, how to read a layout, the key design concepts, and the two workflows themselves. The next four chapters walk through the projects step by step. Chapter 10 covers getting your finished board manufactured, and Chapter 11 is a recipe collection for tasks you will return to again and again.</p>
 <h2 id="sec:intro-how">How This Book Is Organised</h2>
 <p>If you are new to PCB design, read the chapters in order. Each chapter builds on the ones before it, and jumping ahead will leave gaps that become problems once the projects start.</p>
-<p>If you already have experience with PCB design but are new to KiCad, you can move more quickly. Chapter 7 gives you a tour of the KiCad editors. From there you can jump to the projects, using the earlier concept chapters as a reference whenever you need specific background.</p>
+<p>If you already have experience with PCB design but are new to KiCad, you can move more quickly. Chapter 7, Editor Orientation (Just Enough), gives you a tour of the KiCad editors. From there you can jump to the projects, using the earlier concept chapters as a reference whenever you need specific background.</p>
 <p>At the back of the book you will find the ‘Mini Encyclopedia.’ This is a reference section, not reading material. It covers PCB terms and KiCad techniques in depth, and I point you to it from the project chapters whenever a topic deserves more space than the main text allows. If you are curious about a particular term, the Mini Encyclopedia is the first place to look.</p>
 <p>All of the screenshots in this book were captured using KiCad 10, the version covered throughout. KiCad looks and behaves essentially the same on Windows, Mac, and Linux, so the images should match what you see regardless of your platform.</p>
 <h3 id="sec:intro-need">What You Will Need</h3>
@@ -317,7 +337,7 @@
 <p>KiCad is free and open-source. The source code is available for anyone to download, inspect, and build. While I am not rigid about open-source versus commercial software, when a genuinely excellent open-source option exists, I take it. KiCad is one of those cases. Being free matters especially if you are a student or hobbyist. Professional-grade PCB software can run to hundreds of dollars a year on a subscription, and for most of us, those tools offer nothing that KiCad does not.</p>
 <p>KiCad is also unlimited. There is no “standard” tier, no “professional” tier, and no ceiling on board size or layer count that you must pay to lift. You download one installer and you get everything. Other tools offer free licenses for hobbyists or students, but they always come with restrictions on board dimensions, on what you can do with the output, or on where you are allowed to manufacture. There is always the risk that the vendor changes the terms. KiCad carries none of those risks. It is unlimited and it is yours forever. I feel strongly enough about this that I make a yearly donation to CERN to support KiCad’s continued development.</p>
 <p>The feature set is professional grade. Interactive routing, differential pair routing, length matching, multi-sheet schematics, a configurable design rules checker, and a built-in SPICE simulator are all part of a standard installation. You probably will not need all of these in Volume 1, but they are there when you do. KiCad can also be extended through a plugin system and through Python scripting, so if there is a workflow it does not support out of the box, you can add it.</p>
-<p>The community behind KiCad is large and active. Hundreds of thousands of people worldwide use and contribute to the project. Contributing organizations include CERN, the Raspberry Pi Foundation, Arduino LLC, and Digikey Electronics. Translations cover more than a dozen languages. PCB manufacturers have taken notice: many now publish KiCad-specific ordering guides, and some accept the native KiCad project file directly, in addition to the industry-standard ‘Gerber’ format. Component libraries compatible with KiCad are available on major repositories such as SnapEDA and Octopart.</p>
+<p>The community behind KiCad is large and active. Hundreds of thousands of people worldwide use and contribute to the project. Contributing organisations include CERN, the Raspberry Pi Foundation, Arduino LLC, and Digikey Electronics. Translations cover more than a dozen languages. PCB manufacturers have taken notice: many now publish KiCad-specific ordering guides, and some accept the native KiCad project file directly, in addition to the industry-standard ‘Gerber’ format. Component libraries compatible with KiCad are available on major repositories such as SnapEDA and Octopart.</p>
 <p>KiCad runs on Windows, Mac, and Linux, and your project files are fully portable across all three platforms. I use it on all three myself and have never had a problem moving a project between machines. Your finished board files can be sent to any fabricator that accepts Gerber files, which covers every professional fabrication service I have ever used.</p>
 <p>KiCad’s development now follows a yearly release cycle, which means you can count on a predictable schedule of improvements. Each new major version has been more polished and capable than the last. KiCad 10, which this book is based on, is the most fully featured version yet.</p>
 <p>For all of these reasons, KiCad is the tool I reach for every time I sit down to design a PCB, and it is the tool I have chosen to teach with in this book.</p>
@@ -337,6 +357,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -345,14 +369,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

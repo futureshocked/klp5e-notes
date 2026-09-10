@@ -263,6 +263,26 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* ---- Per-reader licence line (step 3 of coding_plans/notes-content-protection.md).
+     This element is NOT emitted by the build: functions/_middleware.js injects it at
+     the edge, as the last child of <body> — deliberately OUTSIDE
+     [data-lightbox-wrapper], so the planned language switcher (which swaps that
+     wrapper's contents via fetch) cannot make the attribution vanish.
+     The middleware also emits these same declarations as an inline style=""
+     attribute, so notes built before this rule existed still render correctly.
+     KEEP THE TWO IN STEP: WATERMARK_STYLE in functions/_middleware.js.
+     font-family uses single quotes to match that inline attribute byte for byte. */
+  .note-licence {
+    margin: 3rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #64748b;
+    text-align: center;
+  }
+
   /* Offset anchored headers so they don't hide under any sticky iframe top. */
   h2[id], h3[id] { scroll-margin-top: 1.5em; }
 
@@ -302,7 +322,7 @@
 </ul>
 <p>Two of these deserve a word before we start. The first is <code>Q1</code>, the part I called the clever heart. I will come back to exactly what it does when we wire it, because it is the one piece of this circuit that is not obvious. The second is simply that most of this board is surface-mount. On the breadboard supply only the USB-C connector was, and every other part was the friendly through-hole kind. Here the boost converter, the inductor, the diodes, and the transistor are all surface-mount, because that is the only sensible way those particular parts come. I have kept the resistors and capacitors as through-hole so the board stays kind to a hand with a soldering iron, but the surface-mount parts are nothing to fear. They change nothing about how you <em>design</em> the board, and with a little practice they are every bit as manageable as their through-hole counterparts. If soldering the smallest of them still does not appeal, you can ask the fab to place them for you when you order the boards. For now, designing it is all that matters. Let’s gather the parts. </p>
 <h2 id="sec:c9-source">Sourcing the Parts</h2>
-<p>Before you draw a single wire, gather your parts, exactly as you did in Chapter 8. Run the ‘sourcing decision tree’ from Chapter 6 across the board: for each part, ask in order whether it lives in the standard library, and if not whether a reliable source can give it to you, and only if neither is true do you author it yourself, which still waits for Volume 2. Stop at the first yes.</p>
+<p>Before you draw a single wire, gather your parts, exactly as you did in Chapter 8. Run the tree from Chapter 6, Finding, Importing, and Managing Parts, across the board, using its section on the sourcing decision tree: for each part, ask in order whether it lives in the standard library, and if not whether a reliable source can give it to you, and only if neither is true do you author it yourself, which still waits for Volume 2. Stop at the first yes.</p>
 <p>Here is the full parts list, with the value you will give each part as you place it. Keep it beside you, because the values matter: the pair <code>R1</code> and <code>R2</code> in particular sets the output voltage, so they are worth getting exactly right.</p>
 <table>
 <thead>
@@ -402,12 +422,12 @@
 <p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-4-snapeda-download-symbol-footprint-step3.png" style="width:45.0%" /></p>
 <p>Figure 9.5: Then pick the file version. Choose “V6 &amp; Later” (the arrow) for any modern KiCad install, and the symbol, footprint, and 3D model arrive together in one package.</p>
 <p>Do not skip the check Chapter 6 called the most important sentence in the chapter: lay the manufacturer’s recommended land pattern beside the footprint KiCad shows you and confirm the pad count, the pitch, and which pad is pin 1 before you trust it. This matters a little more here than it did on the breadboard supply, because almost every part on this board is surface-mount, and a surface-mount footprint leaves you no room to rescue a mirrored or miscounted pin by bending a leg. A minute of looking now saves an evening of chasing later.</p>
-<p>Finally, do the housekeeping that keeps a project healthy: copy the parts you are using into a project-local library, exactly as Chapter 6’s last section described, reached through the project-specific library table with a path built on <code>${KIPRJMOD}</code>. The imported converter, diodes, and inductor especially belong <em>inside</em> the project (Figure 9.6). The test is the same one you know: when you can zip the project folder, hand it to a friend with a fresh KiCad install, and have them open it whole, your parts are sourced. Now let’s draw.</p>
+<p>Finally, do the housekeeping that keeps a project healthy: copy the parts you are using into a project-local library, exactly as Chapter 6, Finding, Importing, and Managing Parts, described in its section on making your project self-contained, reached through the project-specific library table with a path built on <code>${KIPRJMOD}</code>. The imported converter, diodes, and inductor especially belong <em>inside</em> the project (Figure 9.6). The test is the same one you know: when you can zip the project folder, hand it to a friend with a fresh KiCad install, and have them open it whole, your parts are sourced. Now let’s draw.</p>
 
 <p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-5-local-library-organisation.png" style="width:45.0%" /></p>
 <p>Figure 9.6: One tidy way to keep the imported parts inside the project. A <code>Libraries</code> folder holds <code>symbols</code>, <code>footprints</code>, and <code>3D-models</code> subfolders beside the project files, so the whole design travels as a single unit.</p>
 <h2 id="sec:c9-schematic">Drawing the Schematic</h2>
-<p>With the parts gathered, you are ready for the eight-step schematic workflow from Chapter 5. You know every move; I will name each step, give you the details particular to this board, and point you back to Chapter 2 for the mechanics. One thing is different on this project, though: because the board reproduces Clemens Valens’ design, you set the reference designators by hand to match his, rather than letting KiCad auto-annotate. Pinning each part to the designator it carries in the original, so your <code>R1</code> is his <code>R1</code>, lets you read his schematic straight onto yours, and once every part is named and valued the wiring is a direct trace from his drawing. Here is the schematic you are working toward (Figure 9.7); keep it beside you as your guide.</p>
+<p>With the parts gathered, you are ready for the eight-step schematic workflow from Chapter 5. You know every move; I will name each step, give you the details particular to this board, and point you back to Chapter 2, A Hands-On Tour: Schematic, and its section on the 8-step pass, for the mechanics. One thing is different on this project, though: because the board reproduces Clemens Valens’ design, you set the reference designators by hand to match his, rather than letting KiCad auto-annotate. Pinning each part to the designator it carries in the original, so your <code>R1</code> is his <code>R1</code>, lets you read his schematic straight onto yours, and once every part is named and valued the wiring is a direct trace from his drawing. Here is the schematic you are working toward (Figure 9.7); keep it beside you as your guide.</p>
 
 <p><img src="/assets/klp5e-vol1/ch09/ch09-solar-schematic-5b-finished-schematic.png" style="width:100.0%" /></p>
 <p>Figure 9.7: The finished schematic for the tiny solar power supply, after Clemens Valens’ original. This is where the schematic half is headed: every part placed, named, valued, and wired, the three named nets (<code>SOLAR_P</code>, <code>BAT_P</code>, <code>OUT_P</code>) labelled, and plain-text notes beside the connectors and switch (the arrows mark <code>SOLAR</code>, <code>BATTERY</code>, <code>ON/OFF</code>, and <code>OUT</code>) so the sheet reads at a glance.</p>
@@ -522,6 +542,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -530,14 +554,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

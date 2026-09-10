@@ -263,6 +263,26 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* ---- Per-reader licence line (step 3 of coding_plans/notes-content-protection.md).
+     This element is NOT emitted by the build: functions/_middleware.js injects it at
+     the edge, as the last child of <body> — deliberately OUTSIDE
+     [data-lightbox-wrapper], so the planned language switcher (which swaps that
+     wrapper's contents via fetch) cannot make the attribution vanish.
+     The middleware also emits these same declarations as an inline style=""
+     attribute, so notes built before this rule existed still render correctly.
+     KEEP THE TWO IN STEP: WATERMARK_STYLE in functions/_middleware.js.
+     font-family uses single quotes to match that inline attribute byte for byte. */
+  .note-licence {
+    margin: 3rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #64748b;
+    text-align: center;
+  }
+
   /* Offset anchored headers so they don't hide under any sticky iframe top. */
   h2[id], h3[id] { scroll-margin-top: 1.5em; }
 
@@ -434,7 +454,7 @@
 <p><img src="/assets/klp5e-vol1/ch10/ch10-0-nextpcb-PCB-and-assembly.png" /></p>
 <p>Figure 10.12: The assembly path, for later. Step 1 (❶) is the bare-board order you just placed — upload the Gerbers. Step 2 (❷) is what assembly adds on top: a Centroid (pick-and-place) file and the BOM, so the factory knows which parts to buy and where each one goes. The parts table shown is NextPCB’s own template example, not our board’s BOM.</p>
 <p>Since I am recommending NextPCB and they sponsor this book, let me be straight with you one last time: I suggest them because they have served my own projects well, and everything you have just learned works exactly the same at any honest competitor. The skill is yours, not theirs.</p>
-<p>Before you close the laptop, put that skill to work once more. You have taken the breadboard supply all the way to a quote; now do the same with the solar supply from Chapter 9. Plot and drill its Gerbers if you have not already — Chapter 9 covers the steps, and they are the same ones you used here — zip them with the files at the archive’s root, open them in GerbView for a last look, then upload the archive to your fab’s quote page and set the options. Take it right up to the checkout and read the price back. You do not need to place the order or pay for anything, unless you would like a second board to hold, in which case go ahead. The point is to run the whole path yourself, on a board you designed, so the process becomes yours rather than something you only watched me do.</p>
+<p>Before you close the laptop, put that skill to work once more. You have taken the breadboard supply all the way to a quote; now do the same with the solar supply from Chapter 9. Plot and drill its Gerbers if you have not already — Chapter 9, Project 2: Tiny Solar Power Supply, covers the steps in its section on laying out the board, and they are the same ones you used here — zip them with the files at the archive’s root, open them in GerbView for a last look, then upload the archive to your fab’s quote page and set the options. Take it right up to the checkout and read the price back. You do not need to place the order or pay for anything, unless you would like a second board to hold, in which case go ahead. The point is to run the whole path yourself, on a board you designed, so the process becomes yours rather than something you only watched me do.</p>
 <p>And that is the whole journey. You have taken a circuit from an idea on a blank schematic, through two complete workflows, into a folder of manufacturing files, and now out to a factory that will send it back as a board you can hold in your hand. That was the promise of this volume: to design, verify, order, and understand a simple two-layer board, and you have now done all four, twice. In the next chapter we gather a handful of ‘essential recipes,’ the short, standalone how-tos for useful tasks that did not belong to either project. For now, save your work, keep that BOM and those Gerbers safe, and enjoy the wait for the post.</p>
 
 </div>
@@ -449,6 +469,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -457,14 +481,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

@@ -263,6 +263,26 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* ---- Per-reader licence line (step 3 of coding_plans/notes-content-protection.md).
+     This element is NOT emitted by the build: functions/_middleware.js injects it at
+     the edge, as the last child of <body> — deliberately OUTSIDE
+     [data-lightbox-wrapper], so the planned language switcher (which swaps that
+     wrapper's contents via fetch) cannot make the attribution vanish.
+     The middleware also emits these same declarations as an inline style=""
+     attribute, so notes built before this rule existed still render correctly.
+     KEEP THE TWO IN STEP: WATERMARK_STYLE in functions/_middleware.js.
+     font-family uses single quotes to match that inline attribute byte for byte. */
+  .note-licence {
+    margin: 3rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #64748b;
+    text-align: center;
+  }
+
   /* Offset anchored headers so they don't hide under any sticky iframe top. */
   h2[id], h3[id] { scroll-margin-top: 1.5em; }
 
@@ -279,42 +299,42 @@
   <ul>
     <li><a class="note-jump" data-jump="sec:c1-anatomy" role="link" tabindex="0">PCB Anatomy</a>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="a-board-is-a-sandwich-of-layers" role="link" tabindex="0">A board is a sandwich of layers</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-layers" role="link" tabindex="0">A board is a sandwich of layers</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="the-substrate" role="link" tabindex="0">The substrate</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-substrate" role="link" tabindex="0">The substrate</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="copper-tracks-and-traces" role="link" tabindex="0">Copper: tracks and traces</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-copper" role="link" tabindex="0">Copper: tracks and traces</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="pads-holes-and-the-two-ways-to-mount-a-part" role="link" tabindex="0">Pads, holes, and the two ways to mount a part</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-pads" role="link" tabindex="0">Pads, holes, and the two ways to mount a part</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="vias" role="link" tabindex="0">Vias</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-vias" role="link" tabindex="0">Vias</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="soldermask" role="link" tabindex="0">Soldermask</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-soldermask" role="link" tabindex="0">Soldermask</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="silkscreen" role="link" tabindex="0">Silkscreen</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-silkscreen" role="link" tabindex="0">Silkscreen</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="surface-finish" role="link" tabindex="0">Surface finish</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-surface-finish" role="link" tabindex="0">Surface finish</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="mounting-holes-copper-pours-and-thermal-relief" role="link" tabindex="0">Mounting holes, copper pours, and thermal relief</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-thermal-relief" role="link" tabindex="0">Mounting holes, copper pours, and thermal relief</a></li>
       </ul>
     </li>
     <li><a class="note-jump" data-jump="sec:c1-pipeline" role="link" tabindex="0">The Design → Fabrication → Assembly Pipeline</a>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="design-what-you-do-in-kicad" role="link" tabindex="0">Design: what you do in KiCad</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-design" role="link" tabindex="0">Design: what you do in KiCad</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="fabrication-handing-off-to-the-factory" role="link" tabindex="0">Fabrication: handing off to the factory</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-fabrication" role="link" tabindex="0">Fabrication: handing off to the factory</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="assembly-putting-the-parts-on" role="link" tabindex="0">Assembly: putting the parts on</a></li>
+        <li><a class="note-jump" data-jump="sec:c1-assembly" role="link" tabindex="0">Assembly: putting the parts on</a></li>
       </ul>
     </li>
     <li><a class="note-jump" data-jump="sec:c1-install" role="link" tabindex="0">Installing KiCad 10</a>
@@ -331,7 +351,7 @@
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_01_v8.png" /></p>
 <p>Figure 1.1: The top side of our example board, with the main features we’ll meet in this section labelled.</p>
 
-<h3 id="a-board-is-a-sandwich-of-layers">A board is a sandwich of layers</h3>
+<h3 id="sec:c1-layers">A board is a sandwich of layers</h3>
 <p>The easiest way to picture a PCB is as a sandwich (Figure 1.2). At its core is an insulating board that gives the PCB its strength and shape. Onto that core, the manufacturer bonds a thin sheet of copper and then carves the copper away until only the wiring you designed remains. Over the copper goes a protective coating, and on top of that, some printed lettering. Stack those up and you have a board:</p>
 <ul>
 <li>the ‘substrate’, the rigid insulating core;</li>
@@ -345,18 +365,18 @@
 Figure coming soon
 </div>
 <p>Figure 1.2: A two-layer PCB is a sandwich of substrate, copper, soldermask, and silkscreen.</p>
-<h3 id="the-substrate">The substrate</h3>
+<h3 id="sec:c1-substrate">The substrate</h3>
 <p>The substrate is the board you can hold. By far the most common material is a fiberglass-and-epoxy laminate the industry calls ‘FR-4,’ and it’s what your first boards will almost certainly be made of. It’s cheap, strong, and a good electrical insulator. The standard thickness is 1.6 mm (about the thickness of two stacked credit cards), but manufacturers will happily make boards from roughly 0.4 mm up to 2.0 mm if you ever need thinner or thicker stock.</p>
 <p>FR-4 isn’t the only option. Boards meant to bend are built on a thin, flexible plastic film instead (‘flex’ PCBs). Boards that have to shed a lot of heat, such as high-power LED lighting, are sometimes built on an aluminium or copper core. And boards for very high-frequency radio work use specialised materials such as PTFE-based laminates. You don’t need any of these to get started, and we’ll only reach for them much later in the series, but it’s worth knowing FR-4 is a choice, not the only possibility.</p>
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_07_v8.png" /></p>
 <p>Figure 1.3: Our example board is a standard 1.6 mm-thick FR-4 board.</p>
-<h3 id="copper-tracks-and-traces">Copper: tracks and traces</h3>
+<h3 id="sec:c1-copper">Copper: tracks and traces</h3>
 <p>The wiring on a PCB is made of copper. The thin copper lines you can see snaking across the board are called ‘tracks’, or ‘traces’. The two words mean the same thing, and you’ll hear both in the field. A track carries current from one point on the board to another, exactly as a piece of wire would, and you control how wide each one is in your design. Wider tracks carry more current; we’ll come back to that idea when a project actually needs it.</p>
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_10_v8.png" /></p>
 <p>Figure 1.4: The copper lines connecting points on the board are tracks (also called traces).</p>
-<h3 id="pads-holes-and-the-two-ways-to-mount-a-part">Pads, holes, and the two ways to mount a part</h3>
+<h3 id="sec:c1-pads">Pads, holes, and the two ways to mount a part</h3>
 <p>Components don’t solder to bare track; they solder to ‘pads,’ small exposed areas of copper sized to match a component’s connections. How a part attaches to its pads depends on which of the two main component styles it is: ‘through-hole’ or ‘surface-mount.’</p>
 <p>A through-hole part (often abbreviated ‘THT,’ for through-hole technology) has wire leads or pins that you push through holes drilled in the board, then solder on the other side (Figure 1.5). Those holes run all the way from the top face to the bottom and are plated on the inside with metal, so the copper on the top connects electrically to the copper on the bottom. The plated ring of copper around each hole is the pad; the more precise name for that ring is the ‘annular ring.’</p>
 
@@ -373,27 +393,27 @@ Figure coming soon
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_03_v8.png" /></p>
 <p>Figure 1.8: A surface-mount component solders flat onto pads on the board’s surface.</p>
-<h3 id="vias">Vias</h3>
+<h3 id="sec:c1-vias">Vias</h3>
 <p>Look closely and you’ll spot tiny holes scattered across the board that have no component in them (Figure 1.9). These are called ‘vias.’ A via looks like a mounting hole but does a different job: it lets a track jump from one copper layer to another. If a track on the top layer needs to continue on the bottom layer (perhaps to get around something in its way), it dives into a via, crosses to the other side, and carries on. On a two-layer board that’s the whole story. Boards with more layers can use fancier vias that connect only some of the layers (‘blind’ and ‘buried’ vias), but you won’t need those until much later.</p>
 
 <div class="figure-pending">
 Figure coming soon
 </div>
 <p>Figure 1.9: Vias are small plated holes that carry a track from one layer to another. </p>
-<h3 id="soldermask">Soldermask</h3>
+<h3 id="sec:c1-soldermask">Soldermask</h3>
 <p>That coloured coating over most of the board is the ‘soldermask.’ On our example board it happens to be one colour, but soldermask comes in a whole menu of colours these days: green is the classic, but red, blue, black, white, yellow, and purple are all standard options from most manufacturers at no real extra cost. The colour is up to you; the job it does is the same regardless.</p>
 <p>The soldermask does two important things. First, it seals the copper away from the air. Bare copper slowly oxidises, and oxidised copper conducts poorly, so the mask keeps your tracks healthy over time. Second, it makes the board far easier to solder. The mask coats everything <em>except</em> the pads, and because solder won’t stick to the mask, it stays where you want it, on the pads, instead of wandering between them. That matters because pads can sit very close together, and the tip of a soldering iron is often as wide as a pad or wider. Without soldermask it’s easy to accidentally join two neighbouring pads with a blob of solder, a defect called a ‘solder bridge’ (Figure 1.10). The mask doesn’t make bridges impossible, but it makes them much less likely.</p>
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_06_v8.png" /></p>
 <p>Figure 1.10: A solder bridge, a defect that soldermask helps prevent. </p>
-<h3 id="silkscreen">Silkscreen</h3>
+<h3 id="sec:c1-silkscreen">Silkscreen</h3>
 <p>The text and line art printed on the outside of the board is the ‘silkscreen,’ usually in white ink (Figure 1.11). The silkscreen carries no electricity; it’s there purely for the humans who build and use the board. We use it to outline where each component goes, to label pins and connectors, to print the board’s name and version number, and to add logos or other markings. It’s a good habit to give every board a name and a version on the silkscreen, so that a year later you can tell at a glance which board you’re holding. Silkscreen can go on the top, the bottom, or both.</p>
 
 <p><img src="/assets/klp5e-vol1/ch01/0012-what-is-a-pcb_04_v8.jpg" /></p>
 <p>Figure 1.11: The white lettering and outlines are the silkscreen.</p>
-<h3 id="surface-finish">Surface finish</h3>
+<h3 id="sec:c1-surface-finish">Surface finish</h3>
 <p>There’s one more layer most people never notice. Bare copper pads would oxidise just like bare tracks, so the exposed pads get a thin protective ‘surface finish’ that keeps them solderable. You’ll choose a finish when you order a board, so it’s worth recognising the common names. The cheapest and most common is ‘HASL’ (hot-air solder levelling), now usually offered in a lead-free version. A slightly more expensive finish called ‘ENIG’ coats the pads with a microscopically thin layer of gold over nickel; it gives beautifully flat, gold-coloured pads and has become quite affordable. A third option, ‘OSP,’ is a thin organic coating. For your first boards, the standard lead-free HASL is perfectly fine, but when you see “ENIG” or “gold” offered, now you’ll know what it means.</p>
-<h3 id="mounting-holes-copper-pours-and-thermal-relief">Mounting holes, copper pours, and thermal relief</h3>
+<h3 id="sec:c1-thermal-relief">Mounting holes, copper pours, and thermal relief</h3>
 <p>A few more features round out the board. Sometimes you’ll want to bolt your PCB down inside a case, so you add a ‘mounting hole’, much like the holes for through-hole parts, except it carries no electrical connection and doesn’t need to be plated. A screw and nut through it hold the board in place.</p>
 <p>You’ll also often see large open areas of copper rather than thin tracks (Figure 1.12). This is a ‘copper pour’ (or ‘copper fill’), and it’s commonly used to spread a ground or power connection across a wide region of the board. Where a pad connects to one of these large copper areas, you’ll frequently notice the connection is made through a few short, narrow spokes rather than solid metal. That little spoked connection is called a ‘thermal relief.’ It exists to make soldering easier: without it, the big copper area would whisk heat away from your soldering iron faster than you could warm the joint. The thermal relief deliberately pinches the connection so the heat stays put long enough to make a clean joint.</p>
 
@@ -402,7 +422,7 @@ Figure coming soon
 <p>That’s a complete tour of the board in your hand. Here’s the encouraging part: getting a board like this made is no longer the expensive, industrial affair it once was. Manufacturers will produce a handful of small two-layer boards for you for only a few dollars, in your choice of colour and finish, and ship them within a week or two, some far faster. Designing the board is now the interesting part, and that’s exactly what KiCad is for. So how does the design on your screen become the board on your bench? That’s the pipeline we’ll look at next.</p>
 <h2 id="sec:c1-pipeline">The Design → Fabrication → Assembly Pipeline</h2>
 <p>Turning an idea into a working board happens in three stages, and it helps to keep them straight from the start because different people (and different tools) own each one: you <strong>design</strong> the board, a factory <strong>fabricates</strong> it, and then someone, maybe you, maybe a machine, <strong>assembles</strong> the components onto it.</p>
-<h3 id="design-what-you-do-in-kicad">Design: what you do in KiCad</h3>
+<h3 id="sec:c1-design">Design: what you do in KiCad</h3>
 <p>Design is the part this book is mostly about, and it’s the part KiCad handles. Designing a PCB means creating the <em>plans</em> for a board; it is not the same as manufacturing one. As the designer, you decide what the circuit is, what it’s built from, and how everything is laid out physically. It’s a procedural, iterative craft with a real element of personal style; over time, your boards will start to look recognisably yours. You don’t need to be a manufacturing expert, but you do need a rough sense of what a factory can and can’t do, so your design stays buildable.</p>
 <p>In KiCad, design happens in two big steps (we’ll spend whole chapters on each, so this is just the map):</p>
 <ol type="1">
@@ -410,10 +430,10 @@ Figure coming soon
 <li><strong>Layout design.</strong> Then you create the ‘layout’, the physical board itself. Here every symbol gets paired with a ‘footprint,’ the real-world pattern of pads and holes that the actual part will solder to. You arrange those footprints on the board, draw the copper tracks that connect them, define the board’s outline, and add the mounting holes, silkscreen, and other features you met in the previous section.</li>
 </ol>
 <p>The same schematic can become many different layouts, which is why we separate the two. KiCad also checks your work at each step, an ‘Electrical Rules Check’ on the schematic and a ‘Design Rules Check’ on the layout, to catch mistakes early, while they’re cheap to fix.</p>
-<h3 id="fabrication-handing-off-to-the-factory">Fabrication: handing off to the factory</h3>
+<h3 id="sec:c1-fabrication">Fabrication: handing off to the factory</h3>
 <p>When the layout is finished, you export it in the format a manufacturer understands. The industry standard is a set of files called ‘Gerber’ files: plain text files, one per layer of your board, describing exactly where the copper, soldermask, silkscreen, and holes go. (The format is maintained by a company called Ucamco; you never have to read a Gerber file by hand, but it’s good to know the name.) Because they’re text, you can even keep them under version control, which we’ll do in a later volume.</p>
 <p>You upload those files to a PCB manufacturer (a ‘fab house’) and a couple of weeks later a stack of finished boards arrives. This is where modern hobby electronics has changed the most. Services such as OSH Park and NextPCB will make small two-layer boards for only a few dollars, in your choice of colour and surface finish, with quick turnaround. It is possible to etch boards yourself at home with chemicals, but it’s messy, smelly, and mildly hazardous, and the results rarely match a factory’s. For the price, I don’t bother, and I don’t recommend you do either when you’re starting out.</p>
-<h3 id="assembly-putting-the-parts-on">Assembly: putting the parts on</h3>
+<h3 id="sec:c1-assembly">Assembly: putting the parts on</h3>
 <p>A bare board from the fab is just that: bare. ‘Assembly’ is the step that solders the actual components onto it. For a simple through-hole board you can do this yourself with a soldering iron in an afternoon. For surface-mount boards, you can still hand-solder with a little practice, or you can have the fab house assemble the board for you: many now offer an assembly service where they source the parts, place them by machine, and ship a finished, populated board. Either way, assembly is a separate stage from both design and fabrication, and the boundary matters, because it’s where your job as the designer ends and the factory’s begins.</p>
 <p>With the big picture in place, it’s time to get the tool. Let’s install KiCad.</p>
 <h2 id="sec:c1-install">Installing KiCad 10</h2>
@@ -458,6 +478,10 @@ Figure coming soon
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -466,14 +490,14 @@ Figure coming soon
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }

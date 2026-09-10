@@ -263,6 +263,26 @@
   /* Smooth-scroll to anchors when TOC links are clicked. Native CSS; no JS. */
   html { scroll-behavior: smooth; }
 
+  /* ---- Per-reader licence line (step 3 of coding_plans/notes-content-protection.md).
+     This element is NOT emitted by the build: functions/_middleware.js injects it at
+     the edge, as the last child of <body> — deliberately OUTSIDE
+     [data-lightbox-wrapper], so the planned language switcher (which swaps that
+     wrapper's contents via fetch) cannot make the attribution vanish.
+     The middleware also emits these same declarations as an inline style=""
+     attribute, so notes built before this rule existed still render correctly.
+     KEEP THE TWO IN STEP: WATERMARK_STYLE in functions/_middleware.js.
+     font-family uses single quotes to match that inline attribute byte for byte. */
+  .note-licence {
+    margin: 3rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #64748b;
+    text-align: center;
+  }
+
   /* Offset anchored headers so they don't hide under any sticky iframe top. */
   h2[id], h3[id] { scroll-margin-top: 1.5em; }
 
@@ -281,28 +301,28 @@
     </li>
     <li><a class="note-jump" data-jump="sec:c2-pass" role="link" tabindex="0">The 8-Step Pass</a>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-1-create-the-project-and-schematic" role="link" tabindex="0">Step 1: Create the project and schematic</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step1" role="link" tabindex="0">Step 1: Create the project and schematic</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-2-place-symbols" role="link" tabindex="0">Step 2: Place symbols</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step2" role="link" tabindex="0">Step 2: Place symbols</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-3-annotate" role="link" tabindex="0">Step 3: Annotate</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step3" role="link" tabindex="0">Step 3: Annotate</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-4-set-component-values" role="link" tabindex="0">Step 4: Set component values</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step4" role="link" tabindex="0">Step 4: Set component values</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-5-wire-and-label" role="link" tabindex="0">Step 5: Wire and label</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step5" role="link" tabindex="0">Step 5: Wire and label</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-6-assign-footprints" role="link" tabindex="0">Step 6: Assign footprints</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step6" role="link" tabindex="0">Step 6: Assign footprints</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-7-electrical-rules-check" role="link" tabindex="0">Step 7: Electrical rules check</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step7" role="link" tabindex="0">Step 7: Electrical rules check</a></li>
       </ul>
       <ul class="note-toc-sub">
-        <li><a class="note-jump" data-jump="step-8-hand-off-to-layout" role="link" tabindex="0">Step 8: Hand off to layout</a></li>
+        <li><a class="note-jump" data-jump="sec:c2-step8" role="link" tabindex="0">Step 8: Hand off to layout</a></li>
       </ul>
     </li>
     <li><a class="note-jump" data-jump="sec:c2-going-deeper" role="link" tabindex="0">Going Deeper: How the Blinker Works</a>
@@ -338,7 +358,7 @@
 </ol>
 <p>Don’t try to memorise the list. You will have walked all eight by the end of this chapter, and we will pin them down properly as a reusable checklist in Chapter 5. For now, just notice the shape: you build the circuit, you check it, then you hand it on. Let’s walk through it.</p>
 <h2 id="sec:c2-pass">The 8-Step Pass</h2>
-<h3 id="step-1-create-the-project-and-schematic">Step 1: Create the project and schematic</h3>
+<h3 id="sec:c2-step1">Step 1: Create the project and schematic</h3>
 <p>Every KiCad design lives inside a ‘project,’ a folder that holds the schematic, the board, and a handful of supporting files, all sharing one name. We met the project manager in the previous chapter; now we will use it.</p>
 <p>Start KiCad so the project manager window appears. Choose “File” then “New Project,” pick a sensible folder, and give the project a name. I am calling mine <code>ch02-blinky</code>, but any name without spaces will do. KiCad creates the folder for you and, inside it, the project file along with an empty schematic and an empty board, all named to match (Figure 2.2). You will see them appear in the file browser on the left of the window: the <code>.kicad_pro</code> project file at the top, with the <code>.kicad_pcb</code> board and the <code>.kicad_sch</code> schematic nested under it.</p>
 
@@ -350,7 +370,7 @@
 <p>Figure 2.3: The Schematic Editor, ready for a new design. The numbered callouts mark the parts you will use today.</p>
 <p>Take ten seconds to get your bearings; we will explore the editor properly in Chapter 7, so a quick orientation is all you need now. Four areas are worth knowing, and they are numbered in Figure 2.3. The toolbar across the <strong>top</strong> (1) carries the everyday commands: save, undo, zoom, and the check tools you will meet later. The toolbar down the <strong>left</strong> edge (2) controls how things look: the grid, the measurement units, and the cursor. The tall toolbar down the <strong>right</strong> edge (3) holds the tools you use to build a circuit: add a symbol, draw a wire, place a label, and so on. Down in the bottom-right corner sits the title block (4), where a design records its name, date, and revision. Two movements will serve you for the whole tour. To <strong>pan</strong> around the sheet, press and hold the middle (or right) mouse button and drag. To <strong>zoom</strong>, roll the mouse wheel; the view zooms toward wherever the pointer sits. If you ever lose your drawing off the edge of the screen, press the “Home” key to fit everything back into view.</p>
 <p>One last thing worth knowing before we place a part: the canvas has a ‘grid,’ an invisible lattice that your parts and wires snap to. The standard schematic grid is 50 ‘mil’ (a mil is one-thousandth of an inch), and you should leave it alone. KiCad 10 reports the grid in millimetres down in the status bar, where you will see <code>grid 1.27 mm</code>; that is the same spacing, since 1.27 mm equals exactly 50 mil (Figure 2.3). The grid matters more than it looks: KiCad only treats two things as connected when their ends land on exactly the same point, and keeping everything on the grid is what makes that happen reliably. We will see why that is handy in Step 5. </p>
-<h3 id="step-2-place-symbols">Step 2: Place symbols</h3>
+<h3 id="sec:c2-step2">Step 2: Place symbols</h3>
 <p>A schematic is built from ‘symbols.’ A symbol is a small drawing that stands for a real component: the zig-zag (or rectangle) of a resistor, the triangle-and-bar of an LED, the numbered box of a chip. Each symbol shows the part’s ‘pins,’ the points where wires attach. Our first real job is to drop a symbol onto the sheet for every part in the blinker.</p>
 <p>To add a symbol, press the “A” hotkey, or choose “Place Symbols” from the “Place” menu, or click the symbol button (the one that looks like an op-amp triangle) at the top of the right toolbar. The two arrows in Figure 2.4 point to the menu entry and the toolbar button; any of the three routes opens the ‘symbol chooser,’ the window you use to find a part and preview it before placing it (Figure 2.5).</p>
 
@@ -382,7 +402,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-7-components-in-editor-no-references.png" style="width:100.0%" /></p>
 <p>Figure 2.8: All the parts are on the sheet, not yet connected and not yet numbered. Every one still shows a question mark (<code>R?</code>, <code>C?</code>, <code>U?</code>) instead of a unique designator.</p>
-<h3 id="step-3-annotate">Step 3: Annotate</h3>
+<h3 id="sec:c2-step3">Step 3: Annotate</h3>
 <p>Every part is on the sheet, and every one still carries a question mark in its name: <code>R?</code>, <code>C?</code>, <code>U?</code>. Giving each part a unique label, like <code>R1</code>, <code>R2</code>, or <code>U1</code>, is called ‘annotation,’ and KiCad can do it for you in one click. We do it now, before wiring, so that every part already has the name we will use to talk about it while we connect and check the circuit.</p>
 <p>Depending on your settings, KiCad may have been numbering parts automatically as you placed them, in which case you will already see <code>R1</code>, <code>R2</code>, and so on. Either way, it is good practice to run the annotation tool once to make sure every part is numbered cleanly and none was missed.</p>
 <p>Open the tool from the “Tools” menu by choosing “Annotate Schematic,” or click its button on the top toolbar. The dialog (Figure 2.9) offers a few choices about how to number, such as sorting the parts by their X or Y position on the sheet, but the defaults are sensible and you can leave them. Click “Annotate,” and every question mark turns into a real number (Figure 2.10). That is all there is to it.</p>
@@ -393,7 +413,7 @@
 <p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-9-components-annotated.png" style="width:100.0%" /></p>
 <p>Figure 2.10: Every question mark is now a real, unique number (<code>R1</code>, <code>R2</code>, <code>R3</code>, <code>C1</code>, <code>C2</code>, <code>D1</code>, <code>U1</code>, <code>J1</code>). The parts still carry their generic values, which we set next.</p>
 <p>Why bother, and why now? Because from here on, every part needs a unique name so we can refer to it without ambiguity, both to each other and to KiCad’s own tools. The wiring you are about to draw is easier to follow when you can say “the wire from <code>U1</code> pin 3 to <code>R3</code>”; the check we run in Step 7 reports each finding by designator; and the board we build in the next chapter relies on each part having one. Annotation is quick, and doing it before wiring keeps the rest of the workflow smooth.</p>
-<h3 id="step-4-set-component-values">Step 4: Set component values</h3>
+<h3 id="sec:c2-step4">Step 4: Set component values</h3>
 <p>Numbering tells the parts apart; now we say what each one actually is. Look at your resistors and capacitors and you will see they still wear the generic value they were born with: a resistor that just reads <code>R</code>, a capacitor that just reads <code>C</code>. Setting the ‘value’ field turns the schematic into a precise description of the circuit, the difference between “a resistor” and “a 10 kΩ resistor.”</p>
 <p>To set a value, double-click a part (or select it and press “E”) to open its Properties, and type into the “Value” field. Work through the parts that need one:</p>
 <ul>
@@ -407,7 +427,7 @@
 
 <p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-10-component-values-added.png" style="width:100.0%" /></p>
 <p>Figure 2.11: Every resistor and capacitor now declares its value (<code>10k</code>, <code>47k</code>, <code>470</code>, <code>10 nF</code>, <code>10 µF</code>). The sheet now says exactly what the circuit is made of.</p>
-<h3 id="step-5-wire-and-label">Step 5: Wire and label</h3>
+<h3 id="sec:c2-step5">Step 5: Wire and label</h3>
 <p>Now we draw the connections. In a schematic, a wire is not really a drawing of a physical wire; it is a way of declaring that two pins are electrically joined. Draw a wire from one pin to another and you have told KiCad, “these two points are the same node.” That node has a name (KiCad calls it a ‘net’), and in the next chapter the board will use those nets to know what to connect to what.</p>
 <p>To start wiring, press the “W” hotkey, or click the wire tool (the green diagonal line) on the right toolbar. Move the pointer to the end of a pin (you will see the cursor snap to it) and left-click to begin a wire. Click again at each corner you want, and finish on the destination pin. Double-click, or press “Esc,” to end the wire. As you connect pins, notice the small squares that sit at the unconnected end of every pin: when a wire properly lands on a pin, that little square disappears. Those squares are a quiet, reliable hint. If you finish wiring and a square is still showing, something there is not actually connected, even if it looks close.</p>
 <p>Work your way around the circuit, following the finished schematic in Figure 2.1 as your guide. Connect the 555’s pins to the resistors and capacitors, run the output through the LED’s resistor to the LED, and bring the connector to the supply. Where a wire crosses a spot that another wire already occupies and the two should join, KiCad drops a small ‘junction’ dot automatically to show they are connected. Where wires merely cross without a junction dot, they are <em>not</em> connected, which is exactly how you draw two signals that pass over each other without touching.</p>
@@ -423,7 +443,7 @@
 <p><img src="/assets/klp5e-vol1/ch02/ch02-schematic-11-adding-blink-net-label.png" style="width:65.0%" /></p>
 <p>Figure 2.12: Naming the output net “BLINK” in the Label Properties dialog, with the wiring taking shape behind it.</p>
 <p>Take your time here. Wiring is the part of schematic work that rewards a little patience, and it is far and away the most satisfying once it clicks. When every pin’s little square has vanished and the drawing matches Figure 2.1, the circuit is complete. Save your work with “Ctrl+S.” The circuit is drawn, numbered, valued, and named; next we tell each symbol which physical part it will become.</p>
-<h3 id="step-6-assign-footprints">Step 6: Assign footprints</h3>
+<h3 id="sec:c2-step6">Step 6: Assign footprints</h3>
 <p>Here we reach the bridge between the circuit and the physical board. Every symbol on your sheet stands for a part’s <em>function</em>: a resistor’s symbol is the same zig-zag whether the real resistor is a tiny surface-mount chip or a fat through-hole part with long legs. Before we can lay out a board, we have to tell each symbol which physical part it will actually become. That physical pattern of pads and holes is the ‘footprint,’ and pairing a symbol with one is called ‘assigning a footprint.’ We will dig into why symbols and footprints are kept separate in Chapter 4; for now, just know that the board cannot be built until each symbol knows its footprint.</p>
 <p>The most convenient way to assign footprints to a whole circuit at once is the Footprint Assignment tool. Open it from the “Tools” menu by choosing “Assign Footprints,” or from its button on the top toolbar (1 in Figure 2.13). A three-pane window appears: the available footprint libraries on the left (2), your symbols and their assignments in the middle (4), and the footprints inside the selected library on the right (3). To make an assignment, click a symbol in the middle, find a suitable footprint on the right, and double-click it.</p>
 
@@ -478,7 +498,7 @@
 </tbody>
 </table>
 <p>If you ever want to assign a footprint to a single part instead of the whole circuit, you can: double-click the symbol on the sheet (or select it and press “E”) to open its Properties, and set the “Footprint” field there. The Footprint Assignment tool is just the faster way when you have several parts to do at once.</p>
-<h3 id="step-7-electrical-rules-check">Step 7: Electrical rules check</h3>
+<h3 id="sec:c2-step7">Step 7: Electrical rules check</h3>
 <p>Before we hand the design to the board, we ask KiCad to check our work. The ‘Electrical Rules Check,’ or ERC, reads the whole schematic and flags the kinds of mistakes that are easy to make and easy to miss: a pin left unconnected, a power input with nothing driving it, two outputs wired together. It cannot tell you whether your circuit is a good idea, but it is excellent at catching the slips that would otherwise follow you onto the board.</p>
 <p>One small piece of housekeeping comes first, and it is one almost every board needs. Our blinker takes its power in through the connector, J1, not from a chip that announces itself as a supply, so KiCad cannot tell that the <code>VCC</code> and <code>GND</code> rails are genuinely fed; left alone, the check would raise exactly the “power input with nothing driving it” flag mentioned a moment ago. The cure is a small marker called a <code>PWR_FLAG</code>, which simply tells the checker “real power enters the net here.” You add it just as you added <code>VCC</code> and <code>GND</code>: open the power-symbol chooser (the “Add Power Symbol” button, or press “P”), search for <code>PWR_FLAG</code>, and drop one on the <code>VCC</code> net and one on <code>GND</code>, near the connector. With those in place, the check comes back clean. We will not make more of the ERC than that today; in a later project, on a busier board, we will slow down and walk through a couple of the violations it most often reports and how to read them.</p>
 <p>Open the ERC from the button on the top toolbar (1 in Figure 2.14), or from the “Inspect” menu by choosing “Electrical Rules Check,” then click “Run ERC” (2) in the window that appears. On a clean schematic the Violations tab reads zero and the “Errors” and “Warnings” counts both show 0 (3), and you can move on. (The neighbouring “Ignored Tests” tab lists a handful of checks KiCad skips by default; leave it as it is.) If you do see violations, don’t panic; that is the tool doing its job.</p>
@@ -491,7 +511,7 @@
 <p>Figure 2.15: With a wire missing, the ERC points straight at the two unconnected pins, <code>C1</code> pin 1 and <code>U1</code> pin 5 (CONT).</p>
 <p>Now fix it: redraw the wire you deleted and run the ERC once more. The violations clear. This is the habit to build, run the ERC, click each violation, fix it, and re-run until the report is clean. Do it now, while the circuit is small and the fixes take seconds. The very same mistake found <em>after</em> you have paid a factory and waited two weeks for boards would cost you the whole order.</p>
 <p>One note on warnings, as opposed to errors. You may sometimes see a yellow warning rather than a red error, for example a wire end sitting slightly off the grid, or a part with a spare unit you didn’t use. Warnings are KiCad pointing at something it wants you to look at, not necessarily something broken. Read each one, and once you understand it and are sure it does not affect your circuit, it is safe to let it stand. The skill is not making the report empty at all costs; it is understanding every line in it.</p>
-<h3 id="step-8-hand-off-to-layout">Step 8: Hand off to layout</h3>
+<h3 id="sec:c2-step8">Step 8: Hand off to layout</h3>
 <p>That is the whole schematic: every part placed, numbered, and valued, every connection drawn, the important net named, footprints assigned, and the ERC clean. Save the design one more time with “Ctrl+S.” You have just completed the first half of designing a PCB, and it is genuinely the half that matters most. The schematic is the source of truth for the entire project; everything the board does, it does because the schematic said so.</p>
 <p>All that remains is to carry this design across to the PCB Editor and start placing the real parts. KiCad makes the handoff a single command. From the “Tools” menu, choose “Update PCB from Schematic.” KiCad opens the board editor and brings every part and every connection across, so you never have to re-enter any of it. We will not actually lay out the board in this chapter; that is the whole of the next one. But it is worth seeing where the bridge is, because you will cross it on every project from here on.</p>
 <h2 id="sec:c2-going-deeper">Going Deeper: How the Blinker Works</h2>
@@ -517,6 +537,10 @@
   // Delegated at document level so it covers the term index and the footnotes,
   // which a handler bound to the first .note-toc never reached.
   (function () {
+    function nearest(node) {
+      // e.target can be the document itself, which has no closest().
+      return node && node.closest ? node.closest('[data-jump]') : null;
+    }
     function jump(el) {
       var target = document.getElementById(el.getAttribute('data-jump'));
       if (!target) return false;
@@ -525,14 +549,14 @@
     }
     function initJumps() {
       document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-jump]');
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
       // Keyboard equivalent: these are focusable but not real links, so Enter
       // and Space have to be wired by hand.
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-        var el = e.target.closest ? e.target.closest('[data-jump]') : null;
+        var el = nearest(e.target);
         if (el && jump(el)) e.preventDefault();
       });
     }
