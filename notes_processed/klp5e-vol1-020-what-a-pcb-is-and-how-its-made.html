@@ -359,12 +359,11 @@
 <li>the ‘soldermask’, a thin protective coating over the copper;</li>
 <li>the ‘silkscreen’, printed text and graphics on the very outside.</li>
 </ul>
-<p>A simple board like ours has copper on just two faces, a ‘top’ layer and a ‘bottom’ layer, so we call it a ‘two-layer board.’ More complex boards bury extra copper layers inside the sandwich; four, six, and more are common, and we’ll get to those in later volumes. For now, two layers is all we need.</p>
+<p>A simple board like ours has copper on just two faces, a ‘top’ layer and a ‘bottom’ layer, so we call it a ‘two-layer board.’ The coating and the lettering repeat on both faces too, so the stack is a mirror image of itself about the core. More complex boards bury extra copper layers inside the sandwich; four, six, and more are common, and we’ll get to those in later volumes. For now, two layers is all we need.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
-<p>Figure 1.2: A two-layer PCB is a sandwich of substrate, copper, soldermask, and silkscreen.</p>
+
+<p><img src="/assets/klp5e-vol1/ch01/ch01_layer-sandwich_v10.png" /></p>
+<p>Figure 1.2: A two-layer PCB in cross-section. Copper sits on both faces of the insulating substrate, the soldermask covers the copper and opens over the pads, and the silkscreen prints on top of that. The copper, soldermask and silkscreen are all drawn far thicker than life so you can see them; on a real board the core is most of the 1.6 mm.</p>
 <h3 id="sec:c1-substrate">The substrate</h3>
 <p>The substrate is the board you can hold. By far the most common material is a fiberglass-and-epoxy laminate the industry calls ‘FR-4,’ and it’s what your first boards will almost certainly be made of. It’s cheap, strong, and a good electrical insulator. The standard thickness is 1.6 mm (about the thickness of two stacked credit cards), but manufacturers will happily make boards from roughly 0.4 mm up to 2.0 mm if you ever need thinner or thicker stock.</p>
 <p>FR-4 isn’t the only option. Boards meant to bend are built on a thin, flexible plastic film instead (‘flex’ PCBs). Boards that have to shed a lot of heat, such as high-power LED lighting, are sometimes built on an aluminium or copper core. And boards for very high-frequency radio work use specialised materials such as PTFE-based laminates. You don’t need any of these to get started, and we’ll only reach for them much later in the series, but it’s worth knowing FR-4 is a choice, not the only possibility.</p>
@@ -396,9 +395,7 @@ Figure coming soon
 <h3 id="sec:c1-vias">Vias</h3>
 <p>Look closely and you’ll spot tiny holes scattered across the board that have no component in them (Figure 1.9). These are called ‘vias.’ A via looks like a mounting hole but does a different job: it lets a track jump from one copper layer to another. If a track on the top layer needs to continue on the bottom layer (perhaps to get around something in its way), it dives into a via, crosses to the other side, and carries on. On a two-layer board that’s the whole story. Boards with more layers can use fancier vias that connect only some of the layers (‘blind’ and ‘buried’ vias), but you won’t need those until much later.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
+<p><img src="/assets/klp5e-vol1/ch01/ch01-vias.png" /></p>
 <p>Figure 1.9: Vias are small plated holes that carry a track from one layer to another. </p>
 <h3 id="sec:c1-soldermask">Soldermask</h3>
 <p>That coloured coating over most of the board is the ‘soldermask.’ On our example board it happens to be one colour, but soldermask comes in a whole menu of colours these days: green is the classic, but red, blue, black, white, yellow, and purple are all standard options from most manufacturers at no real extra cost. The colour is up to you; the job it does is the same regardless.</p>
@@ -449,9 +446,7 @@ Figure coming soon
 <h2 id="sec:c1-apps">The Project Manager and the Apps</h2>
 <p>KiCad is not a single program. It’s a suite of applications that work together, and the window you see first (the ‘project manager’) is the hub that launches them and keeps your project’s files in one place (Figure 1.13). You don’t need to learn every corner of it today; I just want the workspace to feel familiar before you start using it in earnest in the next chapter.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
+<p><img src="/assets/klp5e-vol1/ch01/ch01-kicad-10-main-window.png" /></p>
 <p>Figure 1.13: The KiCad project manager, the hub that launches the other applications.</p>
 <p>The project manager has three regions worth recognising: a toolbar for creating, opening, and archiving projects; a file browser in the middle showing everything inside your project folder; and a set of buttons that launch the individual applications. You can open most editors straight from here, either by clicking their button or by double-clicking the matching file in the browser.</p>
 <p>You won’t touch most of these applications in Volume 1, but it’s worth knowing they exist so the names aren’t a mystery later:</p>

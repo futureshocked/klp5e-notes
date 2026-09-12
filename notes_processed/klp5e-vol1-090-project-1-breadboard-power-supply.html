@@ -308,13 +308,11 @@
   </ul>
 </details>
 
-<p>This is your first solo board, so let me hand you the safety net before you need it: the workflow. As long as you take the eight schematic steps and the eight layout steps in order, each one leaves the design in a state the next one expects, and you will not get lost. Keep the one-page checklist from Chapter 5 open beside you, and treat this chapter as the project that proves you can follow it without me reading it out.</p>
-<p>Here is what we are building (Figure 8.1): a small power supply for your breadboard. It takes 5 volts in over a ‘USB Type-C’ connector, the same reversible USB connector you met in Chapter 6, and delivers that 5 volts to your breadboard’s power rail through a two-pin header and a couple of jumper wires, with a switch to turn it on and off, a fuse to keep a stray strand of wire on the breadboard from harming your computer, and an LED that glows when the power is flowing.</p>
+<p>This is your first solo board, so let me introduce a workflow you can use to both guide you through the process, and as a safety net. As long as you take the eight schematic steps and the eight layout steps in order, each one leaves the design in a state the next one expects, and you will not get lost. Keep the one-page checklist from Chapter 5 open beside you, and treat this chapter as the project that proves you can follow it without me reading it out.</p>
+<p>Here is what we are building (Figure 8.1): a small power supply for your breadboard. It takes 5 volts in over a ‘USB Type-C’ connector, the same reversible USB connector you met in Chapter 6, and delivers that 5 volts to your breadboard’s power rail through a two-pin header and a couple of jumper wires, with a switch to turn it on and off, a fuse to keep a stray strand of wire on the breadboard from harming your computer, and an LED that glows when the power is flowing. That picture is not a photograph. It is KiCad’s own 3D view of the design files you are about to create, which is a great way to visualise the board before it is manufactured.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
-<p>Figure 8.1: The finished breadboard power supply. This is where we are headed: 5 volts in over USB-C, clean 5 volts out to the breadboard.</p>
+<p><img src="/assets/klp5e-vol1/ch08/ch08-psu-3D.png" style="width:65.0%" /></p>
+<p>Figure 8.1: The finished breadboard power supply, as KiCad’s 3D Viewer draws it from the design files: 5 volts in over USB-C, clean 5 volts out to the breadboard. This is where we are headed.</p>
 <p>You might wonder why a power supply has no regulator chip in it, the way many do. The answer is that USB already hands us a clean, regulated 5 volts, which is exactly the voltage a breadboard full of 5-volt parts wants. So this board’s job is not to <em>make</em> 5 volts but to <em>deliver</em> it: to bring it in safely, switch it, protect it, show that it is live, and present it where jumper wires can reach. That makes it an honest, genuinely useful first project, and a gentle step up from the blinker rather than a leap.</p>
 <p>The circuit is built from a handful of parts:</p>
 <ul>

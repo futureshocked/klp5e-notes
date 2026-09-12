@@ -424,9 +424,7 @@
 <p>There is one catch that trips people up, and it tripped me: Local History does nothing until you turn on the backups that feed it, so on a fresh install the panel is empty. It is not a GitHub feature and it needs no account; it rides on KiCad’s own project backups. To switch it on, open “Preferences → Common” and find the “Project backup” section. Tick “Automatically backup projects,” then set the “Format” to “Incremental” rather than “Zip archive”. The incremental format is the one that keeps the running snapshots Local History reads; the zip format simply writes whole-project archives and leaves the panel empty. Behind the scenes KiCad manages a hidden <code>.history</code> folder for you as an ordinary Git repository, so there is nothing else to set up and no commands to type.</p>
 <p>With that in place, open the “Local History” panel from the “View” menu, under “Panels” (Figure 11.16). You will see a list of snapshots, each with the time it was taken; hover over one and KiCad shows you which files it would bring back. When you find the moment you want to return to, right-click that snapshot and choose “Restore Commit”, and your project is rolled back to how it was then.</p>
 
-<div class="figure-pending">
-Figure coming soon
-</div>
+<p><img src="/assets/klp5e-vol1/ch11/ch11-local-history.png" /></p>
 <p>Figure 11.16: The Local History panel keeps timed snapshots of your project. Right-click one and choose “Restore Commit” to roll back.</p>
 <p>I mention this not because you will need it often, but because knowing it is there changes how it feels to experiment. You can try a bold rearrangement, or tear up half a layout to route it a better way, without the small fear that you are gambling with work you cannot get back. The net is under you. That said, Local History is a convenience, not a backup plan for your life’s work: keep your important projects somewhere safe of their own, and treat this as the fast way to undo a bad afternoon.</p>
 <h2 id="sec:c11-hotkeys">Customise Your Hotkeys</h2>
